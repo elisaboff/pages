@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Criação em Hipermídia — e-Book Interativo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a27;
+    --accent: #6c63ff;
+    --accent2: #ff6b6b;
+    --accent3: #43e97b;
+    --accent4: #f7971e;
+    --text: #e8e8f0;
+    --text-muted: #8888a8;
+    --border: rgba(108,99,255,0.2);
+    --glow: rgba(108,99,255,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* ── SIDEBAR NAV ── */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0;
+    width: 260px; height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 2rem 1.5rem;
+    overflow-y: auto;
+    z-index: 100;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+    margin-bottom: 2rem;
+    line-height: 1.3;
+  }
+
+  .nav-section {
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    margin-bottom: 2px;
+    cursor: pointer;
+  }
+
+  .nav-link:hover, .nav-link.active {
+    background: var(--glow);
+    color: var(--accent);
+  }
+
+  .nav-link .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.4;
+    flex-shrink: 0;
+  }
+
+  .nav-link.active .dot { opacity: 1; }
+
+  /* ── MAIN CONTENT ── */
+  .main {
+    margin-left: 260px;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    padding: 6rem 4rem 5rem;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(108,99,255,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 80%, rgba(67,233,123,0.06) 0%, transparent 60%);
+  }
+
+  .hero-tag {
+    display: inline-block;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.3);
+    color: var(--accent);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.35rem 0.9rem;
+    border-radius: 100px;
+    margin-bottom: 1.5rem;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    line-height: 1.05;
+    margin-bottom: 1.2rem;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 540px;
+    margin-bottom: 2rem;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .meta-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+  }
+
+  .meta-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 4rem;
+    border-bottom: 1px solid var(--border);
+    display: none;
+  }
+
+  .section.active { display: block; }
+
+  .section-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .section h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    margin-bottom: 1.5rem;
+    line-height: 1.1;
+  }
+
+  .section p {
+    color: var(--text-muted);
+    max-width: 740px;
+    margin-bottom: 1.2rem;
+    font-size: 0.98rem;
+  }
+
+  .section p strong { color: var(--text); }
+
+  .section h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin: 2rem 0 0.8rem;
+    color: var(--text);
+  }
+
+  /* ── CARDS ── */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.2rem;
+    margin: 2rem 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--accent));
+    border-radius: 16px 16px 0 0;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(108,99,255,0.4);
+    box-shadow: 0 12px 40px rgba(108,99,255,0.1);
+  }
+
+  .card-icon {
+    font-size: 2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .card h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+
+  .card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ── TIMELINE ── */
+  .timeline {
+    position: relative;
+    margin: 2rem 0;
+    padding-left: 2rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent3), var(--accent2));
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 2.5rem;
+    padding-left: 1.5rem;
+    cursor: pointer;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2.35rem;
+    top: 0.4rem;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+    transition: all 0.3s;
+  }
+
+  .timeline-item:hover::before {
+    transform: scale(1.4);
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  .timeline-year {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  .timeline-item h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .timeline-item p {
+    font-size: 0.87rem;
+    color: var(--text-muted);
+    margin: 0;
+    max-width: 620px;
+  }
+
+  /* ── COMPARE TABLE ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    font-size: 0.9rem;
+    max-width: 760px;
+  }
+
+  .compare-table th {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    padding: 1rem 1.2rem;
+    text-align: left;
+    border-bottom: 2px solid var(--border);
+    color: var(--text);
+  }
+
+  .compare-table th:nth-child(2) { color: var(--accent); }
+  .compare-table th:nth-child(3) { color: var(--accent3); }
+
+  .compare-table td {
+    padding: 0.85rem 1.2rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    vertical-align: top;
+  }
+
+  .compare-table tr:hover td {
+    background: var(--glow);
+    color: var(--text);
+  }
+
+  /* ── WEB GENERATIONS ── */
+  .web-gen {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .gen-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.5rem 1.2rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .gen-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .gen-number {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 3.5rem;
+    line-height: 1;
+    opacity: 0.07;
+    position: absolute;
+    right: 1rem;
+    top: 0.5rem;
+    color: white;
+  }
+
+  .gen-badge {
+    display: inline-block;
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  .gen-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .gen-card p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .gen-card ul {
+    list-style: none;
+    margin-top: 0.6rem;
+  }
+
+  .gen-card ul li {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    padding: 0.15rem 0;
+  }
+
+  .gen-card ul li::before {
+    content: '→ ';
+    color: var(--accent);
+  }
+
+  /* ── TECH GRID ── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .tech-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.3rem;
+    transition: all 0.3s;
+  }
+
+  .tech-card:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+  }
+
+  .tech-badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .tech-card h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .tech-card p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ── HIGHLIGHT BOX ── */
+  .highlight {
+    background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(108,99,255,0.05));
+    border: 1px solid rgba(108,99,255,0.25);
+    border-radius: 14px;
+    padding: 1.5rem 1.8rem;
+    margin: 2rem 0;
+    max-width: 760px;
+  }
+
+  .highlight-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .highlight p {
+    color: var(--text);
+    font-style: italic;
+    font-size: 0.95rem;
+  }
+
+  /* ── REFERENCES ── */
+  .ref-list {
+    list-style: none;
+    margin: 1.5rem 0;
+  }
+
+  .ref-list li {
+    padding: 0.9rem 1rem;
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    border-radius: 0 10px 10px 0;
+    margin-bottom: 0.8rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    transition: border-color 0.2s;
+  }
+
+  .ref-list li:hover { border-color: var(--accent3); }
+  .ref-list li strong { color: var(--text); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 260px; right: 0;
+    height: 3px;
+    background: linear-gradient(to right, var(--accent), var(--accent3));
+    transform-origin: left;
+    z-index: 200;
+    transform: scaleX(0);
+    transition: transform 0.1s;
+  }
+
+  /* ── NAV BUTTONS ── */
+  .nav-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #8078ff;
+    transform: translateX(3px);
+  }
+
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateX(-3px);
+  }
+
+  /* ── HAMBURGER ── */
+  .hamburger {
+    display: none;
+    position: fixed;
+    top: 1rem; left: 1rem;
+    z-index: 300;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 1.2rem;
+    width: 40px; height: 40px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .section-fade {
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── ELEMENTS VISUAL ── */
+  .elements-visual {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin: 2rem 0;
+  }
+
+  .elem-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .elem-tag:hover {
+    background: var(--glow);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(1.05);
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      transform: translateX(-100%);
+    }
+    .sidebar.open {
+      transform: translateX(0);
+    }
+    .main {
+      margin-left: 0;
+    }
+    .progress-bar {
+      left: 0;
+    }
+    .hamburger {
+      display: flex;
+    }
+    .hero, .section {
+      padding: 5rem 1.5rem 2rem;
+    }
+    .cards, .web-gen, .tech-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<button class="hamburger" onclick="toggleSidebar()" title="Menu">☰</button>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">Universidade de Caxias do Sul · Bacharelado em Criação Digital</div>
+  <div class="sidebar-title">Criação em Hipermídia - Profª. Elisa Boff</div>
+
+  <div class="nav-section">Módulos</div>
+  <a class="nav-link active" onclick="goTo('intro')"><span class="dot"></span>Introdução</a>
+  <a class="nav-link" onclick="goTo('historia')"><span class="dot"></span>História da Hipermídia</a>
+  <a class="nav-link" onclick="goTo('diferenca')"><span class="dot"></span>Multimídia × Hipermídia</a>
+  <a class="nav-link" onclick="goTo('elementos')"><span class="dot"></span>Elementos da Hipermídia</a>
+  <a class="nav-link" onclick="goTo('web')"><span class="dot"></span>Gerações da Web</a>
+  <a class="nav-link" onclick="goTo('exemplos')"><span class="dot"></span>Exemplos</a>
+  <a class="nav-link" onclick="goTo('tecnologias')"><span class="dot"></span>Tecnologias</a>
+  <a class="nav-link" onclick="goTo('refs')"><span class="dot"></span>Referências</a>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero" id="hero-area">
+    <div class="hero-bg"></div>
+    <div style="position:relative">
+      <div class="hero-tag">e-Book Interativo</div>
+      <h1>Criação de<br>Hipermídias</h1>
+      <p class="hero-sub">Da multimídia à Web Semântica: fundamentos, elementos, gerações e tecnologias para o desenvolvimento hipermidiático.</p>
+      <div class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-label">Disciplina</span>
+          <span class="meta-value">Criação em Hipermídia</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Curso</span>
+          <span class="meta-value">Bacharelado em Criação Digital</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">Módulos</span>
+          <span class="meta-value">7 Seções</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ 1. INTRODUÇÃO ═══════════ -->
+  <section class="section active section-fade" id="intro">
+    <div class="section-number">Módulo 01</div>
+    <h2>Introdução</h2>
+    <p>A hipermídia é hoje o principal substrato da comunicação digital. Websites, aplicativos, jogos, ambientes imersivos e sistemas educacionais são, em essência, sistemas hipermidiáticos: estruturas não-lineares que integram múltiplos meios e permitem ao usuário navegar ativamente pelo conteúdo.</p>
+    <p>Compreender os fundamentos da hipermídia — sua história, sua estrutura e suas tecnologias — é condição essencial para qualquer profissional de Criação Digital que deseje desenvolver experiências significativas, acessíveis e tecnicamente consistentes.</p>
+    <p>Este e-book percorre os principais conceitos do campo: da origem do hipertexto com Vannevar Bush até as possibilidades abertas pela Web 4.0, passando pelos elementos constitutivos da hipermídia, pelas gerações da World Wide Web e pelas principais ferramentas e tecnologias de desenvolvimento.</p>
+
+    <div class="highlight">
+      <div class="highlight-label">Conceito Central</div>
+      <p>"Hipermídia é a integração não-linear de múltiplas mídias — texto, imagem, áudio, vídeo, animação — conectadas por hiperlinks que permitem ao usuário construir seu próprio percurso de leitura e interação."</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-primary" onclick="goTo('historia')">Próximo módulo →</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ 2. HISTÓRIA ═══════════ -->
+  <section class="section section-fade" id="historia">
+    <div class="section-number">Módulo 02</div>
+    <h2>História da Evolução da<br>Multimídia e Hipermídia</h2>
+    <p>A trajetória da hipermídia confunde-se com a própria história da computação e da comunicação digital. Acompanhe os marcos que moldaram o campo.</p>
+
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <div class="timeline-year">1945</div>
+        <h4>Memex — Vannevar Bush</h4>
+        <p>No artigo "As We May Think", Bush propõe o Memex, um dispositivo hipotético capaz de armazenar e recuperar informações por associação, antecipando a lógica do hipertexto décadas antes da internet.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1963–65</div>
+        <h4>Hipertexto — Ted Nelson</h4>
+        <p>Ted Nelson cunha o termo <strong>hipertexto</strong> e concebe o projeto Xanadu, uma biblioteca universal com ligações bidirecionais entre documentos. Nelson também criou o termo <strong>hipermídia</strong> para designar a extensão do hipertexto a outros formatos midiáticos.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1968</div>
+        <h4>The Mother of All Demos — Doug Engelbart</h4>
+        <p>Douglas Engelbart apresenta ao mundo o mouse, janelas, edição colaborativa e links clicáveis em documentos, demonstrando na prática os princípios do hipertexto.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1987</div>
+        <h4>HyperCard — Apple</h4>
+        <p>A Apple lança o HyperCard, o primeiro sistema hipermidiático amplamente acessível ao público geral. Permitia criar "pilhas" de cartões interligados com textos, imagens, sons e scripts — um precursor direto das páginas web.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1989–91</div>
+        <h4>World Wide Web — Tim Berners-Lee</h4>
+        <p>Berners-Lee propõe e implementa a WWW no CERN, criando HTML, HTTP e URLs. A web nasce como um sistema hipermidiático distribuído em escala global, tornando o hipertexto acessível a qualquer pessoa conectada à internet.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1993</div>
+        <h4>Navegador Mosaic</h4>
+        <p>O Mosaic, criado por Marc Andreessen no NCSA (National Center for Supercomputing Applications), é o primeiro browser a exibir imagens inline junto ao texto, popularizando a experiência hipermidiática para o público leigo e inaugurando a era dos navegadores gráficos.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">1995–2000</div>
+        <h4>Explosão Multimídia e Flash</h4>
+        <p>Com a chegada do Macromedia Flash (1996), surgem websites com animações, áudio e interatividade ricas. CD-ROMs e quiosques multimídia proliferam. A multimídia deixa de ser exclusividade de estúdios especializados e chega a pequenos produtores.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">2004–2006</div>
+        <h4>Web 2.0 e Conteúdo Gerado pelo Usuário</h4>
+        <p>O termo Web 2.0, popularizado por Tim O'Reilly, descreve uma web colaborativa: blogs, wikis, YouTube, redes sociais. O usuário passa de consumidor a produtor de hipermídia, transformando radicalmente a produção e circulação de conteúdo.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">2007–2010</div>
+        <h4>HTML5, CSS3 e o fim do Flash</h4>
+        <p>O HTML5 incorpora áudio, vídeo, canvas e animações nativamente ao navegador, tornando o Flash obsoleto. A hipermídia ganha uma base técnica aberta, acessível e compatível com dispositivos móveis.</p>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-year">2010–presente</div>
+        <h4>Web Semântica, IA e Imersão</h4>
+        <p>A Web 3.0 e 4.0 incorporam metadados semânticos, inteligência artificial, realidade aumentada e virtual à hipermídia, abrindo fronteiras para experiências imersivas, personalizadas e interoperáveis.</p>
+      </div>
+
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goTo('intro')">← Anterior</button>
+      <button class="btn btn-primary" onclick="goTo('diferenca')">Próximo módulo →</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ 3. DIFERENÇA ═══════════ -->
+  <section class="section section-fade" id="diferenca">
+    <div class="section-number">Módulo 03</div>
+    <h2>Multimídia × Hipermídia</h2>
+    <p>Embora frequentemente usados como sinônimos, <strong>multimídia</strong> e <strong>hipermídia</strong> designam conceitos distintos que se complementam.</p>
+
+    <h3>Multimídia</h3>
+    <p>O termo multimídia refere-se à integração de múltiplas formas de mídia — texto, imagem estática, áudio, vídeo e animação — em um único suporte ou produto. O conteúdo multimídia pode ser apresentado de forma <strong>linear</strong> (como um filme ou apresentação sequencial) ou não-linear, mas o elemento central é a <em>combinação de mídias</em>, não necessariamente a interatividade ou a navegação pelo usuário.</p>
+    <p><strong>Exemplo:</strong> Um CD-ROM com vídeos educativos e imagens, reproduzido de forma sequencial, é multimídia.</p>
+
+    <h3>Hipermídia</h3>
+    <p>A hipermídia vai além: é a articulação de múltiplas mídias por meio de <strong>hiperlinks</strong>, criando uma estrutura <strong>não-linear e interativa</strong> que o usuário navega ativamente. O conceito pressupõe a existência de nós (<em>nodes</em>) e conexões (<em>links</em>) entre conteúdos heterogêneos.</p>
+    <p><strong>Exemplo:</strong> Um website de enciclopédia em que o usuário clica em links para navegar entre artigos, vídeos e galerias de imagens é hipermídia.</p>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Característica</th>
+          <th>Multimídia</th>
+          <th>Hipermídia</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Integração de mídias</td>
+          <td>✔ Sim</td>
+          <td>✔ Sim</td>
+        </tr>
+        <tr>
+          <td>Estrutura não-linear</td>
+          <td>Opcional</td>
+          <td>✔ Essencial</td>
+        </tr>
+        <tr>
+          <td>Hiperlinks/navegação</td>
+          <td>✘ Não obrigatório</td>
+          <td>✔ Fundamental</td>
+        </tr>
+        <tr>
+          <td>Interatividade do usuário</td>
+          <td>Limitada</td>
+          <td>✔ Central</td>
+        </tr>
+        <tr>
+          <td>Percurso de leitura</td>
+          <td>Geralmente linear</td>
+          <td>Construído pelo usuário</td>
+        </tr>
+        <tr>
+          <td>Exemplos típicos</td>
+          <td>Apresentações, filmes</td>
+          <td>Websites, games, e-learning</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="highlight">
+      <div class="highlight-label">Síntese</div>
+      <p>Toda hipermídia é multimídia, mas nem toda multimídia é hipermídia. A hipermídia acrescenta à multimídia a dimensão da navegabilidade e da interatividade estrutural.</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goTo('historia')">← Anterior</button>
+      <button class="btn btn-primary" onclick="goTo('elementos')">Próximo módulo →</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ 4. ELEMENTOS ═══════════ -->
+  <section class="section section-fade" id="elementos">
+    <div class="section-number">Módulo 04</div>
+    <h2>Elementos que Compõem<br>uma Hipermídia</h2>
+    <p>Uma hipermídia é composta por elementos de conteúdo, elementos estruturais e elementos de interação. Conhecer cada um deles é fundamental para planejar e desenvolver produtos hipermidiáticos eficazes.</p>
+
+    <h3>Elementos de Conteúdo (Mídias)</h3>
+    <div class="elements-visual">
+      <span class="elem-tag">📝 Texto</span>
+      <span class="elem-tag">🖼 Imagem Estática</span>
+      <span class="elem-tag">🎵 Áudio</span>
+      <span class="elem-tag">🎬 Vídeo</span>
+      <span class="elem-tag">✨ Animação</span>
+      <span class="elem-tag">🕹 Simulação Interativa</span>
+      <span class="elem-tag">📊 Infográfico</span>
+      <span class="elem-tag">🥽 Ambiente 3D/VR</span>
+    </div>
+
+    <h3>Elementos Estruturais</h3>
+    <div class="cards">
+      <div class="card" style="--card-accent: #6c63ff">
+        <div class="card-icon">🔵</div>
+        <h4>Nós (Nodes)</h4>
+        <p>Unidades de informação que contêm o conteúdo da hipermídia. Cada página, tela ou bloco de conteúdo é um nó. Podem ser textuais, visuais, sonoros ou compostos.</p>
+      </div>
+      <div class="card" style="--card-accent: #43e97b">
+        <div class="card-icon">🔗</div>
+        <h4>Hiperlinks (Links)</h4>
+        <p>Conexões entre nós. Podem ser unidirecionais (a maioria na web) ou bidirecionais. São o elemento que confere ao sistema sua característica não-linear.</p>
+      </div>
+      <div class="card" style="--card-accent: #f7971e">
+        <div class="card-icon">🗺</div>
+        <h4>Ancoragens (Anchors)</h4>
+        <p>Pontos específicos dentro de um nó a partir dos quais os links partem ou chegam. Permitem navegar para seções específicas de um documento.</p>
+      </div>
+      <div class="card" style="--card-accent: #ff6b6b">
+        <div class="card-icon">🧭</div>
+        <h4>Estrutura de Navegação</h4>
+        <p>A arquitetura que organiza os nós: linear, hierárquica, em rede, enciclopédica ou mista. Define a experiência cognitiva do usuário ao percorrer o sistema.</p>
+      </div>
+    </div>
+
+    <h3>Elementos de Interação</h3>
+    <div class="cards">
+      <div class="card" style="--card-accent: #a78bfa">
+        <div class="card-icon">🖱</div>
+        <h4>Interface e Affordances</h4>
+        <p>Elementos visuais que sinalizam ao usuário como interagir: botões, menus, ícones, gestos. Determinam a usabilidade do sistema.</p>
+      </div>
+      <div class="card" style="--card-accent: #34d399">
+        <div class="card-icon">↩</div>
+        <h4>Feedback e Resposta</h4>
+        <p>Retorno do sistema às ações do usuário: animações, sons, mudanças visuais, mensagens de confirmação. Elemento essencial para a sensação de controle e imersão.</p>
+      </div>
+      <div class="card" style="--card-accent: #fb923c">
+        <div class="card-icon">🔍</div>
+        <h4>Mecanismos de Busca</h4>
+        <p>Ferramentas que permitem ao usuário localizar informações diretamente, sem necessidade de seguir a estrutura de navegação predefinida.</p>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goTo('diferenca')">← Anterior</button>
+      <button class="btn btn-primary" onclick="goTo('web')">Próximo módulo →</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ 5. GERAÇÕES WEB ═══════════ -->
+  <section class="section section-fade" id="web">
+    <div class="section-number">Módulo 05</div>
+    <h2>As Gerações da Web</h2>
+    <p>A World Wide Web evoluiu em gerações que representam não apenas avanços tecnológicos, mas mudanças profundas na relação entre usuários, conteúdo e sistemas hipermidiáticos.</p>
+
+    <div class="web-gen">
+
+      <div class="gen-card">
+        <div class="gen-number">1</div>
+        <div class="gen-badge" style="background:rgba(108,99,255,0.15);color:#6c63ff">1991–2003</div>
+        <h4>Web 1.0</h4>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem">Web estática e de leitura</p>
+        <ul>
+          <li>Páginas HTML estáticas</li>
+          <li>Usuário apenas consome</li>
+          <li>Sem interação social</li>
+          <li>Links simples entre páginas</li>
+          <li>Design textual/tabular</li>
+        </ul>
+      </div>
+
+      <div class="gen-card">
+        <div class="gen-number">2</div>
+        <div class="gen-badge" style="background:rgba(67,233,123,0.15);color:#43e97b">2004–2009</div>
+        <h4>Web 2.0</h4>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem">Web social e participativa</p>
+        <ul>
+          <li>Conteúdo gerado por usuários</li>
+          <li>Redes sociais (Facebook, YouTube)</li>
+          <li>Blogs, wikis, fóruns</li>
+          <li>AJAX e RIA</li>
+          <li>APIs e mashups</li>
+        </ul>
+      </div>
+
+      <div class="gen-card">
+        <div class="gen-number">3</div>
+        <div class="gen-badge" style="background:rgba(247,151,30,0.15);color:#f7971e">2010–2019</div>
+        <h4>Web 3.0</h4>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem">Web semântica e inteligente</p>
+        <ul>
+          <li>Dados ligados (Linked Data)</li>
+          <li>Personalização por IA</li>
+          <li>Computação em nuvem</li>
+          <li>Dispositivos móveis</li>
+          <li>Realidade aumentada</li>
+        </ul>
+      </div>
+
+      <div class="gen-card">
+        <div class="gen-number">4</div>
+        <div class="gen-badge" style="background:rgba(255,107,107,0.15);color:#ff6b6b">2020–presente</div>
+        <h4>Web 4.0</h4>
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem">Web imersiva e ubíqua</p>
+        <ul>
+          <li>Metaverso e VR/AR</li>
+          <li>IA generativa</li>
+          <li>IoT integrado</li>
+          <li>Blockchain e Web3</li>
+          <li>Interfaces conversacionais</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="highlight">
+      <div class="highlight-label">Perspectiva Histórica</div>
+      <p>A cada geração, a web expande o conceito de hipermídia: da página estática ao ambiente imersivo, do link de texto à conexão semântica entre dados. O profissional de Criação Digital atua hoje numa web que é simultaneamente documento, plataforma, comunidade e espaço tridimensional.</p>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goTo('elementos')">← Anterior</button>
+      <button class="btn btn-primary" onclick="goTo('exemplos')">Próximo módulo →</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ 6. EXEMPLOS ═══════════ -->
+  <section class="section section-fade" id="exemplos">
+    <div class="section-number">Módulo 06</div>
+    <h2>Exemplos de Hipermídia</h2>
+    <p>A hipermídia está presente em praticamente todos os domínios da vida digital. A seguir, alguns exemplos organizados por categoria.</p>
+
+    <div class="cards">
+      <div class="card" style="--card-accent: #6c63ff">
+        <div class="card-icon">🌐</div>
+        <h4>Websites e Portais</h4>
+        <p>Todo website é um sistema hipermidiático. Portais como Wikipedia integram texto, imagens, vídeos, infográficos e milhares de links internos e externos, permitindo percursos de leitura infinitamente variados.</p>
+      </div>
+
+      <div class="card" style="--card-accent: #f7971e">
+        <div class="card-icon">📚</div>
+        <h4>E-Learning e EAD</h4>
+        <p>Plataformas como Moodle, Coursera e Khan Academy são ambientes hipermidiáticos que integram videoaulas, quizzes interativos, fóruns, animações e simulações, adaptando o percurso ao desempenho do aluno.</p>
+      </div>
+
+      <div class="card" style="--card-accent: #43e97b">
+        <div class="card-icon">🎮</div>
+        <h4>Jogos Digitais</h4>
+        <p>Games narrativos como "The Last of Us" ou RPGs como "Baldur's Gate" são hipermídias: combinam audiovisual cinematográfico, áudio imersivo, mecânicas interativas e narrativas ramificadas dependentes das escolhas do jogador.</p>
+      </div>
+
+      <div class="card" style="--card-accent: #ff6b6b">
+        <div class="card-icon">🗞</div>
+        <h4>Jornalismo Digital</h4>
+        <p>Grandes reportagens interativas do New York Times, BBC e UOL (como "Snow Fall") combinam texto longo, vídeo, mapas, infográficos animados e áudio em narrativas hipermidiáticas imersivas.</p>
+      </div>
+
+      <div class="card" style="--card-accent: #a78bfa">
+        <div class="card-icon">🥽</div>
+        <h4>Realidade Virtual e Aumentada</h4>
+        <p>Museus virtuais, simuladores de treinamento e experiências imersivas em VR são hipermídias tridimensionais: o usuário navega literalmente pelo espaço, acionando conteúdos por meio de interações gestuais e olhar.</p>
+      </div>
+
+      <div class="card" style="--card-accent: #34d399">
+        <div class="card-icon">📱</div>
+        <h4>Aplicativos Móveis</h4>
+        <p>Apps como Spotify, Netflix e Instagram são sistemas hipermidiáticos sofisticados: integram múltiplas mídias, oferecem navegação personalizada por algoritmos e conectam usuários em redes sociais de conteúdo.</p>
+      </div>
+
+      <div class="card" style="--card-accent: #fb923c">
+        <div class="card-icon">🎭</div>
+        <h4>Narrativas Interativas</h4>
+        <p>Livros-games digitais, experiências transmídia e obras como "Bandersnatch" (Netflix) são hipermídias narrativas em que o usuário toma decisões que bifurcam a história, explorando múltiplos percursos.</p>
+      </div>
+
+      <div class="card" style="--card-accent: #60a5fa">
+        <div class="card-icon">🏛</div>
+        <h4>Museus e Exposições Digitais</h4>
+        <p>Plataformas como Google Arts & Culture e exposições virtuais de museus integram fotografias em alta resolução, tours 360°, áudios de curadoria e vídeos documentais em experiências hipermidiáticas acessíveis globalmente.</p>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goTo('web')">← Anterior</button>
+      <button class="btn btn-primary" onclick="goTo('tecnologias')">Próximo módulo →</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ 7. TECNOLOGIAS ═══════════ -->
+  <section class="section section-fade" id="tecnologias">
+    <div class="section-number">Módulo 07</div>
+    <h2>Tecnologias para Desenvolvimento<br>de Hipermídias</h2>
+    <p>O ecossistema de tecnologias para criação hipermidiática é vasto e em constante evolução. As ferramentas a seguir representam as principais categorias utilizadas em produção profissional.</p>
+
+    <h3>🧱 Linguagens de Marcação e Estilo</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(227,76,38,0.15);color:#e34c26">Marcação</div>
+        <h4>HTML5</h4>
+        <p>Linguagem estrutural da web. Define a semântica e o conteúdo de páginas e aplicações web, incluindo suporte nativo a áudio, vídeo, canvas e elementos interativos.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(21,114,182,0.15);color:#1572b6">Estilo</div>
+        <h4>CSS3</h4>
+        <p>Controla a apresentação visual: layout, tipografia, animações, transições e design responsivo. Fundamental para a experiência estética de qualquer hipermídia web.</p>
+      </div>
+    </div>
+
+    <h3>⚙️ Linguagens de Programação</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(247,223,30,0.15);color:#c9b500">Frontend</div>
+        <h4>JavaScript / TypeScript</h4>
+        <p>A linguagem de programação da web. Permite criar interatividade, manipular o DOM, consumir APIs e desenvolver aplicações completas no navegador. TypeScript adiciona tipagem estática ao JS.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(56,161,105,0.15);color:#38a169">Backend</div>
+        <h4>Python / Node.js / PHP</h4>
+        <p>Linguagens para o desenvolvimento do lado servidor: gerenciamento de dados, autenticação, lógica de negócios e APIs que alimentam o front-end hipermidiático.</p>
+      </div>
+    </div>
+
+    <h3>🖼 Frameworks e Bibliotecas Frontend</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(97,218,251,0.15);color:#61dafb">Biblioteca</div>
+        <h4>React.js</h4>
+        <p>Biblioteca JavaScript para construção de interfaces baseadas em componentes reutilizáveis. Amplamente usada para SPAs (Single Page Applications) e aplicações hipermidiáticas complexas.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(65,184,131,0.15);color:#41b883">Framework</div>
+        <h4>Vue.js / Angular</h4>
+        <p>Frameworks JavaScript para desenvolvimento de aplicações web reativas. Vue é valorizado pela simplicidade; Angular, pela robustez em projetos corporativos de grande escala.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(255,61,87,0.15);color:#ff3d57">Animação</div>
+        <h4>GSAP (GreenSock)</h4>
+        <p>Biblioteca de animação JavaScript de alta performance. Usada para criar transições, animações de interface e experiências visuais sofisticadas em hipermídias web.</p>
+      </div>
+    </div>
+
+    <h3>🎮 Engines para Jogos e Ambientes Imersivos</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(108,99,255,0.15);color:#6c63ff">Game Engine</div>
+        <h4>Unity</h4>
+        <p>Engine multiplataforma para desenvolvimento de jogos 2D e 3D, aplicações de realidade aumentada (AR), realidade virtual (VR) e simulações interativas. Suporta exportação para web via WebGL.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(31,172,93,0.15);color:#1fac5d">Game Engine</div>
+        <h4>Godot Engine</h4>
+        <p>Engine open source para games 2D e 3D. Versátil, leve e com linguagem própria (GDScript), é cada vez mais adotada em produções independentes e educacionais.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(20,20,80,0.3);color:#a0aec0;border:1px solid rgba(160,174,192,0.2)">3D Web</div>
+        <h4>Three.js / Babylon.js</h4>
+        <p>Bibliotecas JavaScript para renderização 3D no navegador via WebGL. Usadas para criar ambientes imersivos, experiências de realidade aumentada e visualizações tridimensionais na web.</p>
+      </div>
+    </div>
+
+    <h3>🎨 Ferramentas de Criação e Prototipação</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(162,89,255,0.15);color:#a259ff">Design/Prototipação</div>
+        <h4>Figma</h4>
+        <p>Ferramenta colaborativa de design de interfaces e prototipação interativa. Permite criar mockups navegáveis e fluxos de hipermídia antes da implementação técnica.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(0,120,212,0.15);color:#0078d4">E-Learning</div>
+        <h4>Articulate Storyline / Adobe Captivate</h4>
+        <p>Ferramentas especializadas em produção de conteúdo hipermidiático para e-learning: permitem criar cursos interativos com quizzes, simulações e percursos adaptativos sem código.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(255,0,0,0.1);color:#ff4444">Vídeo Interativo</div>
+        <h4>H5P</h4>
+        <p>Framework open source para criação de conteúdo interativo: vídeos com perguntas embutidas, apresentações, jogos educativos e timelines. Integra-se ao Moodle e outros LMS.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(247,151,30,0.15);color:#f7971e">Narrativa</div>
+        <h4>Twine / Ink</h4>
+        <p>Ferramentas para criação de narrativas interativas e jogos de texto. Twine é visual e acessível; Ink é uma linguagem de scripting usada em jogos comerciais como "80 Days".</p>
+      </div>
+    </div>
+
+    <h3>🥽 Realidade Virtual e Aumentada</h3>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(255,107,107,0.15);color:#ff6b6b">WebXR</div>
+        <h4>A-Frame / WebXR</h4>
+        <p>Framework baseado em HTML para criação de cenas VR/AR acessíveis via navegador, sem necessidade de instalação. Permite experiências imersivas democratizadas na web.</p>
+      </div>
+      <div class="tech-card">
+        <div class="tech-badge" style="background:rgba(43,108,176,0.2);color:#63b3ed">AR</div>
+        <h4>AR.js / 8th Wall</h4>
+        <p>Tecnologias para realidade aumentada baseada em webcam e dispositivos móveis. AR.js é open source; 8th Wall oferece experiências AR sofisticadas via navegador.</p>
+      </div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goTo('exemplos')">← Anterior</button>
+      <button class="btn btn-primary" onclick="goTo('refs')">Referências →</button>
+    </div>
+  </section>
+
+  <!-- ═══════════ 8. REFERÊNCIAS ═══════════ -->
+  <section class="section section-fade" id="refs">
+    <div class="section-number">Referências</div>
+    <h2>Referências Bibliográficas</h2>
+    <p>Obras e recursos que fundamentam o conteúdo deste e-book, organizados por relevância temática.</p>
+
+    <h3>Livros e Obras Clássicas</h3>
+    <ul class="ref-list">
+      <li><strong>BUSH, Vannevar.</strong> As We May Think. <em>The Atlantic Monthly</em>, v. 176, n. 1, p. 101–108, jul. 1945. Disponível em: https://www.theatlantic.com</li>
+      <li><strong>NELSON, Ted.</strong> <em>Literary Machines 90.1.</em> Sausalito: Mindful Press, 1990. Obra seminal que apresenta o conceito de hipertexto e o projeto Xanadu.</li>
+      <li><strong>LÉVY, Pierre.</strong> <em>As tecnologias da inteligência: o futuro do pensamento na era da informática.</em> 2. ed. Rio de Janeiro: Editora 34, 2010.</li>
+      <li><strong>LÉVY, Pierre.</strong> <em>Cibercultura.</em> 3. ed. São Paulo: Editora 34, 2010. Análise das transformações culturais decorrentes das redes digitais e da hipermídia.</li>
+      <li><strong>MURRAY, Janet H.</strong> <em>Hamlet no Holodeck: o futuro da narrativa no ciberespaço.</em> São Paulo: Itaú Cultural / UNESP, 2003. Referência fundamental sobre narrativa interativa e hipermídia.</li>
+      <li><strong>LANDOW, George P.</strong> <em>Hypertext 3.0: Critical Theory and New Media in an Era of Globalization.</em> 3. ed. Baltimore: Johns Hopkins University Press, 2006.</li>
+      <li><strong>LEMOS, André.</strong> <em>Cibercultura: tecnologia e vida social na cultura contemporânea.</em> 7. ed. Porto Alegre: Sulina, 2015.</li>
+    </ul>
+
+    <h3>Artigos e Documentos Técnicos</h3>
+    <ul class="ref-list">
+      <li><strong>BERNERS-LEE, Tim; CAILLIAU, Robert.</strong> WorldWideWeb: Proposal for a HyperText Project. CERN, 1990. Disponível em: https://www.w3.org/Proposal.html</li>
+      <li><strong>O'REILLY, Tim.</strong> What Is Web 2.0: Design Patterns and Business Models for the Next Generation of Software. O'Reilly Media, 2005.</li>
+      <li><strong>BERNERS-LEE, Tim; HENDLER, James; LASSILA, Ora.</strong> The Semantic Web. <em>Scientific American</em>, v. 284, n. 5, p. 34–43, maio 2001.</li>
+    </ul>
+
+    <h3>Obras em Língua Portuguesa</h3>
+    <ul class="ref-list">
+      <li><strong>SANTAELLA, Lucia.</strong> <em>Navegar no ciberespaço: o perfil cognitivo do leitor imersivo.</em> São Paulo: Paulus, 2004.</li>
+      <li><strong>SANTAELLA, Lucia.</strong> <em>Linguagens líquidas na era da mobilidade.</em> São Paulo: Paulus, 2007.</li>
+      <li><strong>GOSCIOLA, Vicente.</strong> <em>Roteiro para as novas mídias: do game à TV interativa.</em> 2. ed. São Paulo: Senac, 2008.</li>
+      <li><strong>PRADO, Gilbertto.</strong> <em>Arte telemática: dos intercâmbios pontuais aos ambientes virtuais multiusuário.</em> São Paulo: Itaú Cultural, 2003.</li>
+    </ul>
+
+    <h3>Recursos Online</h3>
+    <ul class="ref-list">
+      <li><strong>W3C — World Wide Web Consortium.</strong> Documentação técnica oficial de HTML, CSS, WebXR e padrões web. Disponível em: https://www.w3.org</li>
+      <li><strong>MDN Web Docs.</strong> Referência técnica completa para tecnologias web. Mozilla Foundation. Disponível em: https://developer.mozilla.org</li>
+      <li><strong>Nielsen Norman Group.</strong> Artigos e pesquisas sobre usabilidade, arquitetura da informação e UX em hipermídias. Disponível em: https://www.nngroup.com</li>
+    </ul>
+
+    <div class="nav-buttons">
+      <button class="btn btn-secondary" onclick="goTo('tecnologias')">← Anterior</button>
+      <button class="btn btn-primary" onclick="goTo('intro')">↑ Voltar ao início</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  const sections = ['intro', 'historia', 'diferenca', 'elementos', 'web', 'exemplos', 'tecnologias', 'refs'];
+
+  function goTo(id) {
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(s => {
+      s.classList.remove('active');
+    });
+    // Deactivate nav links
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+    // Show target
+    const target = document.getElementById(id);
+    if (target) {
+      target.classList.add('active');
+      target.classList.remove('section-fade');
+      void target.offsetWidth; // reflow
+      target.classList.add('section-fade');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Activate nav link
+    const idx = sections.indexOf(id);
+    const links = document.querySelectorAll('.nav-link');
+    if (links[idx]) links[idx].classList.add('active');
+
+    // Update progress
+    const pct = (idx + 1) / sections.length;
+    document.getElementById('progress').style.transform = `scaleX(${pct})`;
+
+    // Close sidebar on mobile
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+  }
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+  }
+
+  // Init
+  goTo('intro');
+</script>
+</body>
+</html>
