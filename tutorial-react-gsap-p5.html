@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial: React + GSAP + p5.js</title>
+<style>
+  :root {
+    --azul: #185FA5;
+    --azul-claro: #E6F1FB;
+    --verde: #3B6D11;
+    --verde-claro: #EAF3DE;
+    --rosa: #993556;
+    --rosa-claro: #FBEAF0;
+    --amarelo: #854F0B;
+    --amarelo-claro: #FAEEDA;
+    --cinza: #5F5E5A;
+    --cinza-claro: #F1EFE8;
+    --texto: #1a1a1a;
+    --texto-secundario: #555;
+    --borda: #ddd;
+    --fundo: #fafafa;
+    --branco: #fff;
+    --codigo-fundo: #f4f4f2;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+    line-height: 1.7;
+  }
+
+  header {
+    background: var(--branco);
+    border-bottom: 1px solid var(--borda);
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+  header h1 { font-size: 1.8rem; font-weight: 600; margin-bottom: 0.4rem; }
+  header p { color: var(--texto-secundario); font-size: 1rem; }
+
+  .chips {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 1rem;
+  }
+  .chip {
+    font-size: 12px; padding: 4px 12px; border-radius: 999px; font-weight: 500;
+  }
+  .chip-react { background: var(--azul-claro); color: var(--azul); }
+  .chip-gsap  { background: var(--verde-claro); color: var(--verde); }
+  .chip-p5    { background: var(--rosa-claro); color: var(--rosa); }
+
+  nav {
+    background: var(--branco);
+    border-bottom: 1px solid var(--borda);
+    display: flex;
+    overflow-x: auto;
+    padding: 0 1rem;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav button {
+    padding: 0.9rem 1.2rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--texto-secundario);
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  nav button:hover { color: var(--texto); }
+  nav button.ativo { color: var(--texto); border-bottom-color: var(--texto); font-weight: 500; }
+
+  main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  .secao { display: none; }
+  .secao.ativa { display: block; }
+
+  h2 { font-size: 1.4rem; font-weight: 600; margin: 2rem 0 0.75rem; color: var(--texto); }
+  h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
+  p  { margin-bottom: 0.75rem; color: var(--texto-secundario); }
+
+  .card {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .card > h3:first-child { margin-top: 0; }
+
+  .badge {
+    display: inline-block; font-size: 11px; padding: 3px 10px;
+    border-radius: 999px; font-weight: 600; margin-bottom: 0.6rem;
+  }
+  .badge-react { background: var(--azul-claro); color: var(--azul); }
+  .badge-gsap  { background: var(--verde-claro); color: var(--verde); }
+  .badge-p5    { background: var(--rosa-claro); color: var(--rosa); }
+  .badge-dica  { background: var(--amarelo-claro); color: var(--amarelo); }
+  .badge-proj  { background: var(--cinza-claro); color: var(--cinza); }
+
+  pre {
+    background: var(--codigo-fundo);
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    overflow-x: auto;
+    margin: 0.75rem 0 1rem;
+    color: #2d2d2d;
+    white-space: pre;
+  }
+  code { font-family: 'Consolas', 'Courier New', monospace; font-size: 0.88em; background: var(--codigo-fundo); padding: 1px 5px; border-radius: 4px; }
+
+  .aviso {
+    background: var(--amarelo-claro);
+    border-left: 3px solid #EF9F27;
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    font-size: 0.88rem;
+    color: var(--amarelo);
+    margin: 0.75rem 0 1rem;
+  }
+
+  .grade-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  .mini-card {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+  }
+  .mini-card h4 { font-size: 1rem; margin-bottom: 0.35rem; }
+  .mini-card p  { font-size: 0.87rem; margin: 0; }
+
+  .passo {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    align-items: flex-start;
+  }
+  .passo-num {
+    min-width: 30px; height: 30px;
+    background: var(--texto); color: #fff;
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 0.8rem; font-weight: 600;
+    margin-top: 2px;
+  }
+  .passo-conteudo { flex: 1; }
+  .passo-conteudo h4 { font-size: 1rem; margin-bottom: 0.3rem; }
+  .passo-conteudo p  { font-size: 0.9rem; margin: 0; }
+
+  .link-externo {
+    display: inline-block;
+    color: var(--azul); text-decoration: none;
+    font-size: 0.9rem; padding: 4px 0;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .link-externo:hover { border-bottom-color: var(--azul); }
+
+  .separador { border: none; border-top: 1px solid var(--borda); margin: 2rem 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 1rem 0; }
+  th { text-align: left; padding: 0.6rem 0.8rem; background: var(--cinza-claro); font-weight: 600; }
+  td { padding: 0.6rem 0.8rem; border-top: 1px solid var(--borda); color: var(--texto-secundario); }
+  tr:hover td { background: var(--fundo); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>React + GSAP + p5.js</h1>
+  <p>Tutorial prático para hipermídia criativa e interativa</p>
+  <div class="chips">
+    <span class="chip chip-react">React</span>
+    <span class="chip chip-gsap">GSAP</span>
+    <span class="chip chip-p5">p5.js</span>
+  </div>
+</header>
+
+<nav>
+  <button class="ativo" onclick="mostrar('visao', this)">Visão Geral</button>
+  <button onclick="mostrar('react', this)">React</button>
+  <button onclick="mostrar('gsap', this)">GSAP</button>
+  <button onclick="mostrar('p5', this)">p5.js</button>
+  <button onclick="mostrar('combinando', this)">Combinando tudo</button>
+  <button onclick="mostrar('projetos', this)">Ideias de projeto</button>
+  <button onclick="mostrar('recursos', this)">Recursos</button>
+</nav>
+
+<main>
+
+<!-- ==================== VISÃO GERAL ==================== -->
+<div id="secao-visao" class="secao ativa">
+  <h2>O que você vai aprender</h2>
+  <p>Este tutorial apresenta três ferramentas poderosas para criar interfaces web criativas e interativas. Cada uma tem um papel diferente no projeto:</p>
+
+  <div class="grade-3">
+    <div class="mini-card">
+      <span class="badge badge-react">React</span>
+      <h4>Estrutura e estado</h4>
+      <p>Organiza a interface em componentes reutilizáveis e gerencia os dados da aplicação.</p>
+    </div>
+    <div class="mini-card">
+      <span class="badge badge-gsap">GSAP</span>
+      <h4>Animações fluidas</h4>
+      <p>Motor de animação profissional que move, transforma e dá vida a qualquer elemento HTML.</p>
+    </div>
+    <div class="mini-card">
+      <span class="badge badge-p5">p5.js</span>
+      <h4>Arte generativa</h4>
+      <p>Cria gráficos, simulações e visuais interativos desenhados pixel a pixel no canvas.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-dica">Sequência recomendada</span>
+    <h3>Por onde começar?</h3>
+    <p>Se você nunca usou nenhuma dessas ferramentas, siga esta ordem:</p>
+
+    <div class="passo">
+      <div class="passo-num">1</div>
+      <div class="passo-conteudo">
+        <h4>Comece pelo p5.js</h4>
+        <p>É a mais imediata e visual. Você vê o resultado na hora, sem configurar nada. Use o editor online em <strong>editor.p5js.org</strong>.</p>
+      </div>
+    </div>
+    <div class="passo">
+      <div class="passo-num">2</div>
+      <div class="passo-conteudo">
+        <h4>Depois experimente o GSAP</h4>
+        <p>Use com HTML puro no CodePen. Anime elementos que você já conhece de CSS.</p>
+      </div>
+    </div>
+    <div class="passo">
+      <div class="passo-num">3</div>
+      <div class="passo-conteudo">
+        <h4>Por fim, estude o React</h4>
+        <p>Para organizar projetos maiores e integrar as três ferramentas de forma elegante.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-dica">Ambiente</span>
+    <h3>Ferramentas online (sem instalar nada)</h3>
+    <table>
+      <tr><th>Ferramenta</th><th>Melhor para</th><th>Link</th></tr>
+      <tr><td>p5.js Editor</td><td>Sketches e arte generativa</td><td><a class="link-externo" href="https://editor.p5js.org" target="_blank">editor.p5js.org</a></td></tr>
+      <tr><td>CodePen</td><td>GSAP com HTML/CSS/JS</td><td><a class="link-externo" href="https://codepen.io" target="_blank">codepen.io</a></td></tr>
+      <tr><td>StackBlitz</td><td>Projetos React completos</td><td><a class="link-externo" href="https://stackblitz.com" target="_blank">stackblitz.com</a></td></tr>
+      <tr><td>CodeSandbox</td><td>React, Vue, qualquer framework</td><td><a class="link-externo" href="https://codesandbox.io" target="_blank">codesandbox.io</a></td></tr>
+    </table>
+    <div class="aviso">Para rodar localmente: instale o Node.js (nodejs.org) e crie um projeto com <code>npm create vite@latest</code>. Escolha "React" quando perguntado.</div>
+  </div>
+</div>
+
+<!-- ==================== REACT ==================== -->
+<div id="secao-react" class="secao">
+  <h2>React — fundamentos</h2>
+  <p>React é uma biblioteca JavaScript para construir interfaces com <strong>componentes</strong> — blocos independentes e reutilizáveis de UI.</p>
+
+  <div class="card">
+    <span class="badge badge-react">Conceito 1</span>
+    <h3>O que é um componente?</h3>
+    <p>Um componente é uma função JavaScript que retorna JSX (HTML dentro do JavaScript). Pense nele como uma peça de Lego da sua interface.</p>
+<pre>
+// Definindo um componente
+function Cartao({ titulo, cor }) {
+  return (
+    &lt;div style={{ background: cor, padding: '1rem', borderRadius: 8 }}&gt;
+      &lt;h2&gt;{titulo}&lt;/h2&gt;
+      &lt;p&gt;Conteúdo do cartão&lt;/p&gt;
+    &lt;/div&gt;
+  );
+}
+
+// Usando o componente no App
+function App() {
+  return (
+    &lt;div&gt;
+      &lt;Cartao titulo="Olá!" cor="coral" /&gt;
+      &lt;Cartao titulo="Mundo" cor="skyblue" /&gt;
+    &lt;/div&gt;
+  );
+}
+</pre>
+    <div class="aviso">As chaves <code>{}</code> dentro do JSX executam JavaScript. <code>{titulo}</code> exibe o valor da variável. As propriedades passadas ao componente se chamam <strong>props</strong>.</div>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-react">Conceito 2</span>
+    <h3>Estado com useState</h3>
+    <p>Estado (<em>state</em>) é um dado que, quando muda, atualiza automaticamente a interface. É o coração das interações no React.</p>
+<pre>
+import { useState } from 'react';
+
+function Contador() {
+  // [valor atual, função para alterar o valor]
+  const [numero, setNumero] = useState(0);
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Você clicou {numero} vezes&lt;/p&gt;
+
+      &lt;button onClick={() =&gt; setNumero(numero + 1)}&gt;
+        Aumentar
+      &lt;/button&gt;
+
+      &lt;button onClick={() =&gt; setNumero(0)}&gt;
+        Zerar
+      &lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</pre>
+    <div class="aviso">Nunca altere o estado diretamente como <code>numero = 5</code>. Sempre use a função <code>setNumero(5)</code> — só assim o React sabe que precisa atualizar a tela.</div>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-react">Conceito 3</span>
+    <h3>Referências com useRef</h3>
+    <p>O <code>useRef</code> cria uma referência direta a um elemento do DOM — essencial para integrar GSAP e p5.js, que precisam do elemento real para funcionar.</p>
+<pre>
+import { useRef } from 'react';
+
+function MeuComponente() {
+  const divRef = useRef(null); // começa como null
+
+  const destacar = () =&gt; {
+    // divRef.current é o elemento &lt;div&gt; real no DOM
+    divRef.current.style.background = 'coral';
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;div ref={divRef} style={{ padding: 20 }}&gt;
+        Clique para me colorir!
+      &lt;/div&gt;
+      &lt;button onClick={destacar}&gt;Colorir&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</pre>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-react">Conceito 4</span>
+    <h3>Efeitos com useEffect</h3>
+    <p>O <code>useEffect</code> executa código depois que o componente aparecer na tela. É aqui que você inicia animações GSAP e sketches p5.js.</p>
+<pre>
+import { useEffect, useRef } from 'react';
+
+function Exemplo() {
+  const ref = useRef(null);
+
+  useEffect(() =&gt; {
+    // Roda quando o componente aparece na tela
+    console.log('Elemento disponível:', ref.current);
+
+    // A função de retorno roda quando o componente sai
+    return () =&gt; {
+      console.log('Limpando...');
+    };
+  }, []); // [] = executa apenas uma vez
+
+  return &lt;div ref={ref}&gt;Olá!&lt;/div&gt;;
+}
+</pre>
+    <div class="aviso">O <code>[]</code> no segundo argumento do <code>useEffect</code> é importante: sem ele, o código roda a cada renderização. Com <code>[]</code>, roda só uma vez ao aparecer.</div>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-react">Exemplo completo</span>
+    <h3>Renderização de lista com estado</h3>
+<pre>
+import { useState } from 'react';
+
+const itensIniciais = ['Maçã', 'Banana', 'Laranja'];
+
+function ListaDeFrutas() {
+  const [frutas, setFrutas] = useState(itensIniciais);
+  const [nova, setNova] = useState('');
+
+  const adicionar = () =&gt; {
+    if (nova.trim() === '') return;
+    setFrutas([...frutas, nova]); // cria novo array com o item
+    setNova(''); // limpa o campo
+  };
+
+  return (
+    &lt;div&gt;
+      &lt;ul&gt;
+        {frutas.map((f, i) =&gt; (
+          &lt;li key={i}&gt;{f}&lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+
+      &lt;input
+        value={nova}
+        onChange={e =&gt; setNova(e.target.value)}
+        placeholder="Nova fruta..."
+      /&gt;
+      &lt;button onClick={adicionar}&gt;Adicionar&lt;/button&gt;
+    &lt;/div&gt;
+  );
+}
+</pre>
+  </div>
+</div>
+
+<!-- ==================== GSAP ==================== -->
+<div id="secao-gsap" class="secao">
+  <h2>GSAP — animações profissionais</h2>
+  <p>GSAP (GreenSock Animation Platform) é o motor de animação mais usado na web. Anima qualquer propriedade CSS, SVG ou objeto JavaScript com controle total.</p>
+
+  <div class="card">
+    <span class="badge badge-gsap">Setup</span>
+    <h3>Como incluir o GSAP</h3>
+    <p><strong>Em HTML puro</strong> — adicione no &lt;head&gt; ou antes do fechamento do &lt;body&gt;:</p>
+<pre>
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"&gt;&lt;/script&gt;
+</pre>
+    <p><strong>Em projeto React</strong> — instale via npm e importe:</p>
+<pre>
+npm install gsap
+
+import { gsap } from 'gsap';
+</pre>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-gsap">Método 1</span>
+    <h3>gsap.to() — animar até um estado</h3>
+    <p>O método mais usado. Anima um elemento <em>até</em> os valores que você definir, partindo do estado atual.</p>
+<pre>
+// Seleciona por classe CSS e anima
+gsap.to(".caixa", {
+  x: 300,           // move 300px para a direita
+  y: -50,           // sobe 50px
+  rotation: 360,    // gira 360 graus
+  scale: 1.5,       // aumenta 50%
+  opacity: 0.5,     // fica semitransparente
+  duration: 2,      // em 2 segundos
+  ease: "bounce.out" // com efeito quique no final
+});
+
+// Também funciona com múltiplos elementos
+gsap.to(".item", {
+  x: 100,
+  stagger: 0.2,     // cada elemento espera 0.2s a mais
+  duration: 0.8
+});
+</pre>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-gsap">Método 2</span>
+    <h3>gsap.from() e gsap.fromTo()</h3>
+    <p><code>from()</code> define de onde a animação começa (o elemento já está no destino final). <code>fromTo()</code> define início E fim explicitamente.</p>
+<pre>
+// O elemento já está no lugar — gsap.from define o ponto de partida
+gsap.from(".titulo", {
+  y: -60,       // vem de 60px acima
+  opacity: 0,   // começa invisível
+  duration: 1,
+  ease: "power2.out"
+});
+
+// Define início e destino explicitamente
+gsap.fromTo(".caixa",
+  { opacity: 0, scale: 0.3, rotation: -45 },   // DE aqui...
+  { opacity: 1, scale: 1,   rotation: 0, duration: 1 } // ATÉ aqui
+);
+</pre>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-gsap">Timeline</span>
+    <h3>Sequências com gsap.timeline()</h3>
+    <p>A timeline encadeia animações em ordem e com controle preciso de tempo. Essencial para animações de entrada complexas.</p>
+<pre>
+// Cria a sequência
+const tl = gsap.timeline({ defaults: { duration: 0.5 } });
+
+tl.from(".fundo",    { opacity: 0 })
+  .from(".titulo",   { y: -40, opacity: 0 })
+  .from(".subtitulo",{ y: -20, opacity: 0 }, "-=0.2") // começa 0.2s antes do fim anterior
+  .from(".botao",    { scale: 0, ease: "back.out(2)" })
+  .to(".decoracao",  { rotation: 360, duration: 1 }, "<"); // "<" = junto com o anterior
+
+// Você pode pausar, reiniciar e controlar a timeline
+tl.pause();
+tl.play();
+tl.restart();
+tl.reverse();
+</pre>
+    <div class="aviso">O símbolo <code>"&lt;"</code> significa "ao mesmo tempo que o anterior" e <code>"-=0.2"</code> significa "0.2 segundos antes do anterior terminar". São os controles de tempo mais usados.</div>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-gsap">Principais eases</span>
+    <h3>Curvas de animação (eases)</h3>
+    <table>
+      <tr><th>Ease</th><th>Efeito</th><th>Quando usar</th></tr>
+      <tr><td><code>power1/2/3.out</code></td><td>Desacelera no final</td><td>Entradas elegantes</td></tr>
+      <tr><td><code>power1/2/3.in</code></td><td>Acelera no final</td><td>Saídas</td></tr>
+      <tr><td><code>back.out(1.7)</code></td><td>Passa do ponto e volta</td><td>Botões, pop-ups</td></tr>
+      <tr><td><code>bounce.out</code></td><td>Quica no final</td><td>Efeitos lúdicos</td></tr>
+      <tr><td><code>elastic.out(1, 0.3)</code></td><td>Oscila como mola</td><td>Arte, jogos</td></tr>
+      <tr><td><code>linear</code></td><td>Velocidade constante</td><td>Rotações infinitas</td></tr>
+    </table>
+    <p>Visualize todas as eases em: <a class="link-externo" href="https://gsap.com/ease-visualizer" target="_blank">gsap.com/ease-visualizer</a></p>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-gsap">No React</span>
+    <h3>GSAP dentro de um componente React</h3>
+<pre>
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+
+function BlocoAnimado() {
+  const elementoRef = useRef(null);
+
+  useEffect(() =&gt; {
+    // Anima quando o componente aparecer
+    gsap.from(elementoRef.current, {
+      y: 80,
+      opacity: 0,
+      duration: 0.9,
+      ease: "power3.out"
+    });
+  }, []);
+
+  return (
+    &lt;div
+      ref={elementoRef}
+      style={{ background: 'coral', padding: '2rem', borderRadius: 12 }}
+    &gt;
+      &lt;h2&gt;Eu apareço animado!&lt;/h2&gt;
+    &lt;/div&gt;
+  );
+}
+</pre>
+  </div>
+</div>
+
+<!-- ==================== P5.JS ==================== -->
+<div id="secao-p5" class="secao">
+  <h2>p5.js — arte e programação criativa</h2>
+  <p>p5.js é uma biblioteca JavaScript inspirada no Processing, pensada para artistas e designers. Ela facilita a criação de gráficos, animações e experiências interativas no canvas do navegador.</p>
+
+  <div class="card">
+    <span class="badge badge-p5">Estrutura base</span>
+    <h3>As duas funções essenciais</h3>
+    <p>Todo sketch de p5.js é construído em volta de duas funções:</p>
+<pre>
+function setup() {
+  // Roda UMA VEZ quando o sketch inicia
+  createCanvas(600, 400); // cria uma tela de 600x400 pixels
+  background(220);        // preenche o fundo (0=preto, 255=branco)
+}
+
+function draw() {
+  // Roda em LOOP contínuo (~60 vezes por segundo)
+  // Aqui ficam as animações e interações
+
+  ellipse(mouseX, mouseY, 50, 50); // desenha onde o mouse estiver
+}
+</pre>
+    <div class="aviso"><code>mouseX</code> e <code>mouseY</code> são variáveis automáticas do p5.js — você não precisa declarar nada para ter acesso à posição do mouse!</div>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-p5">Formas e cores</span>
+    <h3>Desenhando formas básicas</h3>
+<pre>
+function setup() {
+  createCanvas(500, 350);
+}
+
+function draw() {
+  background(30);          // fundo quase preto
+
+  // Cor de preenchimento: fill(R, G, B) ou fill(cinza)
+  fill(255, 100, 50);      // laranja
+  stroke(255, 255, 0);     // contorno amarelo
+  strokeWeight(3);         // espessura do contorno
+
+  rect(50, 50, 150, 100);  // retângulo(x, y, largura, altura)
+  ellipse(300, 120, 100);  // círculo(x, y, diâmetro)
+
+  fill(100, 200, 255);
+  noStroke();              // sem contorno
+  triangle(400,50, 370,150, 430,150);
+
+  stroke(255);
+  line(50, 200, 450, 300); // linha(x1, y1, x2, y2)
+}
+</pre>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-p5">Animação</span>
+    <h3>Criando movimento com variáveis</h3>
+<pre>
+let x = 0;
+let velocidade = 4;
+
+function setup() {
+  createCanvas(500, 200);
+}
+
+function draw() {
+  background(20); // redesenha o fundo a cada frame (apaga rastro)
+
+  // Desenha a bolinha na posição x
+  fill(80, 200, 255);
+  noStroke();
+  ellipse(x, height / 2, 50);
+
+  x = x + velocidade; // avança para a direita
+
+  // Quando sair da tela, volta ao início
+  if (x &gt; width + 25) {
+    x = -25;
+  }
+}
+</pre>
+    <div class="aviso"><code>width</code> e <code>height</code> são variáveis automáticas que guardam o tamanho do canvas. Use sempre em vez de números fixos!</div>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-p5">Interatividade</span>
+    <h3>Respondendo ao mouse e teclado</h3>
+<pre>
+function setup() {
+  createCanvas(500, 300);
+  background(20);
+}
+
+function draw() {
+  // map() converte um valor de um range para outro
+  // Aqui: posição X do mouse (0 a 500) vira cor (0 a 255)
+  let r = map(mouseX, 0, width, 0, 255);
+  let b = map(mouseY, 0, height, 255, 0);
+
+  // 4º parâmetro do fill = transparência (0-255)
+  fill(r, 80, b, 120);
+  noStroke();
+
+  // Só desenha se o mouse estiver pressionado
+  if (mouseIsPressed) {
+    ellipse(mouseX, mouseY, 40);
+  }
+}
+
+// Funções que respondem a eventos específicos:
+function mousePressed() {
+  // Roda uma vez quando o botão do mouse é pressionado
+  console.log('Clicou em:', mouseX, mouseY);
+}
+
+function keyPressed() {
+  if (key === 'c' || key === 'C') {
+    background(20); // limpa a tela pressionando 'C'
+  }
+}
+</pre>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-p5">Funções úteis</span>
+    <h3>Referência rápida das funções mais usadas</h3>
+    <table>
+      <tr><th>Função</th><th>O que faz</th></tr>
+      <tr><td><code>map(val, a1, b1, a2, b2)</code></td><td>Converte valor entre dois ranges</td></tr>
+      <tr><td><code>random(min, max)</code></td><td>Número aleatório entre min e max</td></tr>
+      <tr><td><code>dist(x1,y1, x2,y2)</code></td><td>Distância entre dois pontos</td></tr>
+      <tr><td><code>sin(angle)</code> / <code>cos(angle)</code></td><td>Seno e cosseno (em radianos)</td></tr>
+      <tr><td><code>noise(x)</code></td><td>Ruído Perlin — movimento orgânico</td></tr>
+      <tr><td><code>frameCount</code></td><td>Número do frame atual</td></tr>
+      <tr><td><code>frameRate()</code></td><td>FPS atual / define FPS com valor</td></tr>
+      <tr><td><code>noLoop()</code> / <code>loop()</code></td><td>Para / reinicia o draw()</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-p5">No React</span>
+    <h3>p5.js dentro do React</h3>
+    <p>Use o pacote <code>react-p5</code> para integrar facilmente:</p>
+<pre>
+npm install react-p5
+</pre>
+<pre>
+import Sketch from 'react-p5';
+
+function MeuSketch() {
+  const setup = (p5, canvasParentRef) =&gt; {
+    p5.createCanvas(500, 300).parent(canvasParentRef);
+    p5.background(20);
+  };
+
+  const draw = (p5) =&gt; {
+    let r = p5.map(p5.mouseX, 0, p5.width, 0, 255);
+    p5.fill(r, 100, 200, 150);
+    p5.noStroke();
+    p5.ellipse(p5.mouseX, p5.mouseY, 40);
+  };
+
+  const mousePressed = (p5) =&gt; {
+    p5.background(20); // limpa ao clicar
+  };
+
+  return &lt;Sketch setup={setup} draw={draw} mousePressed={mousePressed} /&gt;;
+}
+</pre>
+    <div class="aviso">Com o <code>react-p5</code>, todas as funções do p5.js passam a ser métodos do objeto <code>p5</code> (primeiro parâmetro). Então <code>ellipse()</code> vira <code>p5.ellipse()</code>.</div>
+  </div>
+</div>
+
+<!-- ==================== COMBINANDO ==================== -->
+<div id="secao-combinando" class="secao">
+  <h2>Combinando React + GSAP + p5.js</h2>
+  <p>As três ferramentas se complementam perfeitamente. Veja como organizar um projeto que usa as três:</p>
+
+  <div class="card">
+    <span class="badge badge-dica">Arquitetura</span>
+    <h3>Quem faz o quê</h3>
+    <div class="grade-3">
+      <div class="mini-card">
+        <span class="badge badge-react">React</span>
+        <h4>Estrutura</h4>
+        <p>Gerencia páginas, navegação, dados e estado da aplicação.</p>
+      </div>
+      <div class="mini-card">
+        <span class="badge badge-gsap">GSAP</span>
+        <h4>Transições</h4>
+        <p>Anima a entrada de componentes, transições de tela, hover em elementos.</p>
+      </div>
+      <div class="mini-card">
+        <span class="badge badge-p5">p5.js</span>
+        <h4>Visuais</h4>
+        <p>Fundo generativo, gráficos animados, simulações interativas.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-dica">Exemplo</span>
+    <h3>Projeto: fundo generativo com menu animado</h3>
+    <p>O p5.js cria partículas no fundo. O React organiza os componentes. O GSAP anima a entrada do menu.</p>
+<pre>
+// App.jsx
+import { useEffect } from 'react';
+import { gsap } from 'gsap';
+import Sketch from 'react-p5';
+
+function App() {
+  // GSAP: anima o menu ao entrar
+  useEffect(() =&gt; {
+    gsap.from(".menu-item", {
+      y: -30,
+      opacity: 0,
+      stagger: 0.15,
+      duration: 0.7,
+      ease: "power2.out",
+      delay: 0.3
+    });
+  }, []);
+
+  // p5.js: fundo com partículas
+  const setup = (p5, ref) =&gt; {
+    p5.createCanvas(p5.windowWidth, p5.windowHeight).parent(ref);
+  };
+
+  const draw = (p5) =&gt; {
+    p5.background(10, 10, 20, 25); // fundo com rastro (alpha baixo)
+    p5.fill(100, 180, 255, 180);
+    p5.noStroke();
+    // Partícula que orbita usando seno/cosseno
+    let x = p5.width/2  + p5.cos(p5.frameCount * 0.01) * 200;
+    let y = p5.height/2 + p5.sin(p5.frameCount * 0.02) * 100;
+    p5.ellipse(x, y, 8);
+  };
+
+  return (
+    &lt;div style={{ position: 'relative', height: '100vh' }}&gt;
+
+      {/* Fundo: canvas p5.js */}
+      &lt;div style={{ position: 'absolute', inset: 0, zIndex: 0 }}&gt;
+        &lt;Sketch setup={setup} draw={draw} /&gt;
+      &lt;/div&gt;
+
+      {/* Conteúdo: menu animado por GSAP */}
+      &lt;nav style={{ position: 'relative', zIndex: 1, padding: '2rem' }}&gt;
+        {['Início', 'Sobre', 'Projetos', 'Contato'].map(item =&gt; (
+          &lt;a key={item} className="menu-item" href="#"
+            style={{ display: 'block', color: 'white', marginBottom: 12 }}&gt;
+            {item}
+          &lt;/a&gt;
+        ))}
+      &lt;/nav&gt;
+
+    &lt;/div&gt;
+  );
+}
+
+export default App;
+</pre>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-dica">Padrão de uso</span>
+    <h3>Checklist de integração</h3>
+    <div class="passo">
+      <div class="passo-num">1</div>
+      <div class="passo-conteudo">
+        <h4>Crie o projeto React com Vite</h4>
+        <p><code>npm create vite@latest meu-projeto -- --template react</code></p>
+      </div>
+    </div>
+    <div class="passo">
+      <div class="passo-num">2</div>
+      <div class="passo-conteudo">
+        <h4>Instale as dependências</h4>
+        <p><code>npm install gsap react-p5</code></p>
+      </div>
+    </div>
+    <div class="passo">
+      <div class="passo-num">3</div>
+      <div class="passo-conteudo">
+        <h4>Separe as responsabilidades</h4>
+        <p>Crie componentes separados: <code>FundoGenerativo.jsx</code> (p5.js), <code>MenuAnimado.jsx</code> (GSAP), etc.</p>
+      </div>
+    </div>
+    <div class="passo">
+      <div class="passo-num">4</div>
+      <div class="passo-conteudo">
+        <h4>Use useEffect para iniciar animações</h4>
+        <p>Sempre inicie GSAP e p5.js dentro de <code>useEffect</code>, após o componente estar no DOM.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PROJETOS ==================== -->
+<div id="secao-projetos" class="secao">
+  <h2>Ideias de projeto criativo</h2>
+  <p>Projetos que combinam as três ferramentas de forma interessante para uma hipermídia criativa:</p>
+
+  <div class="card">
+    <span class="badge badge-proj">Ideia 1</span>
+    <h3>Portfólio com fundo vivo</h3>
+    <p>Um portfólio pessoal onde o fundo é um sketch p5.js (partículas, ondas, constelações). Cada seção entra com animação GSAP. O React organiza as seções e o conteúdo.</p>
+    <p><strong>Desafio criativo:</strong> o fundo responde ao scroll — cada seção ativa muda as cores e forma das partículas.</p>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-proj">Ideia 2</span>
+    <h3>Livro/história interativa</h3>
+    <p>Um conto dividido em capítulos. Cada virada de página é animada com GSAP. O cenário de cada capítulo é desenhado em p5.js (chuva, estrelas, ondas do mar). O React gerencia o estado da narrativa.</p>
+    <p><strong>Desafio criativo:</strong> decisões do leitor mudam o caminho da história (state do React) e os visuais do p5.js.</p>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-proj">Ideia 3</span>
+    <h3>Visualizador de dados artístico</h3>
+    <p>Dados reais (clima, redes sociais, música) visualizados de forma artística com p5.js. Filtros e seleções feitos em React. Transições entre visualizações animadas com GSAP.</p>
+    <p><strong>Desafio criativo:</strong> a visualização muda em tempo real enquanto o usuário arrasta sliders.</p>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-proj">Ideia 4</span>
+    <h3>Jogo narrativo / experiência imersiva</h3>
+    <p>Cenários interativos desenhados em p5.js com física básica (gravidade, colisões). Cutscenes e transições animadas com GSAP Timeline. O React gerencia o inventário, diálogos e progressão.</p>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-proj">Ideia 5</span>
+    <h3>Gerador de arte interativo</h3>
+    <p>O usuário controla parâmetros (cor, velocidade, forma) via sliders e botões feitos em React. O p5.js gera arte generativa em tempo real baseada nesses parâmetros. O GSAP anima os controles e feedbacks visuais da interface.</p>
+  </div>
+</div>
+
+<!-- ==================== RECURSOS ==================== -->
+<div id="secao-recursos" class="secao">
+  <h2>Recursos e referências</h2>
+
+  <div class="card">
+    <span class="badge badge-react">React</span>
+    <h3>Documentação e aprendizado</h3>
+    <p><a class="link-externo" href="https://react.dev/learn" target="_blank">react.dev/learn</a> — Tutorial oficial interativo (recomendado para iniciantes)</p>
+    <p><a class="link-externo" href="https://react.dev/reference/react" target="_blank">react.dev/reference</a> — Referência completa de hooks e API</p>
+    <p><strong>Conceitos essenciais a dominar:</strong> componentes, props, useState, useEffect, useRef, renderização condicional, listas com map().</p>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-gsap">GSAP</span>
+    <h3>Documentação e ferramentas</h3>
+    <p><a class="link-externo" href="https://gsap.com/docs/v3/" target="_blank">gsap.com/docs</a> — Documentação completa</p>
+    <p><a class="link-externo" href="https://gsap.com/ease-visualizer/" target="_blank">gsap.com/ease-visualizer</a> — Visualize e escolha eases</p>
+    <p><a class="link-externo" href="https://gsap.com/cheatsheet/" target="_blank">gsap.com/cheatsheet</a> — Resumo de todos os métodos</p>
+    <p><strong>Plugins gratuitos úteis:</strong> ScrollTrigger (animações com scroll), TextPlugin (anima texto), Draggable.</p>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-p5">p5.js</span>
+    <h3>Documentação e comunidade</h3>
+    <p><a class="link-externo" href="https://p5js.org/reference/" target="_blank">p5js.org/reference</a> — Todas as funções explicadas com exemplos</p>
+    <p><a class="link-externo" href="https://editor.p5js.org" target="_blank">editor.p5js.org</a> — Editor online, sem instalar nada</p>
+    <p><a class="link-externo" href="https://openprocessing.org" target="_blank">openprocessing.org</a> — Galeria de projetos para se inspirar</p>
+    <p><a class="link-externo" href="https://www.youtube.com/@TheCodingTrain" target="_blank">The Coding Train (YouTube)</a> — Tutoriais incríveis de p5.js com Daniel Shiffman</p>
+  </div>
+
+  <div class="card">
+    <span class="badge badge-dica">Dicas para os estudantes</span>
+    <h3>Como aprender mais rápido</h3>
+    <div class="passo">
+      <div class="passo-num">1</div>
+      <div class="passo-conteudo">
+        <h4>Copie e modifique</h4>
+        <p>Pegue exemplos prontos, cole no editor e mude os valores. Aprendizado por experimentação é o mais eficaz nessas ferramentas.</p>
+      </div>
+    </div>
+    <div class="passo">
+      <div class="passo-num">2</div>
+      <div class="passo-conteudo">
+        <h4>Use o console (F12)</h4>
+        <p>Abra o console do navegador sempre. <code>console.log()</code> é seu melhor amigo para depurar.</p>
+      </div>
+    </div>
+    <div class="passo">
+      <div class="passo-num">3</div>
+      <div class="passo-conteudo">
+        <h4>Comece simples</h4>
+        <p>Faça funcionar primeiro, depois embeleze. Um projeto simples que funciona vale mais que um complexo que não termina.</p>
+      </div>
+    </div>
+    <div class="passo">
+      <div class="passo-num">4</div>
+      <div class="passo-conteudo">
+        <h4>Compartilhe seu código</h4>
+        <p>Use CodePen ou StackBlitz para mostrar o projeto para colegas e professores com um link.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+function mostrar(id, btn) {
+  document.querySelectorAll('.secao').forEach(s => s.classList.remove('ativa'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('ativo'));
+  document.getElementById('secao-' + id).classList.add('ativa');
+  btn.classList.add('ativo');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
