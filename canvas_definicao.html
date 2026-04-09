@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Canvas HTML5 — Explicação Interativa</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f5f4f0;
+      color: #1a1a18;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: #6b6a64;
+      margin-bottom: 1.5rem;
+    }
+
+    .panel {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 200px;
+      flex: 1;
+    }
+
+    .ctrl-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ctrl-row label {
+      font-size: 13px;
+      color: #6b6a64;
+    }
+
+    .ctrl-row .val {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1a18;
+    }
+
+    .canvas-wrap {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    canvas {
+      border: 0.5px solid #ccc;
+      //border-radius: 8px;
+      display: block;
+      background: #f8f8f6;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #3b7dd8;
+    }
+
+    input[type="color"] {
+      width: 48px;
+      height: 32px;
+      border: 0.5px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      background: none;
+    }
+
+    .code-box {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      background: #eeecea;
+      border: 0.5px solid #d0cfc8;
+      border-radius: 8px;
+      padding: 14px 16px;
+      line-height: 1.8;
+      color: #1a1a18;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .hl  { color: #c0392b; font-weight: 600; }
+    .hl-x { color: #2471a3; font-weight: 600; }
+
+    .legend {
+      margin-top: 1.5rem;
+      border-top: 0.5px solid #d0cfc8;
+      padding-top: 1rem;
+    }
+
+    .legend h2 {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 0.75rem;
+      color: #444;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    td, th {
+      padding: 6px 10px;
+      text-align: left;
+      border-bottom: 0.5px solid #d0cfc8;
+    }
+
+    th {
+      font-weight: 500;
+      color: #6b6a64;
+      background: #eeecea;
+    }
+
+    td:first-child {
+      font-family: 'Courier New', Courier, monospace;
+      color: #c0392b;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Elemento &lt;canvas&gt; — Explicação Interativa</h1>
+  <p class="subtitle">Mexa nos controles para ver como cada parâmetro afecta o resultado.</p>
+
+  <div class="panel">
+    <div class="controls">
+      <div class="ctrl-row">
+        <label>Cor (fillStyle)</label>
+        <input type="color" id="col" value="#FF0000" oninput="draw()">
+      </div>
+      <div class="ctrl-row">
+        <label>X (posição horizontal)</label>
+        <input type="range" min="0" max="180" value="0" id="rx" oninput="draw()">
+        <span class="val" id="rx-v">0</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Y (posição vertical)</label>
+        <input type="range" min="0" max="100" value="0" id="ry" oninput="draw()">
+        <span class="val" id="ry-v">0</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Largura</label>
+        <input type="range" min="10" max="240" value="150" id="rw" oninput="draw()">
+        <span class="val" id="rw-v">150</span>
+      </div>
+      <div class="ctrl-row">
+        <label>Altura</label>
+        <input type="range" min="10" max="140" value="75" id="rh" oninput="draw()">
+        <span class="val" id="rh-v">75</span>
+      </div>
+    </div>
+
+    <div class="canvas-wrap">
+      <canvas id="myCanvas" width="260" height="150"></canvas>
+    </div>
+  </div>
+
+  <div class="code-box" id="codeview"></div>
+
+  <div class="legend">
+    <h2>Resumo das linhas</h2>
+    <table>
+      <thead>
+        <tr><th>Instrução</th><th>O que faz</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>getElementById</td><td>Encontra o canvas no HTML pelo seu id</td></tr>
+        <tr><td>getContext("2d")</td><td>Obtém o "pincel" para desenhar em 2D</td></tr>
+        <tr><td>fillStyle</td><td>Define a cor de preenchimento</td></tr>
+        <tr><td>fillRect(x, y, w, h)</td><td>Desenha o retângulo na posição e tamanho indicados</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function draw() {
+      const col = document.getElementById('col').value;
+      const x   = +document.getElementById('rx').value;
+      const y   = +document.getElementById('ry').value;
+      const w   = +document.getElementById('rw').value;
+      const h   = +document.getElementById('rh').value;
+
+      document.getElementById('rx-v').textContent = x;
+      document.getElementById('ry-v').textContent = y;
+      document.getElementById('rw-v').textContent = w;
+      document.getElementById('rh-v').textContent = h;
+
+      const canvas = document.getElementById('myCanvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = col;
+      ctx.fillRect(x, y, w, h);
+
+      document.getElementById('codeview').innerHTML =
+        `var canvas = document.getElementById("myCanvas");\nvar ctx = canvas.getContext("2d");\nctx.fillStyle = "<span class="hl">${col}</span>";\nctx.fillRect(<span class="hl-x">${x}, ${y}, ${w}, ${h}</span>);`;
+    }
+    draw();
+  </script>
+
+</body>
+</html>
