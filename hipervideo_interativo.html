@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hipervídeo Interativo — Exemplo Didático - Profª. Elisa Boff</title>
+
+  <!--
+    ============================================================
+    HIPERVÍDEO INTERATIVO — EXEMPLO DIDÁTICO
+    Disciplina: Criação em Hipermídia
+    Profaª. Elisa Boff
+    ============================================================
+    O que este arquivo demonstra:
+      1. Reprodução de vídeo com a tag <video> do HTML5
+      2. Botões de interação que aparecem durante o vídeo
+      3. Navegação por múltiplos caminhos (escolha do usuário)
+      4. Quiz embutido com verificação de resposta
+      5. Formulário de coleta de dados do usuário
+      6. Capítulos (navegação por marcadores de tempo)
+      7. Link externo a partir do vídeo
+
+    ESTRUTURA GERAL:
+      - index: tela inicial (capa) com escolha de caminho
+      - sceneA: Caminho A → vídeo + overlay com quiz
+      - sceneB: Caminho B → vídeo + overlay com formulário
+      - sceneC: Cena final com capítulos e link externo
+
+    Os vídeos usam arquivos públicos gratuitos do site
+    https://www.w3schools.com/html/mov_bbb.mp4 como
+    placeholder. Substitua pelos seus próprios vídeos!
+    ============================================================
+  -->
+
+  <style>
+    /* ===== RESET E VARIÁVEIS DE COR ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f14;       /* fundo geral escuro */
+      --surface:   #161b26;       /* cards e painéis */
+      --border:    #2a3245;       /* bordas sutis */
+      --accent:    #4f8ef7;       /* azul principal */
+      --accent2:   #f7914f;       /* laranja destaque */
+      --success:   #4fca7a;       /* verde correto */
+      --danger:    #f74f4f;       /* vermelho errado */
+      --text:      #e8ecf5;       /* texto principal */
+      --muted:     #7a8aaa;       /* texto secundário */
+      --radius:    10px;
+      --font-title: 'Georgia', serif;
+      --font-body:  'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ===== CONTAINER PRINCIPAL ===== */
+    /*
+      Cada "cena" é um <div class="scene">.
+      Apenas a cena ativa fica visível (display:flex).
+      Usamos JS para alternar entre cenas.
+    */
+    .scene {
+      display: none;                /* oculto por padrão */
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      width: min(780px, 96vw);
+      padding: 32px 24px;
+    }
+    .scene.active { display: flex; } /* classe adicionada pelo JS */
+
+    /* ===== CABEÇALHO DA CENA ===== */
+    .scene-title {
+      font-family: var(--font-title);
+      font-size: clamp(1.3rem, 3vw, 1.9rem);
+      text-align: center;
+      color: var(--text);
+    }
+    .scene-subtitle {
+      font-size: 0.9rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: -14px;
+    }
+
+    /* ===== WRAPPER DO VÍDEO ===== */
+    /*
+      position:relative permite empilhar overlays sobre o vídeo
+      usando position:absolute nos filhos.
+    */
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      background: #000;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    /* A tag <video> ocupa toda a largura do wrapper */
+    video {
+      display: block;
+      width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      background: #000;
+    }
+
+    /* ===== OVERLAY GENÉRICO ===== */
+    /*
+      O overlay é um painel que cobre o vídeo quando ativado.
+      Pode conter quiz, formulário, botões de escolha etc.
+    */
+    .overlay {
+      position: absolute;           /* fica sobre o vídeo */
+      inset: 0;                     /* ocupa todo o wrapper */
+      background: rgba(13,15,20,.88);
+      display: none;                /* oculto inicialmente */
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 28px;
+      text-align: center;
+      z-index: 10;
+    }
+    .overlay.visible { display: flex; } /* JS adiciona esta classe */
+
+    .overlay h2 {
+      font-family: var(--font-title);
+      font-size: 1.3rem;
+      color: var(--text);
+    }
+    .overlay p { color: var(--muted); font-size: 0.9rem; }
+
+    /* ===== BOTÕES ===== */
+    .btn {
+      padding: 10px 22px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn:hover { opacity: .85; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+
+    .btn-primary  { background: var(--accent);  color: #fff; }
+    .btn-secondary{ background: var(--accent2); color: #fff; }
+    .btn-outline  {
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      color: var(--accent);
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    /* ===== QUIZ ===== */
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .quiz-option {
+      padding: 10px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+      font-size: 0.92rem;
+      transition: border-color .2s, background .2s;
+    }
+    .quiz-option:hover { border-color: var(--accent); }
+    /* Classes adicionadas pelo JS após verificação */
+    .quiz-option.correct  { border-color: var(--success); background: #1a3d2b; }
+    .quiz-option.wrong    { border-color: var(--danger);  background: #3d1a1a; }
+
+    #quiz-feedback {
+      font-size: 0.9rem;
+      min-height: 22px;
+    }
+
+    /* ===== FORMULÁRIO ===== */
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 380px;
+    }
+    .form-grid label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: -6px;
+      text-align: left;
+    }
+    .form-grid input, .form-grid select {
+      padding: 9px 12px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.92rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-grid input:focus, .form-grid select:focus {
+      border-color: var(--accent);
+    }
+    #form-feedback {
+      font-size: 0.85rem;
+      color: var(--success);
+      min-height: 20px;
+    }
+
+    /* ===== CAPÍTULOS ===== */
+    /*
+      Lista de marcadores de tempo.
+      Clicar em um capítulo pula o vídeo para aquele instante.
+    */
+    .chapters {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+    }
+    .chapters h3 {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 12px;
+    }
+    .chapter-list { display: flex; flex-direction: column; gap: 6px; }
+    .chapter-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .chapter-item:hover { background: var(--border); }
+    .chapter-time {
+      font-size: 0.78rem;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      min-width: 34px;
+    }
+    .chapter-label { font-size: 0.9rem; }
+
+    /* ===== TELA INICIAL (CAPA) ===== */
+    .cover-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      text-align: center;
+      max-width: 500px;
+    }
+    .cover-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 99px;
+      padding: 3px 12px;
+      margin-bottom: 18px;
+    }
+    .cover-card h1 {
+      font-family: var(--font-title);
+      font-size: clamp(1.4rem, 3.5vw, 2rem);
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+    .cover-card p {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .path-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .path-card {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 14px;
+      cursor: pointer;
+      transition: border-color .2s, transform .15s;
+      text-align: left;
+    }
+    .path-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .path-icon { font-size: 1.6rem; margin-bottom: 8px; }
+    .path-card h4 { font-size: 0.95rem; margin-bottom: 4px; }
+    .path-card p { font-size: 0.78rem; color: var(--muted); }
+
+    /* ===== NOTA FINAL / RESULTADO ===== */
+    .result-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      text-align: center;
+      max-width: 440px;
+    }
+    .result-box h2 {
+      font-family: var(--font-title);
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+    .result-box p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+    .result-box a {
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+    }
+    .result-box a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <!-- 
+  ========================================================
+    CENA 0 — TELA INICIAL (CAPA)
+    Apresenta o hipervídeo e oferece dois caminhos ao usuário.
+  ======================================================== -->
+  <div class="scene active" id="scene-index">
+
+    <div class="cover-card">
+      <span class="cover-badge">Hipervídeo Interativo</span>
+
+      <h1>Bem-vindo ao Treinamento<br>de Produto</h1>
+      <p>
+        Este é um exemplo de narrativa interativa.
+        Escolha um caminho e explore os recursos:
+        quiz, formulário, capítulos e links externos.
+      </p>
+
+      <!-- Grade com dois caminhos — cada botão chama goTo() -->
+      <div class="path-grid">
+
+        <!--
+          goTo('scene-a') navega para a cena A.
+          Veja a função goTo() no bloco <script> abaixo.
+        -->
+        <div class="path-card" onclick="goTo('scene-a')">
+          <div class="path-icon">🎯</div>
+          <h4>Caminho A</h4>
+          <p>Vídeo com quiz ao final</p>
+        </div>
+
+        <div class="path-card" onclick="goTo('scene-b')">
+          <div class="path-icon">📋</div>
+          <h4>Caminho B</h4>
+          <p>Vídeo com formulário de cadastro</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /scene-index -->
+
+
+  <!-- 
+  ========================================================
+    CENA A — VÍDEO + QUIZ
+    Um quiz aparece sobre o vídeo ao final da reprodução.
+  ======================================================== -->
+  <div class="scene" id="scene-a">
+
+    <h2 class="scene-title">📽 Caminho A — Produto em Destaque</h2>
+    <p class="scene-subtitle">O quiz será exibido automaticamente ao fim do vídeo.</p>
+
+    <!--
+      video-wrapper tem position:relative.
+      O overlay do quiz fica empilhado sobre ele (position:absolute).
+    -->
+    <div class="video-wrapper">
+
+      <!--
+        TAG <video>:
+          - id="video-a" → para referenciar no JS
+          - controls → exibe os controles nativos do navegador
+          - preload="metadata" → carrega só metadados (eficiente)
+
+        EVENTO: onended="showOverlay('overlay-quiz')"
+          Quando o vídeo termina, chamamos showOverlay() para
+          exibir o overlay do quiz sobre o vídeo.
+
+        FONTE: use <source src="SEU_VIDEO.mp4" type="video/mp4">
+        Aqui usamos um vídeo público de exemplo.
+      -->
+      <video id="video-a"
+             controls
+             preload="metadata"
+             onended="showOverlay('overlay-quiz')">
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+        Seu navegador não suporta a tag video.
+      </video>
+
+      <!-- OVERLAY DO QUIZ (oculto até o vídeo terminar) -->
+      <div class="overlay" id="overlay-quiz">
+        <h2>🤔 Quiz Rápido</h2>
+        <p>Qual é o principal benefício demonstrado no vídeo?</p>
+
+        <!--
+          Cada opção chama checkAnswer(elemento, correto?)
+          true  → resposta certa
+          false → resposta errada
+        -->
+        <div class="quiz-options">
+          <button class="quiz-option"
+                  onclick="checkAnswer(this, false)">
+            Redução de custos operacionais
+          </button>
+          <button class="quiz-option"
+                  onclick="checkAnswer(this, true)">
+            Facilidade de uso e integração
+          </button>
+          <button class="quiz-option"
+                  onclick="checkAnswer(this, false)">
+            Aumento da velocidade de entrega
+          </button>
+        </div>
+
+        <!-- Área onde o JS escreve o feedback da resposta -->
+        <p id="quiz-feedback"></p>
+
+        <!-- Após o quiz, o usuário pode continuar para a cena C -->
+        <button class="btn btn-primary" onclick="goTo('scene-c')">
+          Continuar →
+        </button>
+      </div>
+
+    </div><!-- /video-wrapper -->
+
+    <button class="btn btn-outline" onclick="goTo('scene-index')">
+      ← Voltar ao início
+    </button>
+
+  </div><!-- /scene-a -->
+
+
+  <!-- 
+  ========================================================
+    CENA B — VÍDEO + FORMULÁRIO
+    Um formulário de captação aparece no meio do vídeo
+    (acionado manualmente aqui por um botão — você pode
+    disparar pelo evento ontimeupdate para um momento exato).
+  ======================================================== -->
+  <div class="scene" id="scene-b">
+
+    <h2 class="scene-title">📋 Caminho B — Cadastre-se</h2>
+    <p class="scene-subtitle">
+      Clique em "Quero me cadastrar" para abrir o formulário sobre o vídeo.
+    </p>
+
+    <div class="video-wrapper">
+
+      <!--
+        ontimeupdate é disparado a cada atualização de progresso.
+        Usamos para verificar se chegou em um momento específico
+        e exibir o formulário automaticamente (veja o JS).
+      -->
+      <video id="video-b"
+             controls
+             preload="metadata"
+             ontimeupdate="checkTimeB()">
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+        Seu navegador não suporta a tag video.
+      </video>
+
+      <!-- OVERLAY DO FORMULÁRIO -->
+      <div class="overlay" id="overlay-form">
+        <h2>📩 Fique por dentro!</h2>
+        <p>Preencha para receber novidades sobre o produto.</p>
+
+        <!--
+          Formulário simples — sem <form action="..."> para
+          não recarregar a página. Usamos um <div> e coletamos
+          os valores via JS com document.getElementById().
+        -->
+        <div class="form-grid">
+          <label for="input-nome">Nome completo</label>
+          <input type="text" id="input-nome" placeholder="Maria da Silva" />
+
+          <label for="input-email">E-mail</label>
+          <input type="email" id="input-email" placeholder="maria@email.com" />
+
+          <label for="input-interesse">Maior interesse</label>
+          <select id="input-interesse">
+            <option value="">Selecione…</option>
+            <option value="preco">Preço</option>
+            <option value="suporte">Suporte técnico</option>
+            <option value="demo">Demonstração</option>
+          </select>
+        </div>
+
+        <!-- Feedback após envio -->
+        <p id="form-feedback"></p>
+
+        <div class="btn-row">
+          <!-- submitForm() lê os campos e exibe confirmação -->
+          <button class="btn btn-primary" onclick="submitForm()">
+            Enviar cadastro
+          </button>
+          <button class="btn btn-outline" onclick="hideOverlay('overlay-form')">
+            Agora não
+          </button>
+        </div>
+      </div>
+
+    </div><!-- /video-wrapper -->
+
+    <!-- Botão manual para abrir o formulário (além do automático) -->
+    <button class="btn btn-secondary" onclick="showOverlay('overlay-form')">
+      📩 Quero me cadastrar
+    </button>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goTo('scene-index')">
+        ← Voltar
+      </button>
+      <button class="btn btn-primary" onclick="goTo('scene-c')">
+        Continuar →
+      </button>
+    </div>
+
+  </div><!-- /scene-b -->
+
+
+  <!-- 
+  ========================================================
+    CENA C — CAPÍTULOS + LINK EXTERNO (cena final)
+    Demonstra navegação por marcadores de tempo e abertura
+    de link externo a partir de um botão no hipervídeo.
+  ======================================================== -->
+  <div class="scene" id="scene-c">
+
+    <h2 class="scene-title">📚 Cena Final — Capítulos & Links</h2>
+    <p class="scene-subtitle">
+      Clique num capítulo para pular direto para aquele trecho do vídeo.
+    </p>
+
+    <div class="video-wrapper">
+      <!-- id="video-c" usado pela função jumpTo() -->
+      <video id="video-c" controls preload="metadata">
+        <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+        Seu navegador não suporta a tag video.
+      </video>
+    </div>
+
+    <!--
+      CAPÍTULOS
+      Cada item armazena o tempo (em segundos) no atributo
+      data-time. A função jumpTo() usa esse valor para definir
+      video.currentTime e iniciar a reprodução a partir dali.
+    -->
+    <div class="chapters">
+      <h3>📑 Capítulos do Vídeo</h3>
+      <div class="chapter-list">
+
+        <!--
+          jumpTo('video-c', segundos) define o ponto de reprodução.
+          Aqui o vídeo de exemplo tem ~10 s, então usamos valores
+          pequenos. Ajuste os segundos para seus vídeos reais.
+        -->
+        <div class="chapter-item" onclick="jumpTo('video-c', 0)">
+          <span class="chapter-time">0:00</span>
+          <span class="chapter-label">Introdução ao produto</span>
+        </div>
+        <div class="chapter-item" onclick="jumpTo('video-c', 3)">
+          <span class="chapter-time">0:03</span>
+          <span class="chapter-label">Principais funcionalidades</span>
+        </div>
+        <div class="chapter-item" onclick="jumpTo('video-c', 6)">
+          <span class="chapter-time">0:06</span>
+          <span class="chapter-label">Como adquirir / contato</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- LINK EXTERNO a partir do hipervídeo -->
+    <div class="result-box">
+      <h2>🌐 Saiba mais</h2>
+      <p>
+        Você pode direcionar o usuário a um site externo com mais
+        informações, uma landing page ou uma loja virtual.
+      </p>
+      <br />
+      <!--
+        openLink() chama window.open() com '_blank' para abrir
+        em nova aba. Isso mantém o hipervídeo ativo na aba atual.
+      -->
+      <button class="btn btn-primary"
+              onclick="openLink('https://www.example.com')">
+        🔗 Acessar site do produto
+      </button>
+    </div>
+
+    <button class="btn btn-outline" onclick="goTo('scene-index')">
+      ↺ Recomeçar
+    </button>
+
+  </div><!-- /scene-c -->
+
+
+  <!-- 
+  ============================================================
+    JAVASCRIPT — toda a lógica interativa do hipervídeo
+  ============================================================ -->
+  <script>
+
+    // ============================================================
+    // 1. NAVEGAÇÃO ENTRE CENAS
+    // ============================================================
+    /*
+      goTo(sceneId) esconde a cena atual e exibe a cena alvo.
+      Também pausa todos os vídeos antes de trocar, evitando
+      que dois vídeos toquem ao mesmo tempo.
+    */
+    function goTo(sceneId) {
+
+      // Pausa todos os vídeos da página
+      document.querySelectorAll('video').forEach(v => v.pause());
+
+      // Remove a classe "active" de todas as cenas
+      document.querySelectorAll('.scene').forEach(s => {
+        s.classList.remove('active');
+      });
+
+      // Adiciona "active" apenas na cena desejada
+      document.getElementById(sceneId).classList.add('active');
+
+      // Rola a página para o topo (útil em mobile)
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+
+    // ============================================================
+    // 2. CONTROLE DE OVERLAYS (exibir / esconder)
+    // ============================================================
+    /*
+      showOverlay(overlayId) pausa o vídeo dentro do mesmo
+      wrapper e exibe o overlay sobre ele.
+    */
+    function showOverlay(overlayId) {
+      const overlay = document.getElementById(overlayId);
+
+      // Pausa o vídeo que está no mesmo wrapper do overlay
+      const video = overlay.closest('.video-wrapper')?.querySelector('video');
+      if (video) video.pause();
+
+      overlay.classList.add('visible');
+    }
+
+    /*
+      hideOverlay(overlayId) esconde o overlay e
+      opcionalmente retoma o vídeo.
+    */
+    function hideOverlay(overlayId) {
+      const overlay = document.getElementById(overlayId);
+      overlay.classList.remove('visible');
+
+      // Retoma o vídeo ao fechar o overlay
+      const video = overlay.closest('.video-wrapper')?.querySelector('video');
+      if (video) video.play();
+    }
+
+
+    // ============================================================
+    // 3. QUIZ — verificar resposta do usuário
+    // ============================================================
+    /*
+      checkAnswer(botao, eCorreta) recebe o elemento clicado
+      e um booleano indicando se é a resposta certa.
+      Desabilita todos os botões para evitar dupla resposta.
+    */
+    function checkAnswer(botao, eCorreta) {
+      const feedback = document.getElementById('quiz-feedback');
+
+      // Desabilita todas as opções
+      document.querySelectorAll('.quiz-option').forEach(opt => {
+        opt.disabled = true;
+      });
+
+      if (eCorreta) {
+        botao.classList.add('correct');
+        feedback.style.color = 'var(--success)';
+        feedback.textContent = '✅ Correto! Muito bem.';
+      } else {
+        botao.classList.add('wrong');
+        feedback.style.color = 'var(--danger)';
+        feedback.textContent = '❌ Não foi dessa vez. Tente revisar o vídeo!';
+      }
+    }
+
+
+    // ============================================================
+    // 4. FORMULÁRIO — capturar e "enviar" dados
+    // ============================================================
+    /*
+      submitForm() lê os valores dos campos, valida e exibe
+      uma confirmação. Em produção, aqui você enviaria os dados
+      para um servidor via fetch() ou XMLHttpRequest.
+    */
+    function submitForm() {
+      const nome      = document.getElementById('input-nome').value.trim();
+      const email     = document.getElementById('input-email').value.trim();
+      const interesse = document.getElementById('input-interesse').value;
+      const feedback  = document.getElementById('form-feedback');
+
+      // Validação simples
+      if (!nome || !email || !interesse) {
+        feedback.style.color = 'var(--danger)';
+        feedback.textContent = '⚠️ Preencha todos os campos.';
+        return;
+      }
+
+      // Aqui você substituiria pelo fetch() para seu back-end:
+      // fetch('/api/leads', { method:'POST', body: JSON.stringify({nome, email, interesse}) })
+
+      feedback.style.color = 'var(--success)';
+      feedback.textContent = `✅ Obrigado, ${nome}! Entraremos em contato.`;
+
+      // Exibe o resultado no console (útil para depuração)
+      console.log('Dados capturados:', { nome, email, interesse });
+    }
+
+
+    // ============================================================
+    // 5. CAPÍTULOS — pular para um trecho do vídeo
+    // ============================================================
+    /*
+      jumpTo(videoId, segundos) define o ponto de reprodução
+      do vídeo e inicia a reprodução a partir dali.
+      Isso é feito via a propriedade currentTime da API
+      HTMLVideoElement.
+    */
+    function jumpTo(videoId, segundos) {
+      const video = document.getElementById(videoId);
+      video.currentTime = segundos;   // define o instante (em segundos)
+      video.play();                   // começa a reproduzir
+    }
+
+
+    // ============================================================
+    // 6. LINK EXTERNO
+    // ============================================================
+    /*
+      openLink(url) abre o link em uma nova aba,
+      mantendo o hipervídeo na aba atual.
+    */
+    function openLink(url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+
+    // ============================================================
+    // 7. DISPARO AUTOMÁTICO POR TEMPO (ontimeupdate)
+    // ============================================================
+    /*
+      checkTimeB() é chamada continuamente enquanto o vídeo B
+      está em reprodução (evento ontimeupdate no HTML).
+      Quando o vídeo chega a 4 segundos, abrimos o formulário
+      automaticamente — sem precisar que o usuário clique.
+
+      Usamos a variável formBShown para garantir que o overlay
+      abra apenas uma vez, não repetidamente a cada frame.
+    */
+    let formBShown = false; // "flag" para abrir o form só uma vez
+
+    function checkTimeB() {
+      const video = document.getElementById('video-b');
+
+      // Abre o formulário quando o vídeo atinge ~4 segundos
+      if (!formBShown && video.currentTime >= 4) {
+        formBShown = true;
+        showOverlay('overlay-form');
+      }
+    }
+
+  </script>
+
+</body>
+</html>
