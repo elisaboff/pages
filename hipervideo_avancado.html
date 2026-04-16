@@ -1,0 +1,1454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hipervídeo Avançado —  Profª. Elisa Boff - Hotspots, Branching & Pause Points</title>
+
+  <!--
+  ================================================================
+  HIPERVÍDEO AVANÇADO — EXEMPLO DIDÁTICO (NÍVEL 2)
+  Disciplina: Criação em Hipermídia
+  Profª. Elisa Boff
+  ================================================================
+  Recursos demonstrados neste arquivo:
+
+    1. HOTSPOTS — áreas clicáveis posicionadas em % sobre o frame
+       do vídeo. Aparecem e somem em janelas de tempo definidas.
+
+    2. PAUSE POINT com COUNTDOWN — o player pausa automaticamente
+       num segundo-chave e exibe um timer regressivo. O usuário
+       DEVE escolher um caminho para continuar.
+
+    3. BRANCHING REAL — dois caminhos de vídeo independentes.
+       Cada escolha leva a um vídeo diferente.
+
+    4. PRELOAD — o próximo vídeo é carregado em background
+       enquanto o atual toca, eliminando o delay na troca.
+
+    5. TRANSIÇÃO COM FADE — troca de vídeo com efeito de
+       escurecimento suave (CSS transition + JS).
+
+    6. HUD (heads-up display) — barra de progresso personalizada,
+       indicador de caminho ativo e botão de mute.
+
+  ESTRUTURA DE CENAS / GRAFO DE NAVEGAÇÃO:
+  ┌─────────┐     pause@4s     ┌──────────────────────┐
+  │  INTRO  │ ─────────────▶  │  ESCOLHA (branching) │
+  └─────────┘                  └──────────┬───────────┘
+                                  ┌───────┴───────┐
+                               Caminho A       Caminho B
+                              (vídeo-a)       (vídeo-b)
+                                  └───────┬───────┘
+                                    CENA FINAL
+  ================================================================
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" />
+
+  <style>
+    /* ───────────────────────────────────────────
+       RESET & VARIÁVEIS
+    ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #08090c;
+      --surface:  #111318;
+      --glass:    rgba(255,255,255,.05);
+      --border:   rgba(255,255,255,.08);
+      --accent-a: #e8c547;   /* amarelo ouro — caminho A */
+      --accent-b: #47b8e8;   /* azul ciano  — caminho B */
+      --white:    #f0f2f8;
+      --muted:    #6b7280;
+      --danger:   #e85447;
+      --r:        12px;
+      --font-d:   'Syne', sans-serif;       /* display */
+      --font-b:   'DM Sans', sans-serif;    /* body */
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--font-b);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+    }
+
+    /* ───────────────────────────────────────────
+       LAYOUT PRINCIPAL
+    ─────────────────────────────────────────── */
+    .app {
+      width: min(860px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    /* Cabeçalho do player */
+    .player-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: var(--r) var(--r) 0 0;
+    }
+    .player-title {
+      font-family: var(--font-d);
+      font-size: 0.85rem;
+      letter-spacing: .06em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* Indicador de caminho ativo */
+    .path-badge {
+      display: none;   /* mostrado via JS */
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 99px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+    }
+    .path-badge.visible { display: flex; }
+    .path-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent-a);
+    }
+    .path-badge.path-b .path-dot { background: var(--accent-b); }
+
+    /* ───────────────────────────────────────────
+       WRAPPER DO VÍDEO — núcleo do hipervídeo
+    ─────────────────────────────────────────── */
+    /*
+      position: relative → permite empilhar todos os
+      elementos interativos (hotspots, overlays, HUD)
+      exatamente sobre o frame do vídeo.
+    */
+    .video-wrapper {
+      position: relative;
+      width: 100%;
+      background: #000;
+      /* aspect-ratio garante proporção 16:9 consistente */
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+    }
+
+    /* ── TAG <video> ──
+       Duas tags video sobrepostas (layer 0 e layer 1).
+       Alternamos qual fica visível para o efeito de fade
+       sem interromper o preload da outra.
+    */
+    .video-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #000;
+      /* Fade controlado pela opacidade via JS */
+      transition: opacity .45s ease;
+    }
+    /* Camada de cima começa visível; a de baixo, oculta */
+    #vid-top    { z-index: 2; opacity: 1; }
+    #vid-bottom { z-index: 1; opacity: 0; }
+
+    /* ── CAMADA DE FADE (escurecimento na troca) ──
+       Um div preto que vai de opacity 0 → 1 → 0
+       durante a transição entre vídeos.
+    */
+    #fade-layer {
+      position: absolute;
+      inset: 0;
+      background: #000;
+      opacity: 0;
+      z-index: 20;
+      pointer-events: none;   /* não bloqueia cliques */
+      transition: opacity .35s ease;
+    }
+    #fade-layer.fading { opacity: 1; }
+
+    /* ───────────────────────────────────────────
+       HOTSPOTS
+    ─────────────────────────────────────────── */
+    /*
+      Hotspot = botão absolutamente posicionado em %
+      sobre o frame. Fica visível apenas na janela de
+      tempo definida pelo JS (timeupdate).
+
+      left/top em % → posição relativa ao frame do vídeo.
+      Isso mantém o hotspot no lugar certo em qualquer
+      resolução de tela.
+    */
+    .hotspot {
+      position: absolute;
+      z-index: 15;
+      opacity: 0;
+      pointer-events: none;   /* invisível = não clicável */
+      transform: scale(.85);
+      transition: opacity .3s, transform .3s;
+    }
+    /* Quando o JS adiciona .active, o hotspot aparece */
+    .hotspot.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: scale(1);
+    }
+
+    /* Visual do hotspot: círculo pulsante */
+    .hotspot-btn {
+      position: relative;
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: rgba(232,197,71,.18);
+      border: 2px solid var(--accent-a);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s;
+    }
+    .hotspot-btn:hover { background: rgba(232,197,71,.35); }
+
+    /* Anel de pulso animado ao redor do hotspot */
+    .hotspot-btn::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-a);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%   { opacity: .7; transform: scale(1); }
+      70%  { opacity: 0;  transform: scale(1.6); }
+      100% { opacity: 0;  transform: scale(1.6); }
+    }
+
+    /* Tooltip que aparece ao passar o mouse no hotspot */
+    .hotspot-tooltip {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(10,11,15,.92);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 0.72rem;
+      white-space: nowrap;
+      color: var(--white);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .hotspot-btn:hover + .hotspot-tooltip,
+    .hotspot-btn:focus + .hotspot-tooltip { opacity: 1; }
+
+    /* ───────────────────────────────────────────
+       OVERLAYS GENÉRICOS
+    ─────────────────────────────────────────── */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: clamp(16px, 4vw, 40px);
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s;
+      backdrop-filter: blur(2px);
+    }
+    .overlay.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* ── OVERLAY DE BRANCHING (escolha de caminho) ── */
+    #overlay-branch {
+      background: rgba(8,9,12,.82);
+    }
+    .branch-title {
+      font-family: var(--font-d);
+      font-size: clamp(1.1rem, 3vw, 1.7rem);
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .branch-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      max-width: 340px;
+    }
+
+    /* Cards de escolha lado a lado */
+    .branch-choices {
+      display: flex;
+      gap: clamp(10px, 2vw, 24px);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .choice-card {
+      width: clamp(130px, 28vw, 200px);
+      padding: clamp(12px, 2vw, 22px) clamp(10px, 2vw, 18px);
+      border-radius: var(--r);
+      border: 1.5px solid var(--border);
+      background: var(--glass);
+      cursor: pointer;
+      transition: border-color .2s, background .2s, transform .15s;
+      text-align: center;
+      backdrop-filter: blur(6px);
+    }
+    .choice-card:hover { transform: translateY(-3px); }
+    .choice-card.card-a { border-color: rgba(232,197,71,.4); }
+    .choice-card.card-a:hover {
+      border-color: var(--accent-a);
+      background: rgba(232,197,71,.08);
+    }
+    .choice-card.card-b { border-color: rgba(71,184,232,.4); }
+    .choice-card.card-b:hover {
+      border-color: var(--accent-b);
+      background: rgba(71,184,232,.08);
+    }
+    .choice-icon { font-size: clamp(1.6rem, 4vw, 2.2rem); margin-bottom: 8px; }
+    .choice-label {
+      font-family: var(--font-d);
+      font-size: clamp(0.8rem, 1.8vw, 1rem);
+      font-weight: 700;
+    }
+    .choice-card.card-a .choice-label { color: var(--accent-a); }
+    .choice-card.card-b .choice-label { color: var(--accent-b); }
+    .choice-desc { font-size: clamp(0.65rem, 1.4vw, 0.78rem); color: var(--muted); margin-top: 4px; }
+
+    /* ── COUNTDOWN ──
+       Timer regressivo exibido junto ao overlay de branching.
+       Barra de progresso encolhe via CSS animation.
+    */
+    .countdown-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .countdown-label {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .countdown-number {
+      font-family: var(--font-d);
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 800;
+      color: var(--danger);
+      line-height: 1;
+      /* Anima de verde → amarelo → vermelho via JS */
+      transition: color .5s;
+    }
+    .countdown-bar-bg {
+      width: clamp(120px, 30vw, 200px);
+      height: 3px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .countdown-bar {
+      height: 100%;
+      background: var(--danger);
+      border-radius: 99px;
+      width: 100%;
+      /* A largura é reduzida via JS a cada segundo */
+      transition: width 1s linear, background .5s;
+    }
+
+    /* ── OVERLAY DE HOTSPOT-INFO ──
+       Aparece quando o usuário clica num hotspot informativo.
+    */
+    #overlay-info {
+      background: rgba(8,9,12,.86);
+      justify-content: flex-start;
+      padding-top: clamp(20px, 5vw, 48px);
+    }
+    .info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: clamp(16px, 3vw, 28px) clamp(16px, 3vw, 32px);
+      max-width: 380px;
+      text-align: left;
+    }
+    .info-tag {
+      font-size: 0.68rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent-a);
+      margin-bottom: 10px;
+    }
+    .info-title {
+      font-family: var(--font-d);
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .info-body {
+      font-size: 0.82rem;
+      color: #9ca3af;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    /* ── OVERLAY FINAL ── */
+    #overlay-end {
+      background: rgba(8,9,12,.9);
+    }
+    .end-badge {
+      font-size: 0.68rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 4px 14px;
+    }
+    .end-title {
+      font-family: var(--font-d);
+      font-size: clamp(1.4rem, 4vw, 2.2rem);
+      font-weight: 800;
+      max-width: 420px;
+    }
+    .end-path-label {
+      font-size: 0.8rem;
+      padding: 5px 16px;
+      border-radius: 99px;
+    }
+    .end-path-label.path-a {
+      background: rgba(232,197,71,.12);
+      color: var(--accent-a);
+      border: 1px solid rgba(232,197,71,.3);
+    }
+    .end-path-label.path-b {
+      background: rgba(71,184,232,.12);
+      color: var(--accent-b);
+      border: 1px solid rgba(71,184,232,.3);
+    }
+    .end-btns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+    /* ───────────────────────────────────────────
+       HUD — BARRA DE PROGRESSO E CONTROLES
+    ─────────────────────────────────────────── */
+    /*
+      HUD = Heads-Up Display.
+      Fica sobre o vídeo (z-index alto), ancorado na base.
+      Aparece ao passar o mouse no wrapper.
+    */
+    .hud {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      z-index: 25;
+      padding: 0 14px 10px;
+      background: linear-gradient(transparent, rgba(0,0,0,.7));
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    .video-wrapper:hover .hud,
+    .hud.always-visible { opacity: 1; }
+
+    /* Barra de progresso do vídeo */
+    .progress-track {
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,.15);
+      border-radius: 99px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent-a);
+      border-radius: 99px;
+      width: 0%;
+      transition: width .25s linear, background .4s;
+      pointer-events: none;
+    }
+
+    /* Linha de marcadores de pause point */
+    .progress-marker {
+      position: absolute;
+      top: -3px;
+      width: 2px;
+      height: 9px;
+      background: var(--danger);
+      border-radius: 1px;
+      transform: translateX(-50%);
+    }
+
+    /* Controles do HUD */
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hud-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,.7);
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: color .15s, background .15s;
+      line-height: 1;
+    }
+    .hud-btn:hover { color: #fff; background: rgba(255,255,255,.1); }
+    .hud-time {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,.55);
+      font-variant-numeric: tabular-nums;
+      margin-left: auto;
+    }
+
+    /* ───────────────────────────────────────────
+       BARRA INFERIOR — mapa de nós do grafo
+    ─────────────────────────────────────────── */
+    .graph-bar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--r) var(--r);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+    }
+    .graph-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 64px;
+    }
+    .graph-dot {
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--border);
+      border: 2px solid var(--muted);
+      transition: background .4s, border-color .4s;
+    }
+    .graph-node.done .graph-dot   { background: var(--muted); border-color: var(--muted); }
+    .graph-node.active .graph-dot { background: var(--accent-a); border-color: var(--accent-a); box-shadow: 0 0 0 3px rgba(232,197,71,.2); }
+    .graph-node.active.path-b .graph-dot { background: var(--accent-b); border-color: var(--accent-b); box-shadow: 0 0 0 3px rgba(71,184,232,.2); }
+    .graph-label {
+      font-size: 0.62rem;
+      color: var(--muted);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .graph-node.active .graph-label { color: var(--white); }
+    .graph-arrow {
+      color: var(--border);
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    /* ───────────────────────────────────────────
+       BOTÕES REUTILIZÁVEIS
+    ─────────────────────────────────────────── */
+    .btn {
+      padding: clamp(8px, 1.5vw, 11px) clamp(16px, 3vw, 24px);
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-d);
+      font-size: clamp(0.78rem, 1.8vw, 0.9rem);
+      font-weight: 700;
+      letter-spacing: .04em;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn:hover  { opacity: .85; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-gold   { background: var(--accent-a); color: #1a1200; }
+    .btn-cyan   { background: var(--accent-b); color: #001a22; }
+    .btn-ghost  { background: var(--glass); color: var(--white); border: 1px solid var(--border); }
+
+    /* ───────────────────────────────────────────
+       TELA DE INTRO (antes do vídeo começar)
+    ─────────────────────────────────────────── */
+    #screen-intro {
+      position: absolute;
+      inset: 0;
+      z-index: 40;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      text-align: center;
+      padding: clamp(16px, 4vw, 40px);
+      transition: opacity .5s;
+    }
+    #screen-intro.hidden { opacity: 0; pointer-events: none; }
+    .intro-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .intro-title {
+      font-family: var(--font-d);
+      font-size: clamp(1.4rem, 5vw, 2.6rem);
+      font-weight: 800;
+      line-height: 1.15;
+      max-width: 500px;
+    }
+    .intro-title em {
+      font-style: normal;
+      color: var(--accent-a);
+    }
+    .intro-desc {
+      font-size: clamp(0.78rem, 2vw, 0.9rem);
+      color: var(--muted);
+      max-width: 380px;
+      line-height: 1.6;
+    }
+    .intro-features {
+      display: flex;
+      gap: clamp(8px, 2vw, 18px);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .intro-feat {
+      font-size: clamp(0.65rem, 1.5vw, 0.74rem);
+      padding: 4px 12px;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      color: var(--muted);
+    }
+
+    /* ───────────────────────────────────────────
+       LEGENDA DIDÁTICA (fora do player)
+    ─────────────────────────────────────────── */
+    .legend {
+      margin-top: 28px;
+      width: min(860px, 100%);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .legend-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 14px 16px;
+    }
+    .legend-item h4 {
+      font-family: var(--font-d);
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .legend-item p {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══════════════════════════════════════════════
+       CABEÇALHO DO PLAYER
+  ══════════════════════════════════════════════ -->
+  <div class="player-header">
+    <span class="player-title">Hipervídeo Avançado — Demo</span>
+
+    <!--
+      Badge que indica qual caminho o usuário escolheu.
+      Visível após o branching. Gerenciado pelo JS.
+    -->
+    <div class="path-badge" id="path-badge">
+      <span class="path-dot"></span>
+      <span id="path-badge-label">Caminho A</span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       WRAPPER DO VÍDEO — núcleo interativo
+  ══════════════════════════════════════════════ -->
+  <div class="video-wrapper" id="wrapper">
+
+    <!-- ── CAMADAS DE VÍDEO (sistema de fade entre duas tags) ──
+         Duas tags <video> empilhadas. A troca suave entre elas
+         simula o fade que plataformas como Vimeo usam.
+         Ao trocar de vídeo:
+           1. #vid-bottom recebe o novo src e faz preload
+           2. Fade escurece a tela
+           3. Trocamos qual camada fica em cima
+           4. Fade clareia revelando o novo vídeo
+    -->
+    <video id="vid-top"
+           class="video-layer"
+           preload="auto"
+           playsinline>
+      <!--
+        src inicial = vídeo de introdução.
+        Substitua pelo seu arquivo .mp4.
+        Usamos placeholder público para demonstração.
+      -->
+      <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+    </video>
+
+    <video id="vid-bottom"
+           class="video-layer"
+           preload="auto"
+           playsinline>
+      <!-- Preenchido dinamicamente pelo JS durante o preload -->
+    </video>
+
+    <!-- ── CAMADA DE FADE ──
+         Div preto que escurece durante a transição.
+    -->
+    <div id="fade-layer"></div>
+
+    <!-- ══════════════════════════════════════════
+         HOTSPOT 1 — Informativo (posição livre sobre o frame)
+         Aparece entre os segundos 1 e 3.5 do vídeo de intro.
+    ══════════════════════════════════════════ -->
+    <!--
+      left/top em % = posição relativa ao frame.
+      top:30% left:20% = parte superior esquerda do vídeo.
+      Ajuste esses valores para encaixar em objetos
+      específicos do seu próprio vídeo!
+    -->
+    <div class="hotspot" id="hs-produto"
+         style="top: 28%; left: 18%;"
+         data-start="1" data-end="3.5">
+
+      <button class="hotspot-btn"
+              onclick="showOverlay('overlay-info')"
+              aria-label="Ver informações">
+        ＋
+      </button>
+      <div class="hotspot-tooltip">Clique para saber mais</div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         HOTSPOT 2 — Hotspot visual (sem ação, só demonstração)
+         Aparece entre os segundos 2 e 4.
+         Posição: canto inferior direito do frame.
+    ══════════════════════════════════════════ -->
+    <div class="hotspot" id="hs-dica"
+         style="top: 62%; left: 68%;"
+         data-start="2" data-end="4">
+
+      <button class="hotspot-btn"
+              style="
+                background: rgba(71,184,232,.15);
+                border-color: var(--accent-b);
+              "
+              onclick="alert('💡 Dica: Este hotspot pode abrir um link, um vídeo relacionado ou qualquer conteúdo!')"
+              aria-label="Dica">
+        💡
+      </button>
+      <div class="hotspot-tooltip">Dica de produto</div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         OVERLAY 1 — INFORMAÇÃO (hotspot info)
+    ══════════════════════════════════════════ -->
+    <div class="overlay" id="overlay-info">
+      <div class="info-card">
+        <p class="info-tag">📦 Destaque do Produto</p>
+        <h2 class="info-title">Recurso Principal</h2>
+        <p class="info-body">
+          Este é um exemplo de hotspot informativo. No seu vídeo real,
+          aqui você colocaria detalhes de um produto que aparece no
+          frame — preço, especificações, link de compra etc.
+        </p>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-gold"
+                  onclick="openLink('https://www.example.com')">
+            Ver produto
+          </button>
+          <button class="btn btn-ghost"
+                  onclick="hideOverlay('overlay-info')">
+            Fechar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         OVERLAY 2 — BRANCHING (escolha de caminho)
+         Ativado automaticamente no pause point (4s).
+    ══════════════════════════════════════════ -->
+    <div class="overlay" id="overlay-branch">
+
+      <p class="branch-sub" style="font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);">
+        Escolha seu caminho
+      </p>
+      <h2 class="branch-title">
+        Como você quer continuar?
+      </h2>
+
+      <!-- Cards de escolha -->
+      <div class="branch-choices">
+        <!--
+          Cada card chama choosePath(caminho).
+          O JS carrega o vídeo correspondente e faz o fade.
+        -->
+        <div class="choice-card card-a" onclick="choosePath('a')">
+          <div class="choice-icon">🚀</div>
+          <div class="choice-label">Caminho A</div>
+          <div class="choice-desc">Demonstração de produto</div>
+        </div>
+        <div class="choice-card card-b" onclick="choosePath('b')">
+          <div class="choice-icon">🎓</div>
+          <div class="choice-label">Caminho B</div>
+          <div class="choice-desc">Tutorial passo a passo</div>
+        </div>
+      </div>
+
+      <!-- Countdown regressivo -->
+      <div class="countdown-wrap">
+        <div class="countdown-label">Auto-seleção em</div>
+        <div class="countdown-number" id="countdown-num">10</div>
+        <div class="countdown-bar-bg">
+          <div class="countdown-bar" id="countdown-bar"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         OVERLAY 3 — TELA FINAL
+         Exibida ao término do vídeo de caminho (A ou B).
+    ══════════════════════════════════════════ -->
+    <div class="overlay" id="overlay-end">
+      <span class="end-badge">Fim da experiência</span>
+      <h2 class="end-title" id="end-title">
+        Você completou o Caminho A!
+      </h2>
+      <div id="end-path-label" class="end-path-label path-a">
+        🚀 Demonstração concluída
+      </div>
+      <div class="end-btns">
+        <button class="btn btn-gold" onclick="restart()">
+          ↺ Recomeçar
+        </button>
+        <button class="btn btn-ghost"
+                onclick="choosePath(currentPath === 'a' ? 'b' : 'a')">
+          Tentar outro caminho
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         HUD — controles sobre o vídeo
+    ══════════════════════════════════════════ -->
+    <div class="hud" id="hud">
+
+      <!-- Barra de progresso clicável -->
+      <div class="progress-track"
+           id="progress-track"
+           onclick="seekVideo(event)">
+        <div class="progress-fill" id="progress-fill"></div>
+        <!--
+          Marcador visual do pause point na barra de progresso.
+          A posição em % é calculada pelo JS baseada no momento
+          do pause point e na duração total do vídeo.
+        -->
+        <div class="progress-marker" id="pause-marker"></div>
+      </div>
+
+      <div class="hud-controls">
+        <button class="hud-btn" id="btn-play" onclick="togglePlay()">▶</button>
+        <button class="hud-btn" id="btn-mute" onclick="toggleMute()">🔊</button>
+        <span class="hud-time" id="hud-time">0:00 / 0:00</span>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         TELA DE INTRO (cobre o vídeo antes de começar)
+    ══════════════════════════════════════════ -->
+    <div id="screen-intro">
+      <p class="intro-eyebrow">Exemplo didático — Hipermídia</p>
+      <h1 class="intro-title">
+        Hipervídeo com<br><em>Branching & Hotspots</em>
+      </h1>
+      <p class="intro-desc">
+        Experiência com pause point automático, contador regressivo,
+        hotspots clicáveis e transição com fade entre caminhos.
+      </p>
+      <div class="intro-features">
+        <span class="intro-feat">🎯 Hotspots</span>
+        <span class="intro-feat">⏱ Pause Point</span>
+        <span class="intro-feat">🔀 Branching</span>
+        <span class="intro-feat">⏳ Countdown</span>
+        <span class="intro-feat">🎬 Fade</span>
+        <span class="intro-feat">📦 Preload</span>
+      </div>
+      <button class="btn btn-gold" onclick="startExperience()" style="margin-top:8px;">
+        ▶ Iniciar experiência
+      </button>
+    </div>
+
+  </div><!-- /video-wrapper -->
+
+  <!-- GRAFO DE NAVEGAÇÃO — mapa visual dos nós -->
+  <div class="graph-bar">
+    <div class="graph-node active" id="node-intro">
+      <div class="graph-dot"></div>
+      <div class="graph-label">Intro</div>
+    </div>
+    <div class="graph-arrow">→</div>
+    <div class="graph-node" id="node-branch">
+      <div class="graph-dot"></div>
+      <div class="graph-label">Escolha</div>
+    </div>
+    <div class="graph-arrow">→</div>
+    <div class="graph-node" id="node-a">
+      <div class="graph-dot"></div>
+      <div class="graph-label">Caminho A</div>
+    </div>
+    <div class="graph-arrow" style="color:var(--border);">╱</div>
+    <div class="graph-node" id="node-b">
+      <div class="graph-dot"></div>
+      <div class="graph-label">Caminho B</div>
+    </div>
+    <div class="graph-arrow">→</div>
+    <div class="graph-node" id="node-end">
+      <div class="graph-dot"></div>
+      <div class="graph-label">Final</div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+
+<!-- ══════════════════════════════════════════
+     LEGENDA DIDÁTICA (fora do player)
+══════════════════════════════════════════ -->
+<div class="legend">
+  <div class="legend-item">
+    <h4>🎯 Hotspot</h4>
+    <p>Área clicável posicionada sobre o frame em coordenadas <code>left/top</code> em %. Ativa numa janela de tempo via <code>ontimeupdate</code>.</p>
+  </div>
+  <div class="legend-item">
+    <h4>⏱ Pause Point</h4>
+    <p>O JS detecta quando <code>currentTime ≥ 4s</code>, pausa o vídeo e exibe o overlay de branching.</p>
+  </div>
+  <div class="legend-item">
+    <h4>⏳ Countdown</h4>
+    <p>Timer regressivo de 10s. Se o usuário não escolher, o JS auto-seleciona o Caminho A.</p>
+  </div>
+  <div class="legend-item">
+    <h4>🔀 Branching</h4>
+    <p>Cada escolha carrega um <code>src</code> diferente na segunda tag <code>&lt;video&gt;</code> e troca as camadas.</p>
+  </div>
+  <div class="legend-item">
+    <h4>📦 Preload</h4>
+    <p>O próximo vídeo começa a baixar em background enquanto o atual toca, eliminando delay na troca.</p>
+  </div>
+  <div class="legend-item">
+    <h4>🎬 Fade</h4>
+    <p>Uma camada preta interposta entre as duas <code>&lt;video&gt;</code> cria o efeito de escurecimento na transição.</p>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     JAVASCRIPT — toda a lógica do hipervídeo
+══════════════════════════════════════════════ -->
+<script>
+  // ============================================================
+  // CONFIGURAÇÃO DO HIPERVÍDEO
+  // ============================================================
+  /*
+    Centralize aqui os dados de cada cena.
+    Para adaptar ao seu projeto, substitua apenas os srcs
+    e ajuste os tempos.
+  */
+  const CONFIG = {
+    // Vídeo de introdução (toca primeiro)
+    intro: {
+      src: 'https://www.w3schools.com/html/mov_bbb.mp4',
+      pauseAt: 4,        // segundos onde ocorre o pause point
+      pauseTolerance: .15 // margem de detecção (evita múltiplos disparo)
+    },
+    // Caminhos disponíveis após o branching
+    paths: {
+      a: {
+        src: 'https://www.w3schools.com/html/movie.mp4', // substitua
+        label: '🚀 Demonstração concluída',
+        title: 'Você completou o Caminho A!',
+        cssClass: 'path-a'
+      },
+      b: {
+        src: 'https://www.w3schools.com/html/mov_bbb.mp4', // substitua
+        label: '🎓 Tutorial concluído',
+        title: 'Você completou o Caminho B!',
+        cssClass: 'path-b'
+      }
+    },
+    countdown: 10   // segundos do timer regressivo
+  };
+
+  // ============================================================
+  // ESTADO DA APLICAÇÃO
+  // ============================================================
+  let currentPhase   = 'intro';   // 'intro' | 'branch' | 'path'
+  let currentPath    = null;      // 'a' | 'b'
+  let pauseTriggered = false;     // evita disparar o pause point 2x
+  let countdownTimer = null;      // referência ao setInterval do countdown
+  let countdownLeft  = CONFIG.countdown;
+  let activeTop      = 'vid-top'; // qual camada está visível no momento
+
+  // Referências aos elementos do DOM
+  const vidTop        = document.getElementById('vid-top');
+  const vidBottom     = document.getElementById('vid-bottom');
+  const fadeLayer     = document.getElementById('fade-layer');
+  const progressFill  = document.getElementById('progress-fill');
+  const pauseMarker   = document.getElementById('pause-marker');
+  const hudTime       = document.getElementById('hud-time');
+  const btnPlay       = document.getElementById('btn-play');
+  const btnMute       = document.getElementById('btn-mute');
+  const pathBadge     = document.getElementById('path-badge');
+  const pathBadgeLbl  = document.getElementById('path-badge-label');
+
+  // O vídeo "ativo" é sempre a camada no topo
+  function activeVideo() {
+    return activeTop === 'vid-top' ? vidTop : vidBottom;
+  }
+
+  // ============================================================
+  // 1. INICIAR EXPERIÊNCIA (botão da tela de intro)
+  // ============================================================
+  function startExperience() {
+    // Esconde a tela de intro com fade CSS
+    document.getElementById('screen-intro').classList.add('hidden');
+
+    // Carrega e toca o vídeo de introdução
+    vidTop.src = CONFIG.intro.src;
+    vidTop.load();
+    vidTop.play();
+
+    // Mostra o HUD
+    document.getElementById('hud').classList.add('always-visible');
+
+    // Calcula a posição % do marcador de pause point
+    // na barra de progresso (precisamos esperar os metadados)
+    vidTop.addEventListener('loadedmetadata', () => {
+      const pct = (CONFIG.intro.pauseAt / vidTop.duration) * 100;
+      pauseMarker.style.left = pct + '%';
+    }, { once: true });
+
+    // ── PRELOAD DO PRÓXIMO VÍDEO ──
+    // Enquanto o intro toca, já carregamos os dois caminhos
+    // em background para que a troca seja instantânea.
+    preloadVideo(CONFIG.paths.a.src);
+    preloadVideo(CONFIG.paths.b.src);
+  }
+
+  // ── PRELOAD ──
+  // Cria uma tag <video> fora da tela e seta preload="auto"
+  // para forçar o browser a baixar o arquivo em background.
+  const preloadCache = {};
+  function preloadVideo(src) {
+    if (preloadCache[src]) return; // já está em cache
+    const v = document.createElement('video');
+    v.preload = 'auto';
+    v.src = src;
+    v.style.display = 'none';
+    document.body.appendChild(v);
+    preloadCache[src] = v;
+  }
+
+  // ============================================================
+  // 2. MONITORAMENTO DO TEMPO (ontimeupdate)
+  // ============================================================
+  /*
+    timeupdate é disparado várias vezes por segundo
+    durante a reprodução. Usamos para:
+      a) atualizar HUD (barra de progresso, tempo)
+      b) ativar/desativar hotspots na janela de tempo
+      c) detectar o pause point e disparar o branching
+  */
+  function onTimeUpdate(vid) {
+    const t   = vid.currentTime;
+    const dur = vid.duration || 1;
+
+    // ── Atualiza barra de progresso ──
+    progressFill.style.width = (t / dur * 100) + '%';
+
+    // ── Atualiza texto de tempo ──
+    hudTime.textContent = formatTime(t) + ' / ' + formatTime(dur);
+
+    // ── Ativa/desativa hotspots por janela de tempo ──
+    updateHotspots(t);
+
+    // ── Detecta pause point (só na fase intro) ──
+    if (currentPhase === 'intro'
+        && !pauseTriggered
+        && t >= CONFIG.intro.pauseAt - CONFIG.intro.pauseTolerance) {
+      triggerBranchingPoint();
+    }
+  }
+
+  // Conecta o listener ao vídeo ativo
+  vidTop.ontimeupdate    = () => onTimeUpdate(vidTop);
+  vidBottom.ontimeupdate = () => onTimeUpdate(vidBottom);
+
+  // ── Ao terminar um vídeo de caminho ──
+  vidTop.onended    = () => { if (currentPhase === 'path') showEndScreen(); };
+  vidBottom.onended = () => { if (currentPhase === 'path') showEndScreen(); };
+
+  // ============================================================
+  // 3. HOTSPOTS — ativar por janela de tempo
+  // ============================================================
+  /*
+    Cada hotspot tem data-start e data-end no HTML.
+    O JS verifica se currentTime está dentro desse intervalo
+    e adiciona/remove a classe .active.
+  */
+  function updateHotspots(t) {
+    document.querySelectorAll('.hotspot').forEach(hs => {
+      const start = parseFloat(hs.dataset.start);
+      const end   = parseFloat(hs.dataset.end);
+      const inRange = (t >= start && t <= end);
+      hs.classList.toggle('active', inRange);
+    });
+  }
+
+  // ============================================================
+  // 4. PAUSE POINT — disparar o branching
+  // ============================================================
+  function triggerBranchingPoint() {
+    pauseTriggered = true;
+    activeVideo().pause();       // pausa o vídeo exato neste frame
+    currentPhase = 'branch';
+
+    // Atualiza grafo de navegação
+    setGraphNode('node-branch');
+
+    // Exibe o overlay de escolha
+    showOverlay('overlay-branch');
+
+    // Inicia o countdown
+    startCountdown();
+  }
+
+  // ============================================================
+  // 5. COUNTDOWN REGRESSIVO
+  // ============================================================
+  /*
+    A cada segundo:
+      - decrementa countdownLeft
+      - atualiza o número e a barra de progresso
+      - muda a cor conforme o tempo restante
+    Ao chegar em 0, auto-seleciona o Caminho A.
+  */
+  function startCountdown() {
+    countdownLeft = CONFIG.countdown;
+    updateCountdownUI();
+
+    countdownTimer = setInterval(() => {
+      countdownLeft--;
+      updateCountdownUI();
+
+      if (countdownLeft <= 0) {
+        clearInterval(countdownTimer);
+        choosePath('a'); // seleção automática
+      }
+    }, 1000);
+  }
+
+  function updateCountdownUI() {
+    const numEl = document.getElementById('countdown-num');
+    const barEl = document.getElementById('countdown-bar');
+
+    numEl.textContent = countdownLeft;
+
+    // Barra encolhe proporcionalmente
+    const pct = (countdownLeft / CONFIG.countdown) * 100;
+    barEl.style.width = pct + '%';
+
+    // Muda de verde → amarelo → vermelho
+    if (countdownLeft > CONFIG.countdown * .6) {
+      numEl.style.color = '#4fca7a';
+      barEl.style.background = '#4fca7a';
+    } else if (countdownLeft > CONFIG.countdown * .3) {
+      numEl.style.color = '#e8c547';
+      barEl.style.background = '#e8c547';
+    } else {
+      numEl.style.color = 'var(--danger)';
+      barEl.style.background = 'var(--danger)';
+    }
+  }
+
+  // ============================================================
+  // 6. BRANCHING — escolher caminho e trocar vídeo
+  // ============================================================
+  function choosePath(path) {
+    // Para o countdown (caso ainda esteja rodando)
+    clearInterval(countdownTimer);
+
+    currentPath  = path;
+    currentPhase = 'path';
+    const cfg    = CONFIG.paths[path];
+
+    // Esconde o overlay de escolha
+    hideOverlay('overlay-branch');
+
+    // Atualiza o badge de caminho no cabeçalho
+    pathBadge.classList.add('visible');
+    pathBadgeLbl.textContent = path === 'a' ? 'Caminho A' : 'Caminho B';
+    if (path === 'b') pathBadge.classList.add('path-b');
+    else              pathBadge.classList.remove('path-b');
+
+    // Atualiza cor da barra de progresso pelo caminho escolhido
+    progressFill.style.background =
+      path === 'a' ? 'var(--accent-a)' : 'var(--accent-b)';
+
+    // Atualiza grafo de navegação
+    setGraphNode(path === 'a' ? 'node-a' : 'node-b');
+
+    // Troca o vídeo com efeito de fade
+    transitionToVideo(cfg.src);
+
+    // Remove o marcador de pause point (não faz mais sentido)
+    pauseMarker.style.display = 'none';
+  }
+
+  // ============================================================
+  // 7. TRANSIÇÃO COM FADE ENTRE VÍDEOS
+  // ============================================================
+  /*
+    Algoritmo de fade com duas camadas de <video>:
+
+    1. Identifica qual camada está "em cima" (visível)
+       e qual está "embaixo" (oculta).
+    2. Coloca o novo src na camada de baixo.
+    3. Aciona o FADE IN do #fade-layer (escurece).
+    4. Após o escurecimento, inverte as opacidades:
+       - camada de baixo (novo vídeo) → opacity 1
+       - camada de cima (vídeo antigo) → opacity 0
+    5. Inicia a reprodução do novo vídeo.
+    6. Aciona o FADE OUT do #fade-layer (clareia).
+    7. Troca a referência de qual é a camada "ativa".
+  */
+  function transitionToVideo(src) {
+    const topLayer    = document.getElementById('vid-top');
+    const bottomLayer = document.getElementById('vid-bottom');
+    const isTopActive = (activeTop === 'vid-top');
+
+    const currentLayer = isTopActive ? topLayer : bottomLayer;
+    const nextLayer    = isTopActive ? bottomLayer : topLayer;
+
+    // Prepara o próximo vídeo
+    nextLayer.src = src;
+    nextLayer.load();
+
+    // FASE 1 — escurece com o fade layer
+    fadeLayer.classList.add('fading');
+
+    setTimeout(() => {
+      // FASE 2 — troca visibilidade das camadas
+      currentLayer.style.opacity = '0';
+      nextLayer.style.opacity    = '1';
+      nextLayer.style.zIndex     = '2';
+      currentLayer.style.zIndex  = '1';
+
+      // Toca o novo vídeo
+      nextLayer.play();
+
+      // FASE 3 — clareia
+      fadeLayer.classList.remove('fading');
+
+      // Atualiza qual camada é a "ativa"
+      activeTop = isTopActive ? 'vid-bottom' : 'vid-top';
+
+    }, 380); // aguarda o CSS transition do fade (350ms + margem)
+  }
+
+  // ============================================================
+  // 8. TELA FINAL
+  // ============================================================
+  function showEndScreen() {
+    const cfg = CONFIG.paths[currentPath];
+
+    document.getElementById('end-title').textContent = cfg.title;
+
+    const lbl = document.getElementById('end-path-label');
+    lbl.textContent = cfg.label;
+    lbl.className   = 'end-path-label ' + cfg.cssClass;
+
+    showOverlay('overlay-end');
+    setGraphNode('node-end');
+  }
+
+  // ============================================================
+  // 9. REINICIAR
+  // ============================================================
+  function restart() {
+    // Reseta estado
+    currentPhase    = 'intro';
+    currentPath     = null;
+    pauseTriggered  = false;
+    clearInterval(countdownTimer);
+
+    // Esconde todos os overlays
+    document.querySelectorAll('.overlay').forEach(o => {
+      o.classList.remove('visible');
+    });
+
+    // Reseta badge
+    pathBadge.classList.remove('visible', 'path-b');
+
+    // Reseta barra e marcador
+    progressFill.style.width      = '0%';
+    progressFill.style.background = 'var(--accent-a)';
+    pauseMarker.style.display     = '';
+
+    // Reseta grafo
+    document.querySelectorAll('.graph-node').forEach(n => {
+      n.classList.remove('active', 'done', 'path-b');
+    });
+    setGraphNode('node-intro');
+
+    // Volta ao vídeo de intro na camada principal
+    const topLayer    = document.getElementById('vid-top');
+    const bottomLayer = document.getElementById('vid-bottom');
+    topLayer.style.opacity    = '1';
+    topLayer.style.zIndex     = '2';
+    bottomLayer.style.opacity = '0';
+    bottomLayer.style.zIndex  = '1';
+    activeTop = 'vid-top';
+
+    topLayer.src = CONFIG.intro.src;
+    topLayer.load();
+    topLayer.play();
+
+    // Reposiciona o marcador de pause point
+    topLayer.addEventListener('loadedmetadata', () => {
+      const pct = (CONFIG.intro.pauseAt / topLayer.duration) * 100;
+      pauseMarker.style.left = pct + '%';
+    }, { once: true });
+
+    // Reinicia o preload
+    preloadVideo(CONFIG.paths.a.src);
+    preloadVideo(CONFIG.paths.b.src);
+  }
+
+  // ============================================================
+  // 10. CONTROLES DE HUD
+  // ============================================================
+
+  // Play / Pause
+  function togglePlay() {
+    const vid = activeVideo();
+    if (vid.paused) {
+      vid.play();
+      btnPlay.textContent = '⏸';
+    } else {
+      vid.pause();
+      btnPlay.textContent = '▶';
+    }
+  }
+
+  // Mute / Unmute
+  function toggleMute() {
+    const vid = activeVideo();
+    vid.muted = !vid.muted;
+    btnMute.textContent = vid.muted ? '🔇' : '🔊';
+  }
+
+  // Clique na barra de progresso → seek
+  function seekVideo(e) {
+    const vid   = activeVideo();
+    const track = document.getElementById('progress-track');
+    const rect  = track.getBoundingClientRect();
+    const pct   = (e.clientX - rect.left) / rect.width;
+    vid.currentTime = pct * vid.duration;
+  }
+
+  // Atualiza ícone de play/pause
+  vidTop.onplay    = () => btnPlay.textContent = '⏸';
+  vidTop.onpause   = () => btnPlay.textContent = '▶';
+  vidBottom.onplay = () => btnPlay.textContent = '⏸';
+  vidBottom.onpause= () => btnPlay.textContent = '▶';
+
+  // ============================================================
+  // 11. GRAFO DE NAVEGAÇÃO — atualiza nó ativo
+  // ============================================================
+  function setGraphNode(nodeId) {
+    document.querySelectorAll('.graph-node').forEach(n => {
+      // Nós anteriores ficam como "done"
+      if (n.id !== nodeId && n.classList.contains('active')) {
+        n.classList.remove('active');
+        n.classList.add('done');
+      }
+    });
+    const node = document.getElementById(nodeId);
+    if (node) {
+      node.classList.remove('done');
+      node.classList.add('active');
+      if (currentPath === 'b') node.classList.add('path-b');
+    }
+  }
+
+  // ============================================================
+  // 12. UTILITÁRIOS
+  // ============================================================
+
+  // Exibe um overlay
+  function showOverlay(id) {
+    document.getElementById(id)?.classList.add('visible');
+  }
+
+  // Esconde um overlay e retoma o vídeo
+  function hideOverlay(id) {
+    document.getElementById(id)?.classList.remove('visible');
+    activeVideo().play();
+  }
+
+  // Abre link em nova aba
+  function openLink(url) {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
+  // Formata segundos → "m:ss"
+  function formatTime(s) {
+    if (isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    return m + ':' + sec;
+  }
+
+</script>
+</body>
+</html>
