@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Áudio Dinâmico em Hipermídia — Exemplos Interativos</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+
+  :root {
+    --bg: #0d0d12;
+    --surface: #16161f;
+    --surface2: #1e1e2a;
+    --border: #2a2a38;
+    --accent1: #7c6ef7;
+    --accent2: #f76e8a;
+    --accent3: #6ef7c4;
+    --accent4: #f7c46e;
+    --accent5: #6eaff7;
+    --accent6: #f76ec4;
+    --accent7: #a8f76e;
+    --accent8: #f7956e;
+    --text: #e8e8f0;
+    --text-dim: #7a7a96;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    text-align: center;
+    padding: 60px 24px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #3a2f8030 0%, transparent 70%);
+    pointer-events: none;
+  }
+  header .eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent1);
+    margin-bottom: 12px;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #fff 30%, var(--accent1));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px;
+  }
+  header p {
+    color: var(--text-dim);
+    max-width: 560px;
+    margin: 0 auto;
+    font-size: 15px;
+  }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: border-color .25s, transform .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--accent1));
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .card:hover {
+    border-color: color-mix(in srgb, var(--card-accent, var(--accent1)) 40%, transparent);
+    transform: translateY(-2px);
+  }
+
+  .card-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--card-accent, var(--accent1));
+    opacity: .8;
+  }
+  .card h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+  }
+  .card h2 span {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-dim);
+    margin-top: 3px;
+  }
+  .card p {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    flex: 1;
+  }
+  .card p strong { color: var(--text); font-weight: 500; }
+
+  /* ── DEMO AREA ── */
+  .demo {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .demo-label {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* Game display */
+  .game-screen {
+    background: #0a0a10;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .enemy-icon { font-size: 22px; }
+  .coin-icon  { font-size: 22px; }
+  .status-text { color: var(--text-dim); font-size: 12px; }
+
+  /* Mood bars */
+  .mood-bar-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .mood-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+  .mood-row .label { width: 90px; color: var(--text-dim); }
+  .bar-bg { flex: 1; height: 8px; background: #1a1a26; border-radius: 99px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; transition: width .6s ease; }
+
+  /* Waveform canvas */
+  canvas.waveform {
+    width: 100%; height: 50px;
+    border-radius: 6px;
+    background: #0a0a10;
+    display: block;
+  }
+
+  /* Narrative map */
+  .nav-map { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .nav-zone {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all .2s;
+  }
+  .nav-zone.active { border-color: var(--accent5); color: var(--accent5); background: #1a2a3a; }
+  .nav-zone:not(.active) { background: #1a1a26; color: var(--text-dim); }
+
+  /* Immersive meter */
+  .immersion-meter { display: flex; gap: 4px; }
+  .immersion-bar {
+    flex: 1; height: 32px; border-radius: 4px;
+    background: #1a1a26;
+    transition: background .4s;
+  }
+
+  /* Aesthetic genres */
+  .genre-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .genre-tag {
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    transition: all .2s;
+  }
+  .genre-tag.active { color: var(--bg); font-weight: 600; }
+
+  /* Kinetic rhythm */
+  .rhythm-track { display: flex; gap: 6px; align-items: center; }
+  .beat-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #2a2a38;
+    transition: background .1s, transform .1s;
+  }
+  .beat-dot.hit { transform: scale(1.4); }
+
+  /* Sound classification */
+  .sound-class-row { display: flex; gap: 10px; }
+  .sound-class-box {
+    flex: 1; background: #0a0a10; border-radius: 8px; padding: 12px;
+    border: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .sound-class-box .type-label {
+    font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    margin-bottom: 6px; font-weight: 600;
+  }
+  .sound-class-box .icon { font-size: 24px; margin-bottom: 6px; }
+  .sound-class-box p { color: var(--text-dim); line-height: 1.4; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: opacity .2s, transform .1s;
+    color: var(--bg);
+    background: var(--card-accent, var(--accent1));
+  }
+  .btn:active { transform: scale(.97); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--card-accent, var(--accent1));
+    color: var(--card-accent, var(--accent1));
+  }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Log output */
+  .log {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    min-height: 18px;
+    padding: 4px 0;
+  }
+  .log.ok   { color: var(--accent3); }
+  .log.warn { color: var(--accent4); }
+  .log.bad  { color: var(--accent2); }
+  .log.info { color: var(--accent5); }
+
+  /* Section label */
+  .section-label {
+    max-width: 1200px;
+    margin: 40px auto 10px;
+    padding: 0 24px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .card { padding: 20px; }
+    .sound-class-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Disciplina de Hipermídia · Profª. Elisa Boff · UCS</div>
+  <h1>Funções do Áudio<br>Dinâmico</h1>
+  <p>Exemplos interativos das 7 funções do IASIG (2012) + classificação de sons familiares e abstratos. Clique nos botões para ouvir os sons gerados via Web Audio API.</p>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="section-label">— As 7 Funções</div>
+<div class="grid" id="cards"></div>
+
+<!-- Sons classificados -->
+<div class="section-label">— Classificação: Sons Familiares vs. Abstratos</div>
+<div class="grid" id="cards2"></div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<script>
+// ─────────────────────────────────────────────
+//  WEB AUDIO CONTEXT (lazy init on first click)
+// ─────────────────────────────────────────────
+let AC;
+function getAC() {
+  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+
+// ─── Oscillator helpers ───────────────────────
+function osc(type, freq, dur, vol=0.18, detune=0, startDelay=0) {
+  const ac = getAC();
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.connect(g); g.connect(ac.destination);
+  o.type = type; o.frequency.value = freq; o.detune.value = detune;
+  const t = ac.currentTime + startDelay;
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(vol, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.start(t); o.stop(t + dur + 0.05);
+}
+
+function noise(dur, vol=0.12, startDelay=0) {
+  const ac = getAC();
+  const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random()*2-1;
+  const s = ac.createBufferSource();
+  const f = ac.createBiquadFilter(); f.type='bandpass'; f.frequency.value=1200;
+  const g = ac.createGain();
+  s.buffer = buf;
+  s.connect(f); f.connect(g); g.connect(ac.destination);
+  const t = ac.currentTime + startDelay;
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  s.start(t); s.stop(t + dur + 0.05);
+}
+
+// ─── Composite sound effects ──────────────────
+
+function sfxEnemy() {
+  // Tense dissonant cluster
+  [180,182,270,271,360,540].forEach((f,i)=> osc('sawtooth',f,1.2,0.06,0,i*0.02));
+}
+function sfxCoin() {
+  // Cheerful ascending arpeggio
+  [523,659,784,1047].forEach((f,i)=> osc('sine',f,0.25,0.14,0,i*0.08));
+}
+function sfxSad() {
+  [330,294,262,247].forEach((f,i)=> osc('sine',f,0.45,0.13,0,i*0.18));
+}
+function sfxHappy() {
+  [523,587,659,698,784].forEach((f,i)=> osc('sine',f,0.25,0.15,0,i*0.09));
+}
+function sfxTense() {
+  [100,150,200,250,300,350].forEach((f,i)=> {
+    osc('sawtooth',f,2.0,0.05,i*3,0);
+  });
+  osc('square',80,2.0,0.08);
+}
+function sfxRelax() {
+  [261,329,392,523].forEach((f,i)=> {
+    osc('sine',f,1.5,0.08,0,i*0.15);
+  });
+}
+function sfxTransition() {
+  // Whoosh up
+  const ac = getAC();
+  const o = ac.createOscillator();
+  const g = ac.createGain();
+  o.connect(g); g.connect(ac.destination);
+  o.type = 'sine';
+  const t = ac.currentTime;
+  o.frequency.setValueAtTime(200,t);
+  o.frequency.exponentialRampToValueAtTime(1200,t+0.4);
+  g.gain.setValueAtTime(0.15,t);
+  g.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+  o.start(t); o.stop(t+0.6);
+}
+function sfxSilence() {
+  // Very faint breath-like noise then true silence
+  noise(0.15, 0.05);
+}
+function sfxForest() {
+  // Layered high-freq noise + low hum (ambient)
+  noise(2.0, 0.07);
+  osc('sine',60,2.0,0.04);
+  osc('sine',80,2.0,0.03,5);
+}
+function sfxSpace() {
+  // Reverb-like sweeping tones
+  [120,180,240,300].forEach((f,i)=> osc('sine',f,2.5,0.05,0,i*0.3));
+}
+function sfxCity() {
+  noise(2,0.1);
+  [80,120].forEach(f=>osc('sawtooth',f,2,0.04));
+}
+function sfxImmersive() {
+  sfxForest();
+  [300,400,600].forEach((f,i)=> osc('sine',f,1.5,0.04,0,i*0.4));
+}
+function sfxImmersiveMask() {
+  sfxCity();
+  [300,450,600,750].forEach((f,i)=> osc('sine',f,2.5,0.06,0,i*0.2));
+}
+
+// Kinetic
+let kineticsInterval = null;
+let kinetikBeat = 0;
+function sfxKineticBeat() {
+  osc('square', 200, 0.05, 0.2);
+  noise(0.05, 0.15);
+}
+function sfxKineticFail() {
+  osc('sawtooth', 100, 0.3, 0.18);
+}
+
+// Aesthetic genres
+function sfxAmbient() {
+  [200,250,300,350,400].forEach((f,i)=> osc('sine',f,2.5,0.05,0,i*0.3));
+}
+function sfxElectronic() {
+  [440,440,880,660,880,440].forEach((f,i)=> osc('square',f,0.12,0.15,0,i*0.13));
+}
+function sfxOrchestra() {
+  // Chord
+  [262,330,392,494].forEach((f,i)=> {
+    osc('sawtooth',f,1.5,0.06,i*2);
+    osc('sine',f*2,1.5,0.03,i*3);
+  });
+}
+
+// Familiar
+function sfxDoorbell() {
+  osc('sine',700,0.3,0.2,0,0);
+  osc('sine',556,0.4,0.18,0,0.25);
+}
+function sfxNotification() {
+  osc('sine',880,0.12,0.18,0,0);
+  osc('sine',1108,0.12,0.18,0,0.14);
+}
+function sfxClick() {
+  noise(0.03,0.3);
+}
+
+// Abstract
+function sfxAbstractAlert() {
+  [900,800,700,600,500].forEach((f,i)=> osc('square',f,0.1,0.15,0,i*0.07));
+}
+function sfxAbstractLevel() {
+  // Ascending chord stab
+  [300,400,600,800,1000].forEach((f,i)=> osc('sine',f,0.3,0.12,0,i*0.04));
+}
+function sfxAbstractError() {
+  osc('sawtooth',110,0.4,0.2);
+  osc('sawtooth',116,0.4,0.2);
+}
+
+// ─────────────────────────────────────────────
+//  CARD DEFINITIONS
+// ─────────────────────────────────────────────
+const cards = [
+  // 1 — SEMIÓTICA
+  {
+    num:'01',
+    accent:'var(--accent1)',
+    title:'Função Semiótica',
+    subtitle:'Transmitir significado e antecipar estados',
+    desc:`Sons como <strong>símbolos</strong> que comunicam ao usuário o estado da interface — inimigos, recompensas, perigo — reduzindo a curva de aprendizagem. Inclui função <strong>antecipatória/preparatória</strong>.`,
+    demo: `
+      <div class="demo-label">Exemplo: Game de aventura</div>
+      <div class="game-screen">
+        <span class="enemy-icon">👾</span>
+        <span class="coin-icon">🪙</span>
+        <span id="sem-status" class="status-text">Clique nos botões abaixo</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="playSem('enemy')">👾 Inimigo (tensão)</button>
+        <button class="btn btn-ghost" onclick="playSem('coin')">🪙 Moeda (positivo)</button>
+      </div>
+      <div class="log" id="sem-log"></div>
+    `
+  },
+  // 2 — EMOCIONAL
+  {
+    num:'02',
+    accent:'var(--accent2)',
+    title:'Função Emocional',
+    subtitle:'Induzir e manipular estados de humor',
+    desc:`Além de transmitir informação, o som <strong>induz emoções</strong> no usuário — tristeza, alegria, urgência — orientando suas respostas. O ritmo pode aumentar ou diminuir a percepção de dificuldade.`,
+    demo: `
+      <div class="demo-label">Ritmo emocional da interface</div>
+      <div class="mood-bar-wrap">
+        <div class="mood-row"><span class="label">Imersão</span><div class="bar-bg"><div class="bar-fill" id="bar-imm" style="width:20%;background:var(--accent2)"></div></div></div>
+        <div class="mood-row"><span class="label">Tensão</span><div class="bar-bg"><div class="bar-fill" id="bar-ten" style="width:10%;background:var(--accent4)"></div></div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" style="background:var(--accent2)" onclick="playEmo('sad')">😢 Tristeza</button>
+        <button class="btn btn-ghost" style="border-color:var(--accent2);color:var(--accent2)" onclick="playEmo('happy')">😊 Alegria</button>
+        <button class="btn btn-ghost" style="border-color:var(--accent4);color:var(--accent4)" onclick="playEmo('tense')">⚡ Urgência</button>
+      </div>
+      <div class="log" id="emo-log"></div>
+    `
+  },
+  // 3 — ESTRUTURAL
+  {
+    num:'03',
+    accent:'var(--accent3)',
+    title:'Função Estrutural',
+    subtitle:'Criar, reforçar ou mascarar a estrutura',
+    desc:`Sons indicam <strong>mudanças na narrativa</strong>, transições de fase, e continuidade de conteúdo. Um <strong>breve silêncio</strong> pode sinalizar fim de tarefa ou iminência de evento.`,
+    demo: `
+      <div class="demo-label">Transição de fases</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <div id="phase-a" style="padding:8px 14px;border-radius:6px;font-size:13px;background:#1e1e2a;border:1px solid var(--accent3);color:var(--accent3)">Fase 1</div>
+        <span style="color:var(--text-dim);font-size:18px">→</span>
+        <div id="phase-b" style="padding:8px 14px;border-radius:6px;font-size:13px;background:#1a1a26;border:1px solid var(--border);color:var(--text-dim)">Fase 2</div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" style="background:var(--accent3);color:#0d0d12" onclick="playEst('transition')">🔀 Tocar transição</button>
+        <button class="btn btn-ghost" style="border-color:var(--accent3);color:var(--accent3)" onclick="playEst('silence')">🔇 Silêncio estrutural</button>
+      </div>
+      <div class="log" id="est-log"></div>
+    `
+  },
+  // 4 — NARRATIVA
+  {
+    num:'04',
+    accent:'var(--accent5)',
+    title:'Função Narrativa',
+    subtitle:'Situar o usuário no contexto da interface',
+    desc:`O som ancora o usuário no <strong>onde, quando e o quê</strong> está acontecendo. Músicas ambientes distintas por local informam a posição na narrativa. Sons não-verbais criam <em>ambient moods</em>.`,
+    demo: `
+      <div class="demo-label">Localização por ambiente sonoro</div>
+      <div class="nav-map" id="nav-map">
+        <div class="nav-zone active" data-zone="forest" onclick="playNar('forest',this)">🌲 Floresta</div>
+        <div class="nav-zone" data-zone="space" onclick="playNar('space',this)">🚀 Espaço</div>
+        <div class="nav-zone" data-zone="city" onclick="playNar('city',this)">🏙️ Cidade</div>
+      </div>
+      <div class="log" id="nar-log"></div>
+    `
+  },
+  // 5 — IMERSIVA
+  {
+    num:'05',
+    accent:'var(--accent6)',
+    title:'Função Imersiva',
+    subtitle:'Suspensão de descrença e foco na tarefa',
+    desc:`O som cria uma <strong>ilusão do real</strong>, aprofundando o envolvimento. Também pode <strong>mascarar sons externos</strong>, aumentando progressivamente o foco na interface.`,
+    demo: `
+      <div class="demo-label">Nível de imersão</div>
+      <div class="immersion-meter" id="imm-meter">
+        ${[...Array(10)].map((_,i)=>`<div class="immersion-bar" id="imb-${i}"></div>`).join('')}
+      </div>
+      <div class="btn-row">
+        <button class="btn" style="background:var(--accent6)" onclick="playImm('enter')">🎧 Entrar no ambiente</button>
+        <button class="btn btn-ghost" style="border-color:var(--accent6);color:var(--accent6)" onclick="playImm('mask')">🔊 Mascarar externo</button>
+      </div>
+      <div class="log" id="imm-log"></div>
+    `
+  },
+  // 6 — ESTÉTICA
+  {
+    num:'06',
+    accent:'var(--accent4)',
+    title:'Função Estética',
+    subtitle:'Identidade sonora e clima da interface',
+    desc:`Sons criam a <strong>identidade</strong> da interface e oferecem pistas sobre seu ritmo e caráter. Músicas suaves = tarefa leve; aceleradas = ação e dinâmica. Gêneros musicais criam expectativas intertextuais.`,
+    demo: `
+      <div class="demo-label">Gênero → Clima percebido</div>
+      <div class="genre-row" id="genre-row">
+        <span class="genre-tag" data-color="var(--accent3)" onclick="playEst2('ambient',this)">🌿 Ambient</span>
+        <span class="genre-tag" data-color="var(--accent1)" onclick="playEst2('electronic',this)">⚡ Eletrônico</span>
+        <span class="genre-tag" data-color="var(--accent4)" onclick="playEst2('orchestra',this)">🎻 Orquestral</span>
+      </div>
+      <div class="log" id="est2-log"></div>
+    `
+  },
+  // 7 — CINÉTICA
+  {
+    num:'07',
+    accent:'var(--accent7)',
+    title:'Função Cinética',
+    subtitle:'Conectar áudio a resposta motora',
+    desc:`Sons motivam e <strong>confirmam movimentos físicos</strong>. O ritmo da música guia a execução de ações — acertos recebem feedback positivo, erros recebem feedback negativo — como em <em>Dance Dance Revolution</em>.`,
+    demo: `
+      <div class="demo-label">Ritmo — pressione no tempo certo!</div>
+      <div class="rhythm-track" id="rhythm-track">
+        ${[...Array(8)].map((_,i)=>`<div class="beat-dot" id="bd-${i}"></div>`).join('')}
+        <span style="flex:1;text-align:right;font-size:11px;color:var(--text-dim)" id="kin-score">Acertos: 0</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn" style="background:var(--accent7);color:#0d0d12" id="kin-start" onclick="startKinetics()">▶ Iniciar ritmo</button>
+        <button class="btn btn-ghost" style="border-color:var(--accent7);color:var(--accent7)" onclick="hitKinetics()">🥁 Bater (ESPAÇO)</button>
+        <button class="btn btn-ghost" style="border-color:var(--border);color:var(--text-dim)" onclick="stopKinetics()">■ Parar</button>
+      </div>
+      <div class="log" id="kin-log"></div>
+    `
+  }
+];
+
+// ─────────────────────────────────────────────
+//  Classification cards
+// ─────────────────────────────────────────────
+const cards2 = [
+  {
+    num:'A',
+    accent:'var(--accent8)',
+    title:'Sons Familiares',
+    subtitle:'Ícones Auditivos — vocabulário sonoro já conhecido',
+    desc:`Sons do cotidiano que possuem significados que <strong>transcendem o contexto da interface</strong>. Ajudam a reforçar metáforas visuais. Exemplos: campainha, clique de botão, som de notificação.`,
+    demo: `
+      <div class="demo-label">Sons do cotidiano digital</div>
+      <div class="sound-class-row">
+        <div class="sound-class-box">
+          <div class="type-label" style="color:var(--accent8)">Ícone Auditivo</div>
+          <div class="icon">🔔</div>
+          <p>Campainha — indica chegada, chamada</p>
+          <br>
+          <button class="btn" style="background:var(--accent8);font-size:12px;padding:6px 12px" onclick="sfxDoorbell()">▶ Tocar</button>
+        </div>
+        <div class="sound-class-box">
+          <div class="type-label" style="color:var(--accent8)">Ícone Auditivo</div>
+          <div class="icon">📲</div>
+          <p>Notificação — alerta de nova mensagem</p>
+          <br>
+          <button class="btn" style="background:var(--accent8);font-size:12px;padding:6px 12px" onclick="sfxNotification()">▶ Tocar</button>
+        </div>
+        <div class="sound-class-box">
+          <div class="type-label" style="color:var(--accent8)">Ícone Auditivo</div>
+          <div class="icon">🖱️</div>
+          <p>Clique — confirmação de interação direta</p>
+          <br>
+          <button class="btn" style="background:var(--accent8);font-size:12px;padding:6px 12px" onclick="sfxClick()">▶ Tocar</button>
+        </div>
+      </div>
+      <div class="log info" id="fam-log">↑ Você reconhece estes sons sem precisar aprender</div>
+    `
+  },
+  {
+    num:'B',
+    accent:'var(--accent1)',
+    title:'Sons Abstratos',
+    subtitle:'Ícones Sonoros — significado deve ser aprendido',
+    desc:`Sons <strong>não-familiares</strong> cujos significados precisam ser <em>convencionados</em>. Úteis para chamar atenção e sinalizar estados de interface. Exemplos: beeps de sistema, alertas eletrônicos, sons de game sem correspondente real.`,
+    demo: `
+      <div class="demo-label">Sons sem referência no cotidiano</div>
+      <div class="sound-class-row">
+        <div class="sound-class-box">
+          <div class="type-label" style="color:var(--accent1)">Ícone Sonoro</div>
+          <div class="icon">⚠️</div>
+          <p>Alerta de sistema — indica erro ou atenção requerida</p>
+          <br>
+          <button class="btn" style="background:var(--accent1);font-size:12px;padding:6px 12px" onclick="sfxAbstractAlert()">▶ Tocar</button>
+        </div>
+        <div class="sound-class-box">
+          <div class="type-label" style="color:var(--accent1)">Ícone Sonoro</div>
+          <div class="icon">🆙</div>
+          <p>Level-up — indica progressão positiva</p>
+          <br>
+          <button class="btn" style="background:var(--accent1);font-size:12px;padding:6px 12px" onclick="sfxAbstractLevel()">▶ Tocar</button>
+        </div>
+        <div class="sound-class-box">
+          <div class="type-label" style="color:var(--accent1)">Ícone Sonoro</div>
+          <div class="icon">❌</div>
+          <p>Erro crítico — dissonância indica falha grave</p>
+          <br>
+          <button class="btn" style="background:var(--accent1);font-size:12px;padding:6px 12px" onclick="sfxAbstractError()">▶ Tocar</button>
+        </div>
+      </div>
+      <div class="log info" id="abs-log">↑ Estes precisam de aprendizado — mas são eficazes após convenção</div>
+    `
+  }
+];
+
+// ─────────────────────────────────────────────
+//  RENDER CARDS
+// ─────────────────────────────────────────────
+function renderCards(data, containerId) {
+  const container = document.getElementById(containerId);
+  data.forEach(card => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.style.setProperty('--card-accent', card.accent);
+    div.innerHTML = `
+      <div class="card-num">${card.num}</div>
+      <h2>${card.title}<span>${card.subtitle}</span></h2>
+      <p>${card.desc}</p>
+      <div class="demo">
+        ${card.demo}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+renderCards(cards, 'cards');
+renderCards(cards2, 'cards2');
+
+// ─────────────────────────────────────────────
+//  INTERACTION HANDLERS
+// ─────────────────────────────────────────────
+
+// 1 Semiótica
+function playSem(type) {
+  const log = document.getElementById('sem-log');
+  const status = document.getElementById('sem-status');
+  if (type === 'enemy') {
+    sfxEnemy();
+    status.textContent = '👾 Inimigo detectado — tensão crescente!';
+    status.style.color = 'var(--accent2)';
+    log.className = 'log bad';
+    log.textContent = '→ Símbolo sonoro: perigo iminente (função preparatória)';
+  } else {
+    sfxCoin();
+    status.textContent = '🪙 +100 pontos coletados!';
+    status.style.color = 'var(--accent3)';
+    log.className = 'log ok';
+    log.textContent = '→ Símbolo sonoro: evento positivo identificado';
+  }
+}
+
+// 2 Emocional
+function playEmo(type) {
+  const log = document.getElementById('emo-log');
+  const barImm = document.getElementById('bar-imm');
+  const barTen = document.getElementById('bar-ten');
+  if (type === 'sad') {
+    sfxSad(); barImm.style.width='35%'; barTen.style.width='20%';
+    log.className='log info'; log.textContent='→ Melodia descendente: induz sentimento de perda/tristeza';
+  } else if (type === 'happy') {
+    sfxHappy(); barImm.style.width='75%'; barTen.style.width='15%';
+    log.className='log ok'; log.textContent='→ Arpejos ascendentes: induz alegria, motivação, engajamento';
+  } else {
+    sfxTense(); barImm.style.width='60%'; barTen.style.width='90%';
+    log.className='log bad'; log.textContent='→ Frequências dissonantes: aumenta percepção de urgência';
+  }
+}
+
+// 3 Estrutural
+function playEst(type) {
+  const log = document.getElementById('est-log');
+  const phA = document.getElementById('phase-a');
+  const phB = document.getElementById('phase-b');
+  if (type === 'transition') {
+    sfxTransition();
+    phA.style.borderColor='var(--border)'; phA.style.color='var(--text-dim)'; phA.style.background='#1a1a26';
+    phB.style.borderColor='var(--accent3)'; phB.style.color='var(--accent3)'; phB.style.background='#1e1e2a';
+    log.className='log ok'; log.textContent='→ Som de transição: cria continuidade entre estados da interface';
+    setTimeout(()=>{
+      phA.style.borderColor='var(--accent3)'; phA.style.color='var(--accent3)'; phA.style.background='#1e1e2a';
+    },3000);
+  } else {
+    sfxSilence();
+    log.className='log warn'; log.textContent='→ Silêncio estrutural: sinaliza fim de tarefa ou iminência de evento';
+  }
+}
+
+// 4 Narrativa
+function playNar(zone, el) {
+  document.querySelectorAll('.nav-zone').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  const log = document.getElementById('nar-log');
+  const msgs = {
+    forest: ['→ Você está na floresta — sons graves e orgânicos localizam o usuário', sfxForest],
+    space:  ['→ Estação espacial — frequências etéreas indicam ambiente hostil/desconhecido', sfxSpace],
+    city:   ['→ Ambiente urbano — ruído e baixas frequências criam sensação de caos/agitação', sfxCity]
+  };
+  log.className='log info'; log.textContent = msgs[zone][0];
+  msgs[zone][1]();
+}
+
+// 5 Imersiva
+let immLevel = 0;
+function playImm(type) {
+  const log = document.getElementById('imm-log');
+  if (type === 'enter') {
+    sfxImmersive();
+    immLevel = Math.min(immLevel + 3, 10);
+    log.className='log ok'; log.textContent='→ Ambiente sonoro: cria ilusão do real, suspende descrença';
+  } else {
+    sfxImmersiveMask();
+    immLevel = Math.min(immLevel + 2, 10);
+    log.className='log info'; log.textContent='→ Mascaramento: reduz percepção de sons externos, aumenta foco';
+  }
+  for (let i=0; i<10; i++) {
+    const bar = document.getElementById(`imb-${i}`);
+    bar.style.background = i < immLevel
+      ? `hsl(${280+i*8}, 70%, ${45+i*3}%)`
+      : '#2a2a38';
+  }
+}
+
+// 6 Estética
+function playEst2(genre, el) {
+  document.querySelectorAll('.genre-tag').forEach(e=>{
+    e.classList.remove('active'); e.style.background=''; e.style.color='var(--text-dim)';
+  });
+  const color = el.dataset.color;
+  el.classList.add('active');
+  el.style.background = color;
+  el.style.color = 'var(--bg)';
+  const log = document.getElementById('est2-log');
+  const msgs = {
+    ambient:    ['🌿 Clima tranquilo, tarefa leve, ritmo contemplativo', sfxAmbient],
+    electronic: ['⚡ Identidade moderna, dinâmica, interface técnica/jovem', sfxElectronic],
+    orchestra:  ['🎻 Prestígio, narrativa épica, peso emocional elevado', sfxOrchestra]
+  };
+  log.className='log info'; log.textContent='→ '+msgs[genre][0];
+  msgs[genre][1]();
+}
+
+// 7 Cinética
+let kineticsActive = false;
+let beatCursor = 0;
+let kineticsScore = 0;
+let hitWindow = false;
+
+function startKinetics() {
+  if (kineticsActive) return;
+  kineticsActive = true;
+  kineticsScore = 0;
+  beatCursor = 0;
+  document.getElementById('kin-score').textContent = 'Acertos: 0';
+  document.getElementById('kin-log').textContent = '';
+  kineticsInterval = setInterval(() => {
+    // reset previous
+    const prev = document.getElementById(`bd-${(beatCursor-1+8)%8}`);
+    if (prev) prev.style.background = '#2a2a38';
+    // light current
+    const cur = document.getElementById(`bd-${beatCursor}`);
+    if (cur) { cur.style.background = 'var(--accent7)'; cur.style.transform='scale(1.3)'; }
+    sfxKineticBeat();
+    hitWindow = true;
+    setTimeout(() => {
+      if (cur) cur.style.transform = 'scale(1)';
+      hitWindow = false;
+    }, 200);
+    beatCursor = (beatCursor + 1) % 8;
+  }, 500);
+}
+
+function stopKinetics() {
+  clearInterval(kineticsInterval);
+  kineticsActive = false;
+  for (let i=0;i<8;i++) {
+    const b = document.getElementById(`bd-${i}`);
+    if(b) { b.style.background='#2a2a38'; b.style.transform='scale(1)'; }
+  }
+}
+
+function hitKinetics() {
+  if (!kineticsActive) return;
+  const log = document.getElementById('kin-log');
+  if (hitWindow) {
+    kineticsScore++;
+    document.getElementById('kin-score').textContent = `Acertos: ${kineticsScore}`;
+    osc('sine', 880, 0.1, 0.2);
+    log.className='log ok'; log.textContent='✓ Batida no tempo! Feedback positivo confirma execução correta';
+  } else {
+    sfxKineticFail();
+    log.className='log bad'; log.textContent='✗ Fora do tempo — feedback negativo indica erro motor';
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); hitKinetics(); }
+});
+</script>
+</body>
+</html>
