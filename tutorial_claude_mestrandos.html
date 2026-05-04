@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude.ai para Professores — Tutorial Interativo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300;1,600&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1f2535;
+    --border: #2a3049;
+    --accent: #d4a843;
+    --accent2: #7b9ef0;
+    --accent3: #6ecb94;
+    --accent4: #e06b8b;
+    --text: #e8eaf0;
+    --text-muted: #8891aa;
+    --text-dim: #555d78;
+    --tag-bg: #252d42;
+    --radius: 12px;
+    --radius-lg: 20px;
+    --glow: 0 0 40px rgba(212,168,67,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── Grid de fundo ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(123,158,240,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(123,158,240,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative;
+    text-align: center;
+    padding: 80px 24px 64px;
+    overflow: hidden;
+  }
+
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+  .orb-1 { width: 500px; height: 300px; background: rgba(212,168,67,0.06); top: -100px; left: 50%; transform: translateX(-50%); }
+  .orb-2 { width: 300px; height: 300px; background: rgba(123,158,240,0.05); top: 0; right: -100px; }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--tag-bg); border: 1px solid var(--border);
+    border-radius: 100px; padding: 6px 16px;
+    font-size: 13px; color: var(--accent); font-weight: 500;
+    margin-bottom: 24px; letter-spacing: 0.02em;
+  }
+  .badge .dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  header h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  header h1 em { color: var(--accent); font-style: italic; }
+
+  .subtitle {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 580px;
+    margin: 0 auto 36px;
+    font-weight: 300;
+  }
+
+  .header-chips {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+    margin-bottom: 48px;
+  }
+  .chip {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 100px; padding: 6px 14px;
+    font-size: 13px; color: var(--text-muted);
+  }
+
+  /* ── Nav lateral ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 0;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  nav.sidebar {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    padding: 24px 0;
+    height: fit-content;
+  }
+
+  .nav-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.12em;
+    color: var(--text-dim); text-transform: uppercase;
+    margin-bottom: 12px; padding: 0 12px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 8px;
+    font-size: 13.5px; color: var(--text-muted);
+    cursor: pointer; transition: all 0.2s;
+    text-decoration: none; margin-bottom: 2px;
+    border: 1px solid transparent;
+  }
+  .nav-item:hover { background: var(--surface); color: var(--text); }
+  .nav-item.active { background: var(--surface2); color: var(--accent); border-color: var(--border); }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-num {
+    margin-left: auto; font-size: 11px;
+    background: var(--tag-bg); border-radius: 4px;
+    padding: 1px 6px; color: var(--text-dim);
+  }
+
+  /* ── Main ── */
+  main { padding: 0 0 0 48px; }
+
+  /* ── Intro card ── */
+  .intro-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 36px;
+    margin-bottom: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .intro-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+  }
+
+  .intro-card h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem; font-weight: 600;
+    margin-bottom: 12px; color: var(--text);
+  }
+
+  .intro-card p { color: var(--text-muted); margin-bottom: 10px; }
+
+  .capabilities-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .cap-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex; align-items: flex-start; gap: 12px;
+  }
+  .cap-icon { font-size: 24px; line-height: 1; }
+  .cap-text strong { display: block; font-size: 13px; color: var(--text); margin-bottom: 2px; }
+  .cap-text span { font-size: 12px; color: var(--text-muted); }
+
+  /* ── Sections ── */
+  .section {
+    margin-bottom: 56px;
+    scroll-margin-top: 24px;
+  }
+
+  .section-header {
+    display: flex; align-items: center; gap: 16px;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-icon {
+    width: 48px; height: 48px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .section-title h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.6rem; font-weight: 600;
+    color: var(--text); line-height: 1.2;
+  }
+  .section-title p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── Use cases ── */
+  .usecase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .usecase-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+    user-select: none;
+  }
+  .usecase-header:hover { background: var(--surface2); }
+
+  .usecase-title {
+    display: flex; align-items: center; gap: 12px;
+    font-weight: 500; color: var(--text);
+  }
+  .usecase-label {
+    font-size: 13px; color: var(--text-muted);
+    background: var(--tag-bg); border-radius: 6px;
+    padding: 2px 10px;
+  }
+
+  .usecase-chevron {
+    font-size: 18px; color: var(--text-dim);
+    transition: transform 0.3s;
+  }
+  .usecase.open .usecase-chevron { transform: rotate(180deg); }
+
+  .usecase-body {
+    display: none;
+    padding: 0 20px 20px;
+  }
+  .usecase.open .usecase-body { display: block; }
+
+  .usecase-desc {
+    font-size: 14.5px; color: var(--text-muted);
+    margin-bottom: 20px;
+    padding-top: 4px;
+    line-height: 1.7;
+  }
+
+  /* ── Prompt boxes ── */
+  .prompts-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+    color: var(--accent); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .prompt-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+
+  .prompt-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .prompt-tag {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; border-radius: 4px;
+    padding: 2px 8px;
+  }
+  .tag-basico { background: rgba(110,203,148,0.12); color: var(--accent3); }
+  .tag-intermediario { background: rgba(212,168,67,0.12); color: var(--accent); }
+  .tag-avancado { background: rgba(224,107,139,0.12); color: var(--accent4); }
+
+  .copy-btn {
+    background: var(--tag-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 10px;
+    font-size: 12px; color: var(--text-muted);
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .copy-btn:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .copy-btn.copied { background: var(--accent3); color: var(--bg); border-color: var(--accent3); }
+
+  .prompt-text {
+    padding: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .prompt-text .ph {
+    color: var(--accent2);
+    font-style: italic;
+  }
+
+  /* ── Tips ── */
+  .tip-box {
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    margin-top: 16px;
+    display: flex; gap: 12px;
+    font-size: 14px;
+  }
+  .tip-box.info { background: rgba(123,158,240,0.06); border: 1px solid rgba(123,158,240,0.2); }
+  .tip-box.warn { background: rgba(212,168,67,0.06); border: 1px solid rgba(212,168,67,0.2); }
+  .tip-box.success { background: rgba(110,203,148,0.06); border: 1px solid rgba(110,203,148,0.2); }
+  .tip-box .tip-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .tip-box p { color: var(--text-muted); line-height: 1.6; }
+  .tip-box strong { color: var(--text); }
+
+  /* ── Best practices ── */
+  .practices-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 8px;
+  }
+
+  .practice-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .practice-card .p-num {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem; font-weight: 900;
+    color: var(--border); line-height: 1;
+    margin-bottom: 8px;
+  }
+  .practice-card h4 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .practice-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .practice-card.highlight { border-color: var(--accent); }
+  .practice-card.highlight .p-num { color: rgba(212,168,67,0.3); }
+
+  /* ── Comparison table ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-top: 16px;
+  }
+  .compare-table th {
+    background: var(--surface2);
+    padding: 12px 16px;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 12px 16px;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:nth-child(even) td { background: var(--surface); }
+  .compare-table .good { color: var(--accent3); }
+  .compare-table .bad { color: var(--accent4); }
+
+  /* ── Glossário ── */
+  .glossary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .glossary-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+  .glossary-item dt { font-weight: 600; font-size: 14px; color: var(--accent2); margin-bottom: 4px; }
+  .glossary-item dd { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center;
+    padding: 48px 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 13px;
+  }
+  footer strong { color: var(--text-muted); }
+
+  /* ── Scroll indicator ── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0%;
+    z-index: 100;
+    transition: width 0.1s;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.sidebar { display: none; }
+    main { padding: 0; }
+    .capabilities-grid { grid-template-columns: 1fr; }
+    .practices-grid { grid-template-columns: 1fr; }
+    .glossary-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── Fade in ── */
+  .section { opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s; }
+  .section.visible { opacity: 1; transform: none; }
+  .intro-card { opacity: 0; transform: translateY(20px); transition: opacity 0.5s, transform 0.5s; }
+  .intro-card.visible { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progress"></div>
+
+<header>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
+  <div class="badge">
+    <span class="dot"></span>
+    Tutorial Interativo — Profª. Elisa Boff — PGM0735 · UCS
+    <span class="dot"></span>
+  </div>
+
+  <h1>Como usar <em>Claude.ai</em><br>no planejamento pedagógico</h1>
+
+  <p class="subtitle">Um guia prático para professores da Educação Básica explorarem a inteligência artificial como parceira no ensino e na aprendizagem.<br> <span style="color: rgba(212,168,67);">Profª. Elisa Boff - Universidade de Caxias do Sul</span></p>
+
+  <div class="header-chips">
+    <span class="chip">🏫 Ensino Fundamental e Médio</span>
+    <span class="chip">📐 STEAM e Interdisciplinaridade</span>
+    <span class="chip">🔄 Sala de Aula Invertida</span>
+    <span class="chip">💡 Exemplos prontos de prompts</span>
+  </div>
+</header>
+
+<div class="layout">
+  <nav class="sidebar">
+    <div class="nav-label">Conteúdo</div>
+    <a class="nav-item active" href="#intro" data-section="intro">
+      <span class="nav-icon">🌟</span> O que é Claude?
+    </a>
+    <a class="nav-item" href="#planejar" data-section="planejar">
+      <span class="nav-icon">📅</span> Planejar disciplinas
+      <span class="nav-num">5</span>
+    </a>
+    <a class="nav-item" href="#conteudo" data-section="conteudo">
+      <span class="nav-icon">📚</span> Organizar conteúdos
+      <span class="nav-num">4</span>
+    </a>
+    <a class="nav-item" href="#referencias" data-section="referencias">
+      <span class="nav-icon">🔍</span> Buscar referências
+      <span class="nav-num">3</span>
+    </a>
+    <a class="nav-item" href="#exercicios" data-section="exercicios">
+      <span class="nav-icon">✏️</span> Criar exercícios
+      <span class="nav-num">4</span>
+    </a>
+    <a class="nav-item" href="#praticas" data-section="praticas">
+      <span class="nav-icon">🎯</span> Práticas pedagógicas
+      <span class="nav-num">5</span>
+    </a>
+    <a class="nav-item" href="#avaliacao" data-section="avaliacao">
+      <span class="nav-icon">📊</span> Avaliação
+      <span class="nav-num">4</span>
+    </a>
+    <a class="nav-item" href="#steam" data-section="steam">
+      <span class="nav-icon">🔬</span> Abordagem STEAM
+      <span class="nav-num">3</span>
+    </a>
+    <a class="nav-item" href="#boas-praticas" data-section="boas-praticas">
+      <span class="nav-icon">⭐</span> Boas práticas
+    </a>
+    <a class="nav-item" href="#glossario" data-section="glossario">
+      <span class="nav-icon">📖</span> Glossário
+    </a>
+  </nav>
+
+  <main>
+
+    <!-- INTRO -->
+    <div class="intro-card" id="intro">
+      <h2>🌟 O que é Claude e como ele pode ajudar você?</h2>
+      <p>Claude é um assistente de inteligência artificial criado pela Anthropic. Diferente de ferramentas de busca, ele <strong>conversa com você</strong>: entende o contexto, faz perguntas de acompanhamento, propõe alternativas e colabora na construção de ideias — como um colega especialista disponível 24 horas.</p>
+      <p>Para professores da Educação Básica, Claude pode atuar como um <strong>parceiro no planejamento pedagógico</strong>, ajudando desde a estruturação de uma disciplina até a criação de atividades, exercícios e instrumentos de avaliação.</p>
+
+      <div class="capabilities-grid">
+        <div class="cap-item">
+          <span class="cap-icon">🧠</span>
+          <div class="cap-text">
+            <strong>Entende contexto</strong>
+            <span>Você conta sobre sua turma e ele adapta as sugestões</span>
+          </div>
+        </div>
+        <div class="cap-item">
+          <span class="cap-icon">✍️</span>
+          <div class="cap-text">
+            <strong>Gera textos e materiais</strong>
+            <span>Planos, rubricas, exercícios, casos de ensino</span>
+          </div>
+        </div>
+        <div class="cap-item">
+          <span class="cap-icon">🔄</span>
+          <div class="cap-text">
+            <strong>Itera e refina</strong>
+            <span>Você pode pedir ajustes até chegar no resultado ideal</span>
+          </div>
+        </div>
+        <div class="cap-item">
+          <span class="cap-icon">📐</span>
+          <div class="cap-text">
+            <strong>Aplica metodologias</strong>
+            <span>Sala invertida, PBL, Bloom, BNCC e muito mais</span>
+          </div>
+        </div>
+        <div class="cap-item">
+          <span class="cap-icon">🌐</span>
+          <div class="cap-text">
+            <strong>Pesquisa e sintetiza</strong>
+            <span>Referências bibliográficas e tendências em educação</span>
+          </div>
+        </div>
+        <div class="cap-item">
+          <span class="cap-icon">🎯</span>
+          <div class="cap-text">
+            <strong>Diferencia por nível</strong>
+            <span>Adequa para EF Anos Iniciais, Finais ou EM</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tip-box info" style="margin-top:24px">
+        <span class="tip-icon">💡</span>
+        <p><strong>Como usar este tutorial:</strong> cada seção abaixo apresenta uma forma de uso do Claude, com exemplos de prompts prontos para copiar e colar. Clique nos cartões para expandir os prompts. Os níveis <span style="color:var(--accent3)">●&nbsp;Básico</span>, <span style="color:var(--accent)">●&nbsp;Intermediário</span> e <span style="color:var(--accent4)">●&nbsp;Avançado</span> indicam a complexidade do prompt.</p>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 1: PLANEJAR -->
+    <div class="section" id="planejar">
+      <div class="section-header">
+        <div class="section-icon">📅</div>
+        <div class="section-title">
+          <h2>Estruturar e planejar disciplinas</h2>
+          <p>Do zero ao plano completo — Claude ajuda a organizar toda a arquitetura de uma disciplina</p>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc1">
+        <div class="usecase-header" onclick="toggle('uc1')">
+          <div class="usecase-title">
+            <span>📋</span> Criar um planejamento anual ou semestral
+            <span class="usecase-label">Planejamento</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Descreva sua disciplina, o nível dos alunos e os objetivos gerais — Claude organiza os conteúdos em unidades, sugere uma sequência lógica e distribui no tempo disponível, já indicando conexões com a BNCC.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Sou professora de Ciências no 7.º ano do Ensino Fundamental. Preciso de um planejamento semestral para o 2.º semestre com os temas: ecossistemas, cadeia alimentar, impactos ambientais e educação ambiental. Tenho 3 aulas de 50 minutos por semana, 20 semanas disponíveis. Organize em unidades temáticas com carga horária sugerida para cada uma.</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Estou estruturando a disciplina de Matemática para o 9.º ano, turma com dificuldades em álgebra. O semestre tem 18 semanas, 4 aulas semanais. Preciso cobrir: equações do 2.º grau, funções quadráticas, geometria analítica básica e estatística descritiva.
+
+Elabore um planejamento semestral que:
+- Comece com revisão e reforço de pré-requisitos (3 semanas)
+- Progrida dos conteúdos mais simples para os complexos
+- Reserve 1 semana para cada avaliação
+- Indique as habilidades da BNCC relacionadas a cada unidade
+- Sugira uma estratégia de sala de aula invertida para pelo menos 2 unidades</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-avancado">Avançado</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Preciso criar uma unidade interdisciplinar STEAM de 6 semanas para o 8.º ano do EF, envolvendo Ciências, Matemática e Arte, com o tema central "Geometria na Natureza: Padrões e Fractais".
+
+Elabore um plano que inclua:
+1. Objetivos de aprendizagem usando a Taxonomia de Bloom revisada
+2. Competências gerais da BNCC contempladas
+3. Sequência didática semana a semana
+4. Estratégias de sala de aula invertida com indicação do que vai para Pré-Aula
+5. Um produto final integrando as três disciplinas
+6. Instrumentos de avaliação formativa e somativa
+
+Contexto: escola pública, turma de 30 alunos, acesso limitado a computadores (laboratório disponível 1x/semana).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc2">
+        <div class="usecase-header" onclick="toggle('uc2')">
+          <div class="usecase-title">
+            <span>🎯</span> Definir objetivos de aprendizagem
+            <span class="usecase-label">Bloom & BNCC</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Escrever bons objetivos de aprendizagem é uma das tarefas mais desafiadoras do planejamento. Claude domina a Taxonomia de Bloom revisada e pode transformar temas vagos em objetivos precisos e mensuráveis.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Preciso escrever objetivos de aprendizagem para uma aula sobre o ciclo da água, para alunos do 6.º ano. Use verbos da Taxonomia de Bloom e escreva pelo menos um objetivo para cada nível cognitivo (lembrar, compreender, aplicar, analisar, avaliar, criar).</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Tenho este objetivo mal formulado para o 2.º ano do EM: "O aluno vai aprender sobre funções".
+
+Por favor:
+1. Explique por que este objetivo é inadequado
+2. Reescreva-o como 4 objetivos específicos, mensuráveis e adequados ao nível do 2.º ano EM
+3. Indique qual habilidade da BNCC (código) cada objetivo está relacionado
+4. Para cada objetivo, sugira um verbo de ação diferente da Taxonomia de Bloom</div>
+          </div>
+
+          <div class="tip-box warn" style="margin-top:16px">
+            <span class="tip-icon">⚠️</span>
+            <p><strong>Dica importante:</strong> Sempre informe o nível de ensino (EF I, EF II, EM) e se possível o ano/série. Claude adapta completamente a linguagem, a profundidade e as estratégias ao nível dos alunos.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc3">
+        <div class="usecase-header" onclick="toggle('uc3')">
+          <div class="usecase-title">
+            <span>🗓️</span> Distribuir conteúdo em cronograma
+            <span class="usecase-label">Cronograma</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Distribua conteúdos em um cronograma realista, considerando feriados, semanas de prova e eventos escolares. Claude ajuda a equilibrar a carga e prever revisões.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Tenho os seguintes conteúdos de História para o 3.º ano do EM, 2.º semestre:
+- Primeira Guerra Mundial (4 aulas)
+- Entre-guerras e Crise de 1929 (3 aulas)
+- Ascensão do Totalitarismo (4 aulas)
+- Segunda Guerra Mundial (5 aulas)
+- Guerra Fria (4 aulas)
+- Descolonização da África e Ásia (3 aulas)
+- Revisão e avaliação (4 aulas)
+
+Distribua em um cronograma semanal para 18 semanas, com 2 aulas de 50 min/semana. Reserve uma semana no meio para semana de provas da escola. Apresente em formato de tabela com: semana, datas aproximadas (a partir de agosto/2025), conteúdo e observações.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc4">
+        <div class="usecase-header" onclick="toggle('uc4')">
+          <div class="usecase-title">
+            <span>🔄</span> Planejar com Sala de Aula Invertida
+            <span class="usecase-label">Metodologia Ativa</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Claude conhece profundamente a metodologia da Sala de Aula Invertida e pode estruturar os três momentos (Pré-Aula, Aula, Pós-Aula) com atividades concretas e recursos adequados.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-avancado">Avançado</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Quero implementar a Sala de Aula Invertida na minha aula de Português para o 1.º ano do EM, sobre o tema "Gêneros Textuais Digitais" (artigo de opinião, comentário em redes sociais, meme como crítica social).
+
+Tenho 3 aulas de 50 min para esta unidade. Monte a sequência completa dos três momentos:
+
+PRÉ-AULA: materiais para estudo autônomo em casa (máx. 30 min de estudo)
+AULA (3 encontros): atividades ativas e colaborativas
+PÓS-AULA: aprofundamento e produto final
+
+Considere que nem todos os alunos têm internet em casa — inclua alternativas offline para a Pré-Aula.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc5">
+        <div class="usecase-header" onclick="toggle('uc5')">
+          <div class="usecase-title">
+            <span>📁</span> Estruturar uma nova disciplina do zero
+            <span class="usecase-label">Ementa & Programa</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Precisa criar uma disciplina nova, eletiva ou de projeto? Claude ajuda a criar a ementa, definir o programa, propor metodologias e estruturar a avaliação de forma coerente.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-avancado">Avançado</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Vou criar uma disciplina eletiva para o Ensino Médio chamada "Tecnologia e Sociedade", com 40 horas/semestre, para alunos de 1.º e 2.º ano. A escola fica em cidade de médio porte, alunos de classe média-baixa com acesso ao celular mas nem sempre a computador.
+
+Elabore:
+1. Ementa (5-8 linhas)
+2. Justificativa (por que esta disciplina importa)
+3. Objetivos gerais e específicos (Taxonomia de Bloom)
+4. Programa: 6 unidades temáticas com subtemas
+5. Metodologia predominante (sugira 2-3 metodologias ativas pertinentes)
+6. Avaliação: instrumentos e pesos
+7. 10 referências bibliográficas pertinentes (livros, artigos, vídeos)
+
+Conecte com as competências gerais 4, 5 e 7 da BNCC (pensamento científico, cultura digital, argumentação).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 2: CONTEÚDO -->
+    <div class="section" id="conteudo">
+      <div class="section-header">
+        <div class="section-icon">📚</div>
+        <div class="section-title">
+          <h2>Organizar e explicar conteúdos</h2>
+          <p>Textos explicativos, sínteses, mapas conceituais e adaptações para diferentes níveis</p>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc6">
+        <div class="usecase-header" onclick="toggle('uc6')">
+          <div class="usecase-title">
+            <span>✍️</span> Criar textos explicativos adaptados ao nível
+            <span class="usecase-label">Material Didático</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Claude escreve textos sobre qualquer conteúdo curricular na linguagem certa para cada faixa etária — do lúdico para os anos iniciais ao analítico para o Ensino Médio.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Escreva um texto explicativo sobre fotossíntese para alunos do 5.º ano do Ensino Fundamental. Use linguagem simples, analogias do cotidiano e termine com 3 perguntas de reflexão. Máximo 300 palavras.</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Preciso de um texto introdutório sobre a Revolução Industrial para alunos do 8.º ano. O texto deve:
+- Ter no máximo 400 palavras
+- Usar linguagem acessível mas não simplista
+- Conectar com situações que adolescentes de hoje conhecem
+- Destacar as consequências sociais (não apenas econômicas)
+- Terminar com uma questão problematizadora que gere debate em sala
+
+Não use estilo enciclopédico — escreva de forma envolvente, como se fosse uma história.</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Adapte o seguinte trecho sobre [tema] para dois níveis diferentes:
+- Versão A: para alunos do 6.º ano (linguagem acessível, exemplos concretos)
+- Versão B: para alunos do 3.º ano do EM (linguagem mais técnica, maior profundidade)
+
+[Cole aqui o trecho original que deseja adaptar]</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc7">
+        <div class="usecase-header" onclick="toggle('uc7')">
+          <div class="usecase-title">
+            <span>🗺️</span> Criar esquemas e mapas conceituais
+            <span class="usecase-label">Síntese Visual</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Claude não gera imagens, mas pode estruturar mapas conceituais em texto, criar esquemas hierárquicos e sugerir como organizar visualmente os conteúdos para que você ou seus alunos montem.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Crie um mapa conceitual em formato de texto hierárquico (usando recuos e setas) sobre o tema "Sistemas do Corpo Humano" para alunos do 8.º ano. Inclua os principais sistemas, suas funções e 2-3 interações entre eles.</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Vou pedir aos meus alunos do 2.º EM que construam um mapa mental sobre "Funções Orgânicas da Química". Elabore:
+1. Um roteiro com as categorias e subcategorias que o mapa deve conter
+2. As principais conexões que os alunos devem identificar
+3. 5 perguntas norteadoras para guiá-los durante a construção
+4. Critérios de avaliação do mapa (rubrica simples com 3 níveis)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc8">
+        <div class="usecase-header" onclick="toggle('uc8')">
+          <div class="usecase-title">
+            <span>🌍</span> Contextualizar conteúdo na realidade local
+            <span class="usecase-label">Contextualização</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Um dos maiores desafios é tornar o conteúdo relevante para os alunos. Claude pode ajudar a criar exemplos, situações-problema e conexões com a realidade local dos estudantes.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Ensino Matemática (razão e proporção, regra de três) para alunos do 7.º ano em uma escola de cidade pequena do interior do Rio Grande do Sul, onde muitas famílias trabalham com agropecuária.
+
+Crie 5 situações-problema contextualizadas nesta realidade (fazenda, animais, plantio, cooperativas, feiras agrícolas) que envolvam regra de três simples e composta. As situações devem ser genuinamente úteis no dia a dia dessas famílias.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc9">
+        <div class="usecase-header" onclick="toggle('uc9')">
+          <div class="usecase-title">
+            <span>📖</span> Criar casos de ensino
+            <span class="usecase-label">Aprendizagem Ativa</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Casos de ensino são narrativas de situações reais ou fictícias que colocam os alunos diante de um dilema ou problema. Claude cria casos ricos, contextualizados e com questões orientadoras.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-avancado">Avançado</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Crie um caso de ensino para alunos do 3.º ano do EM (disciplina: Biologia + Filosofia, abordagem interdisciplinar) sobre o tema "Edição Genética: CRISPR e os Limites Éticos da Ciência".
+
+O caso deve ter:
+- Uma narrativa instigante de 400-500 palavras com personagens reais na situação
+- Um dilema genuíno sem resposta fácil
+- 6 questões discussão (2 de compreensão, 2 analíticas, 2 de posicionamento ético)
+- Notas para o professor com os principais conceitos científicos e filosóficos envolvidos
+- Sugestão de como conduzir o debate (40 min)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 3: REFERÊNCIAS -->
+    <div class="section" id="referencias">
+      <div class="section-header">
+        <div class="section-icon">🔍</div>
+        <div class="section-title">
+          <h2>Buscar e organizar referências</h2>
+          <p>Bibliografias, indicações de leitura, fontes digitais e como verificar confiabilidade</p>
+        </div>
+      </div>
+
+      <div class="tip-box warn">
+        <span class="tip-icon">⚠️</span>
+        <p><strong>Atenção importante:</strong> Claude pode sugerir referências, mas pode cometer erros em títulos ou autores — especialmente em obras menos conhecidas. <strong>Sempre verifique</strong> as referências antes de usá-las. Prefira pedir sugestões por área/tema e depois confirmar nas bases de dados (Google Acadêmico, Scielo, Capes).</p>
+      </div>
+
+      <div class="usecase" id="uc10" style="margin-top:16px">
+        <div class="usecase-header" onclick="toggle('uc10')">
+          <div class="usecase-title">
+            <span>📚</span> Sugerir bibliografia por tema e nível
+            <span class="usecase-label">Referências</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Peça referências para fundamentar seu planejamento — teórico-metodológicas para você professor e indicações de leitura para os alunos.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Sugira 8 referências para um professor que quer aprofundar seus conhecimentos sobre Aprendizagem Baseada em Projetos (PBL) aplicada ao Ensino Médio. Inclua: 3 livros clássicos, 3 artigos científicos recentes (pós-2018) e 2 recursos digitais gratuitos (sites, vídeos, cursos). Para cada um, escreva 2 linhas explicando por que é relevante.</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Preciso de indicações de leitura para meus alunos do 9.º ano sobre o tema "Fake News e Pensamento Crítico". Quero:
+- 3 livros de literatura juvenil ou ensaios acessíveis para adolescentes
+- 4 artigos ou reportagens jornalísticas de qualidade (indique o veículo)
+- 2 documentários ou vídeos (YouTube, streaming)
+- 1 podcast ou rádio
+Todos devem ser em português e adequados para a faixa de 14-15 anos.</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Formate as seguintes referências nas normas da ABNT NBR 6023:2018:
+
+[Cole aqui as referências mal formatadas ou incompletas que você quer ajustar]</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc11">
+        <div class="usecase-header" onclick="toggle('uc11')">
+          <div class="usecase-title">
+            <span>🔬</span> Identificar tendências em educação
+            <span class="usecase-label">Atualização</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Claude pode trazer um panorama sobre tendências pedagógicas, novas abordagens e debates contemporâneos na educação básica.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Quero me atualizar sobre o uso de Inteligência Artificial no Ensino Médio. Elabore um panorama que inclua:
+1. O que pesquisas recentes indicam sobre benefícios e riscos
+2. Exemplos concretos de como IA pode ser usada na sala de aula (não apenas pelo professor, mas pelos alunos)
+3. Questões éticas que um professor deve considerar
+4. Como adaptar isso à realidade de escolas públicas brasileiras com recursos limitados
+5. 3 atividades práticas que posso fazer amanhã, sem tecnologia especial</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 4: EXERCÍCIOS -->
+    <div class="section" id="exercicios">
+      <div class="section-header">
+        <div class="section-icon">✏️</div>
+        <div class="section-title">
+          <h2>Criar exercícios e atividades</h2>
+          <p>De questões de múltipla escolha a problemas abertos, exercícios diferenciados por nível</p>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc12">
+        <div class="usecase-header" onclick="toggle('uc12')">
+          <div class="usecase-title">
+            <span>📝</span> Exercícios por nível de complexidade
+            <span class="usecase-label">Diferenciação</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Claude cria exercícios em diferentes formatos (múltipla escolha, dissertativo, resolução de problemas, criativo) e calibrados para diferentes níveis de habilidade na mesma turma.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Crie 10 questões de múltipla escolha sobre "Frações" para alunos do 6.º ano. Cada questão deve ter 4 alternativas (uma correta, três distratores plausíveis). Inclua gabarito comentado ao final, explicando por que cada distrator está errado.</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Minha turma do 7.º ano tem três grupos com níveis de habilidade diferentes em Matemática (básico, intermediário e avançado). Crie exercícios sobre "Equações do 1.º grau" em três versões:
+
+- Nível 1 (básico): 4 exercícios com contexto concreto e etapas guiadas
+- Nível 2 (intermediário): 4 exercícios com problemas de aplicação no cotidiano
+- Nível 3 (avançado): 4 exercícios com problemas abertos e múltiplas soluções possíveis
+
+Todos devem trabalhar o mesmo conceito, mas com complexidade progressiva. Inclua gabarito.</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-avancado">Avançado</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Crie uma atividade investigativa de Ciências sobre "Qualidade da Água" para o 6.º ano, no formato de uma "mini-pesquisa científica". A atividade deve:
+- Simular o método científico (hipótese → observação → análise → conclusão)
+- Poder ser feita com materiais simples de casa ou escola
+- Ter duração de 2 aulas (50 min cada)
+- Incluir: roteiro para o aluno, perguntas de investigação e ficha de registro de dados
+- Conectar com a realidade local (acesso à água, rio próximo, qualidade da água de torneira)
+- Indicar adaptações para alunos com deficiência visual ou motora</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc13">
+        <div class="usecase-header" onclick="toggle('uc13')">
+          <div class="usecase-title">
+            <span>🎭</span> Atividades criativas e colaborativas
+            <span class="usecase-label">Engajamento</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Além dos exercícios tradicionais, Claude propõe atividades que envolvem criatividade, colaboração, debate e protagonismo dos alunos.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Quero fazer um debate estruturado em sala sobre o tema "Energia Nuclear: Solução ou Ameaça?" com alunos do 3.º EM (Física e Química).
+
+Elabore:
+1. Briefing para os dois grupos (a favor e contra) com argumentos científicos sólidos para cada lado
+2. Regras do debate (tempo de fala, réplica, tréplica)
+3. Ficha de avaliação para os espectadores (que observam e julgam a qualidade dos argumentos)
+4. 5 perguntas que o professor mediador pode fazer para aprofundar o debate
+5. Como conectar com o currículo de Física (fissão nuclear, energia) e Química (radioatividade)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc14">
+        <div class="usecase-header" onclick="toggle('uc14')">
+          <div class="usecase-title">
+            <span>🏫</span> Atividades para diferentes espaços
+            <span class="usecase-label">Espaços Educativos</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Claude adapta atividades para o laboratório de ciências, biblioteca, pátio, espaço comunitário ou aula-passeio — ampliando os espaços de aprendizagem.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Vou fazer uma "Aula no Pátio" de Geografia para o 8.º ano sobre biomas brasileiros. O pátio da escola tem árvores, grama e um pequeno canteiro. Temos 50 minutos.
+
+Crie uma sequência de atividades que:
+- Explore o espaço físico disponível para observação e comparação com biomas
+- Inclua trabalho em grupos pequenos (4-5 alunos)
+- Use apenas materiais de baixo custo (caderno, caneta, folhas para coletar)
+- Conecte a observação local com o conteúdo dos biomas
+- Termine com uma síntese coletiva</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc15">
+        <div class="usecase-header" onclick="toggle('uc15')">
+          <div class="usecase-title">
+            <span>🎮</span> Gamificação e aprendizagem lúdica
+            <span class="usecase-label">Engajamento</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Jogos educativos, quiz, simulações e dinâmicas gamificadas — Claude cria atividades que tornam o aprendizado mais motivador.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-avancado">Avançado</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Crie um jogo de cartas educativo sobre "Sistema Solar" para alunos do 6.º ano, que possa ser impresso em papel comum.
+
+O jogo deve:
+- Ter entre 30-40 cartas com informações reais e precisas
+- Ter regras simples (explicáveis em 5 minutos)
+- Envolver 2-4 jogadores
+- Durar uma aula de 50 minutos
+- Trabalhar: nomes dos planetas, características (tamanho relativo, distância, satélites), distinção entre planetas rochosos e gasosos
+
+Forneça: descrição de cada tipo de carta, regras completas do jogo, e sugestão de design (o que deve aparecer em cada carta).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 5: PRÁTICAS PEDAGÓGICAS -->
+    <div class="section" id="praticas">
+      <div class="section-header">
+        <div class="section-icon">🎯</div>
+        <div class="section-title">
+          <h2>Ideias para práticas pedagógicas</h2>
+          <p>Metodologias ativas, projetos integradores, dinâmicas e estratégias inovadoras</p>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc16">
+        <div class="usecase-header" onclick="toggle('uc16')">
+          <div class="usecase-title">
+            <span>💡</span> Gerar ideias de projetos integradores
+            <span class="usecase-label">Projetos</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Projetos que conectam disciplinas diferentes e resultam em um produto concreto são poderosos para engajar os alunos. Claude brainstorma ideias e as desenvolve em roteiros práticos.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Sugira 10 ideias de projetos integradores para o 2.º ano do Ensino Médio que conectem Biologia, Química e Matemática. Para cada ideia, indique: tema, produto final, disciplinas envolvidas e duração estimada.</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-avancado">Avançado</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Desenvolva o projeto integrador "Horta Escolar como Laboratório Vivo" para turmas do 6.º ao 9.º ano do EF, envolvendo Ciências, Matemática, Português e Arte.
+
+Elabore:
+1. Justificativa pedagógica
+2. Objetivos de aprendizagem por disciplina
+3. Roteiro de 8 semanas com atividades semanais por disciplina
+4. Conexões interdisciplinares explícitas (como cada disciplina contribui para o projeto central)
+5. Produto final por série (algo diferente para cada ano)
+6. Sistema de avaliação do projeto (processo + produto)
+7. Como envolver as famílias e a comunidade
+
+Contexto: escola municipal, sem verba extra — use apenas materiais recicláveis e doações.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc17">
+        <div class="usecase-header" onclick="toggle('uc17')">
+          <div class="usecase-title">
+            <span>🌱</span> Estratégias para alunos com dificuldades
+            <span class="usecase-label">Inclusão</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Claude sugere abordagens diferenciadas para alunos com dificuldades de aprendizagem, transtornos como TDAH e dislexia, ou deficiências — sempre dentro dos princípios da educação inclusiva.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Tenho um aluno do 7.º ano com diagnóstico de TDAH que tem muita dificuldade em permanecer concentrado durante atividades de leitura e escrita longas. Ele é muito criativo e gosta de desenhar.
+
+Sugira:
+1. Adaptações na apresentação das atividades de Português (leitura e produção textual) para este aluno
+2. Como aproveitar a habilidade artística dele dentro das atividades da turma
+3. Estratégias de organização do tempo e do espaço em sala
+4. Como comunicar as adaptações para os outros alunos sem expor o estudante</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc18">
+        <div class="usecase-header" onclick="toggle('uc18')">
+          <div class="usecase-title">
+            <span>🤝</span> Dinâmicas de grupo e aprendizagem cooperativa
+            <span class="usecase-label">Cooperação</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Atividades estruturadas em grupo que garantem que todos participem e aprendam — não apenas os mais falantes.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Descreva como aplicar a estratégia "Jigsaw" (Sala de Aula Quebra-Cabeça) para ensinar o tema "Biomas Brasileiros" para o 6.º ano. Inclua: como dividir o tema entre os grupos de especialistas, o que cada grupo deve preparar, como fazer a reunião dos grupos-base e como avaliar a aprendizagem individual.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc19">
+        <div class="usecase-header" onclick="toggle('uc19')">
+          <div class="usecase-title">
+            <span>📱</span> Atividades com tecnologia acessível
+            <span class="usecase-label">Tecnologia</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Usar tecnologia na sala de aula não exige equipamentos caros — Claude sugere atividades que funcionam com o celular dos alunos ou com computadores básicos.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Quero criar um "Podcast da Turma" sobre temas históricos com alunos do 9.º ano. Os alunos têm smartphones com acesso a internet e gravador.
+
+Elabore o roteiro completo do projeto:
+1. Como apresentar o projeto e motivar os alunos (1 aula)
+2. Como pesquisar e roteirizar um episódio (2 aulas)
+3. Como gravar e editar com ferramentas gratuitas e simples (1 aula)
+4. Como publicar ou compartilhar (1 aula)
+5. Critérios de avaliação (conteúdo histórico, qualidade narrativa, trabalho em equipe)
+6. Sugestão de temas históricos do 9.º ano que funcionam bem para podcast</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 6: AVALIAÇÃO -->
+    <div class="section" id="avaliacao">
+      <div class="section-header">
+        <div class="section-icon">📊</div>
+        <div class="section-title">
+          <h2>Instrumentos de avaliação</h2>
+          <p>Rubricas, provas, autoavaliação e avaliação formativa</p>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc20">
+        <div class="usecase-header" onclick="toggle('uc20')">
+          <div class="usecase-title">
+            <span>📋</span> Criar rubricas de avaliação
+            <span class="usecase-label">Rubricas</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Rubricas claras e detalhadas tornam a avaliação mais justa e transparente para os alunos. Claude cria rubricas analíticas com critérios e descritores precisos.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Crie uma rubrica para avaliar apresentações orais de alunos do 8.º ano. A rubrica deve ter 5 critérios, 4 níveis de desempenho (excelente, bom, satisfatório, insuficiente) e descritores claros para cada célula. Ao final, inclua espaço para feedback qualitativo.</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-avancado">Avançado</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Elabore um sistema completo de avaliação para um projeto STEAM de 4 semanas sobre "Construção de Pontes com materiais recicláveis" (Física + Matemática + Arte, 3.º EM).
+
+O sistema deve incluir:
+1. Rubrica do produto final (a ponte): resistência, design, criatividade — com critérios mensuráveis
+2. Rubrica do processo: participação, trabalho em equipe, registro de diário de bordo
+3. Rubrica da apresentação final (5 min por grupo)
+4. Instrumento de autoavaliação para cada aluno (escala + questões reflexivas)
+5. Instrumento de avaliação por pares
+6. Proposta de pesos para compor a nota final
+
+Total: 10 pontos. Apresente em formato de tabela pronta para uso.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc21">
+        <div class="usecase-header" onclick="toggle('uc21')">
+          <div class="usecase-title">
+            <span>📜</span> Elaborar provas e questões
+            <span class="usecase-label">Avaliação Somativa</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Provas equilibradas, com questões que testam diferentes níveis cognitivos — não apenas memorização.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Elabore uma prova de Ciências para o 7.º ano sobre o tema "Ecossistemas e Cadeias Alimentares" com:
+- 5 questões de múltipla escolha (nível básico — Bloom: lembrar/compreender)
+- 3 questões dissertativas curtas (nível médio — Bloom: aplicar/analisar)
+- 1 questão dissertativa de interpretação com texto/imagem (nível alto — Bloom: avaliar/criar)
+- Total: 10 pontos (indique a pontuação de cada questão)
+- Gabarito comentado
+
+Evite questões que testam apenas memorização de nomes. Priorize compreensão de processos e aplicação em situações novas.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc22">
+        <div class="usecase-header" onclick="toggle('uc22')">
+          <div class="usecase-title">
+            <span>🪞</span> Autoavaliação e portfólio
+            <span class="usecase-label">Avaliação Formativa</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Instrumentos que desenvolvem a metacognição dos alunos — a capacidade de refletir sobre o próprio aprendizado.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Crie um instrumento de autoavaliação para alunos do 1.º EM ao final de um bimestre. Quero que o instrumento:
+- Tenha uma parte com escala Likert (1 a 5) para hábitos de estudo e participação
+- Tenha 5 questões abertas sobre o que aprenderam, o que foi difícil e o que fariam diferente
+- Inclua uma seção de metas para o próximo bimestre
+- Seja honesto mas encorajador (não punitivo)
+- Possa ser respondido em 15 minutos
+Linguagem para adolescentes de 15-16 anos.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc23">
+        <div class="usecase-header" onclick="toggle('uc23')">
+          <div class="usecase-title">
+            <span>💬</span> Feedback personalizado para os alunos
+            <span class="usecase-label">Devolutiva</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Claude ajuda a transformar correções em feedbacks construtivos — que orientam, motivam e indicam o caminho para a melhoria.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-basico">Básico</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Escrevi estas anotações de correção para um aluno: "introdução fraca, sem argumentos, conclusão não responde ao tema, boa pesquisa".
+
+Transforme estas anotações em um feedback construtivo de 5-6 linhas, em tom positivo e encorajador, que oriente o aluno sobre como melhorar cada aspecto. O aluno tem 14 anos e está no 9.º ano.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 7: STEAM -->
+    <div class="section" id="steam">
+      <div class="section-header">
+        <div class="section-icon">🔬</div>
+        <div class="section-title">
+          <h2>Abordagem STEAM e Interdisciplinaridade</h2>
+          <p>Como Claude pode ajudar a criar propostas genuinamente integradas</p>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc24">
+        <div class="usecase-header" onclick="toggle('uc24')">
+          <div class="usecase-title">
+            <span>🔗</span> Identificar conexões entre disciplinas
+            <span class="usecase-label">Interdisciplinar</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Um dos maiores desafios da interdisciplinaridade é identificar conexões genuínas (não forçadas) entre os conteúdos. Claude ajuda a mapear essas pontes.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-intermediario">Intermediário</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Sou professora de Matemática e minha colega de Geografia quer fazer um projeto interdisciplinar sobre "Urbanização e Crescimento das Cidades". Mapeie:
+
+1. Quais conteúdos de Matemática do 9.º ano se conectam naturalmente com este tema
+2. Quais conteúdos de Geografia do 9.º ano se conectam com cada conteúdo matemático
+3. 3 atividades concretas que integrem as duas disciplinas
+4. Um produto final que exija contribuição real das duas disciplinas (não dois trabalhos separados colados)
+5. Como dividir a avaliação entre os dois professores</div>
+          </div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-avancado">Avançado</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Preciso criar uma proposta STEAM completa para uma "Feira de Ciências e Arte" da escola, envolvendo todos os professores do 8.º ano (Ciências, Matemática, Português, História, Geografia e Arte).
+
+O tema central é: "Mudanças Climáticas: Dados, Narrativas e Soluções Locais".
+
+Elabore:
+1. O "fio condutor" do tema que justifica a participação de cada disciplina
+2. Contribuição específica e conteúdo de cada disciplina
+3. Produto final por grupo de 5 alunos (que combine dados científicos + narrativa + solução visual/criativa)
+4. Cronograma de 6 semanas para preparação
+5. Como será a Feira (duração, dinâmica, avaliadores, critérios)
+6. Sugestão de como conectar com a comunidade local</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="usecase" id="uc25">
+        <div class="usecase-header" onclick="toggle('uc25')">
+          <div class="usecase-title">
+            <span>🧩</span> Integrar Arte e Humanidades ao STEAM
+            <span class="usecase-label">O "A" do STEAM</span>
+          </div>
+          <span class="usecase-chevron">⌄</span>
+        </div>
+        <div class="usecase-body">
+          <p class="usecase-desc">Muitas propostas STEAM esquecem o "A" (Arts) ou o tratam superficialmente. Claude ajuda a criar propostas onde Arte, Filosofia e Humanidades têm papel central — não decorativo.</p>
+          <div class="prompts-label">📝 Exemplos de prompts</div>
+
+          <div class="prompt-card">
+            <div class="prompt-meta">
+              <span class="prompt-tag tag-avancado">Avançado</span>
+              <button class="copy-btn" onclick="copyPrompt(this)">Copiar</button>
+            </div>
+            <div class="prompt-text">Quero criar um projeto onde Arte não seja apenas "decoração" de um conteúdo científico, mas tenha papel central na produção de conhecimento. O tema é "Memória Coletiva e Identidade Local" para o 9.º ano (História + Arte + Português).
+
+Elabore uma proposta em que:
+1. A investigação artística (fotografia, instalação, mural) seja o método de pesquisa — não apenas o produto
+2. Os alunos usem técnicas artísticas para registrar e analisar memórias da comunidade
+3. O resultado contribua de fato para a comunidade escolar e local
+4. Português entre como curadoria e narrativa do projeto (catálogo, legendas, manifesto)
+5. História ofereça o contexto e a análise temporal
+
+Duração: 8 semanas. Escola com recursos básicos de Arte.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 8: BOAS PRÁTICAS -->
+    <div class="section" id="boas-praticas">
+      <div class="section-header">
+        <div class="section-icon">⭐</div>
+        <div class="section-title">
+          <h2>Boas práticas ao usar Claude</h2>
+          <p>Como extrair o melhor da IA e evitar os erros mais comuns</p>
+        </div>
+      </div>
+
+      <div class="practices-grid">
+        <div class="practice-card highlight">
+          <div class="p-num">01</div>
+          <h4>Forneça contexto rico</h4>
+          <p>Sempre informe: ano/série, número de alunos, recursos disponíveis, desafios específicos da turma e o que você já tentou. Quanto mais contexto, melhor o resultado.</p>
+        </div>
+        <div class="practice-card">
+          <div class="p-num">02</div>
+          <h4>Itere e refine</h4>
+          <p>A primeira resposta raramente é a melhor. Use "ajuste X", "reduza para Y aulas", "adicione Z" para chegar exatamente no que precisa. Claude lembra o contexto da conversa.</p>
+        </div>
+        <div class="practice-card">
+          <div class="p-num">03</div>
+          <h4>Peça formatos específicos</h4>
+          <p>Diga exatamente o formato que quer: tabela, lista, texto corrido, roteiro numerado. Isso economiza tempo de reformatação e já entrega o material pronto para uso.</p>
+        </div>
+        <div class="practice-card highlight">
+          <div class="p-num">04</div>
+          <h4>Verifique referências</h4>
+          <p>Claude pode errar em títulos, datas e autores de referências bibliográficas. Sempre verifique no Google Acadêmico, Scielo ou biblioteca antes de usar.</p>
+        </div>
+        <div class="practice-card">
+          <div class="p-num">05</div>
+          <h4>Adapte ao seu estilo</h4>
+          <p>O material gerado é um ponto de partida — não um produto final. Revise, adapte à sua linguagem, à sua turma e ao seu contexto. Você conhece seus alunos; Claude não.</p>
+        </div>
+        <div class="practice-card">
+          <div class="p-num">06</div>
+          <h4>Use como parceiro de reflexão</h4>
+          <p>Além de gerar materiais, Claude pode discutir abordagens pedagógicas, analisar dilemas de sala de aula e ajudar você a pensar sobre decisões curriculares.</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 28px">
+        <div class="prompts-label">⚖️ Comparativo: prompts fracos vs. prompts fortes</div>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>❌ Prompt fraco</th>
+              <th>✅ Prompt forte</th>
+              <th>Por que melhora?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="bad">"Me dê uma atividade de Matemática"</td>
+              <td class="good">"Crie 3 exercícios de equações do 1.º grau para 7.º ano, com contexto do cotidiano, nível intermediário, com gabarito"</td>
+              <td>Especifica disciplina, série, tipo, nível, formato de saída</td>
+            </tr>
+            <tr>
+              <td class="bad">"Faça um plano de aula"</td>
+              <td class="good">"Elabore um plano de aula de 50 min sobre fotossíntese para o 6.º ano usando sala de aula invertida, com Pré-Aula de 20 min em casa"</td>
+              <td>Especifica duração, tema, série, metodologia, estrutura</td>
+            </tr>
+            <tr>
+              <td class="bad">"Busque referências sobre educação"</td>
+              <td class="good">"Sugira 5 artigos científicos recentes (2019–2024) sobre metodologias ativas no Ensino Fundamental II, preferencialmente em português"</td>
+              <td>Especifica quantidade, período, tema específico, idioma</td>
+            </tr>
+            <tr>
+              <td class="bad">"Escreva uma rubrica"</td>
+              <td class="good">"Crie uma rubrica para avaliar trabalhos em grupo de História (9.º ano) com 4 critérios, 3 níveis e descritores escritos para o aluno entender — não para o professor"</td>
+              <td>Especifica público, número de critérios/níveis, perspectiva do leitor</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tip-box success" style="margin-top:20px">
+        <span class="tip-icon">🌟</span>
+        <p><strong>O melhor uso da IA:</strong> Use Claude para as tarefas que consomem muito do seu tempo (formatação, estruturação, geração de variações) e reserve sua energia criativa para o que só você pode fazer — conhecer seus alunos, tomar decisões pedagógicas, criar vínculo e motivar. A IA é ferramental; a docência é relacional.</p>
+      </div>
+    </div>
+
+    <!-- GLOSSÁRIO -->
+    <div class="section" id="glossario">
+      <div class="section-header">
+        <div class="section-icon">📖</div>
+        <div class="section-title">
+          <h2>Glossário</h2>
+          <p>Termos usados neste tutorial e no diálogo com Claude</p>
+        </div>
+      </div>
+
+      <dl class="glossary-grid">
+        <div class="glossary-item">
+          <dt>Prompt</dt>
+          <dd>O texto que você escreve para Claude. Um bom prompt é como uma instrução detalhada para um assistente — quanto mais claro, melhor o resultado.</dd>
+        </div>
+        <div class="glossary-item">
+          <dt>Taxonomia de Bloom</dt>
+          <dd>Hierarquia de habilidades cognitivas: lembrar → compreender → aplicar → analisar → avaliar → criar. Usada para graduar objetivos de aprendizagem.</dd>
+        </div>
+        <div class="glossary-item">
+          <dt>Sala de Aula Invertida</dt>
+          <dd>Metodologia em que o conteúdo conceitual vai para casa (Pré-Aula) e o tempo em sala é usado para atividades práticas e resolução de problemas.</dd>
+        </div>
+        <div class="glossary-item">
+          <dt>STEAM</dt>
+          <dd>Abordagem integrada de Science (Ciência), Technology (Tecnologia), Engineering (Engenharia), Arts (Arte) e Mathematics (Matemática).</dd>
+        </div>
+        <div class="glossary-item">
+          <dt>Rubrica analítica</dt>
+          <dd>Instrumento de avaliação com critérios explícitos e descritores para cada nível de desempenho — torna a avaliação mais transparente e justa.</dd>
+        </div>
+        <div class="glossary-item">
+          <dt>Avaliação formativa</dt>
+          <dd>Avaliação contínua ao longo do processo de aprendizagem, com o objetivo de orientar e ajustar o ensino — não apenas atribuir nota.</dd>
+        </div>
+        <div class="glossary-item">
+          <dt>PBL (Problem-Based Learning)</dt>
+          <dd>Aprendizagem Baseada em Problemas — os alunos aprendem resolvendo um problema real ou simulado, construindo conhecimento de forma ativa.</dd>
+        </div>
+        <div class="glossary-item">
+          <dt>BNCC</dt>
+          <dd>Base Nacional Comum Curricular — documento que define as aprendizagens essenciais de cada etapa da Educação Básica no Brasil, organizada em competências e habilidades.</dd>
+        </div>
+        <div class="glossary-item">
+          <dt>Metacognição</dt>
+          <dd>A capacidade de pensar sobre o próprio aprendizado — identificar o que se sabe, o que não se sabe e como aprender melhor. Autoavaliações desenvolvem metacognição.</dd>
+        </div>
+        <div class="glossary-item">
+          <dt>Jigsaw (Sala Quebra-Cabeça)</dt>
+          <dd>Estratégia cooperativa em que cada aluno torna-se "especialista" em uma parte do conteúdo e depois ensina os colegas, garantindo responsabilidade individual.</dd>
+        </div>
+      </dl>
+    </div>
+
+  </main>
+</div>
+
+<footer>
+  <p>Desenvolvido pela Profª. Elisa Boff para a disciplina <strong>PGM0735 – Planejamento em Ensino de Ciências e Matemática</strong> com apoio de claude.ai</p>
+  <p style="margin-top:6px">Universidade de Caxias do Sul · Mestrado Profissional em Ensino de Ciências e Matemática</p>
+</footer>
+
+<script>
+  // Toggle accordions
+  function toggle(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+
+  // Copy prompt text
+  function copyPrompt(btn) {
+    const text = btn.closest('.prompt-card').querySelector('.prompt-text').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✓ Copiado!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copiar';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // Progress bar
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const scrollTop = doc.scrollTop || document.body.scrollTop;
+    const scrollHeight = doc.scrollHeight - doc.clientHeight;
+    const progress = (scrollTop / scrollHeight) * 100;
+    document.getElementById('progress').style.width = progress + '%';
+  });
+
+  // Active nav item on scroll
+  const sections = document.querySelectorAll('.section, .intro-card');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(item => {
+          item.classList.toggle('active', item.dataset.section === id || item.getAttribute('href') === '#' + id);
+        });
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.15 });
+
+  sections.forEach(s => observer.observe(s));
+
+  // Smooth scroll for nav
+  navItems.forEach(item => {
+    item.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(item.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>
