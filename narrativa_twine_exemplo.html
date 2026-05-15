@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Floresta das Escolhas — Exemplo Twine Harlowe</title>
+<style>
+  /* ============================================================
+     ESTILOS GLOBAIS DA HISTÓRIA
+     No Twine real: Menu > Edit Story Stylesheet
+     ============================================================ */
+
+  @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Crimson+Pro:wght@400;600&display=swap');
+
+  :root {
+    --cor-fundo: #1a1a2e;
+    --cor-texto: #e8dcc8;
+    --cor-link: #f0c060;
+    --cor-link-hover: #ffe899;
+    --cor-destaque: #c084fc;
+    --cor-perigo: #f87171;
+    --cor-sucesso: #86efac;
+    --fonte-corpo: 'Lora', Georgia, serif;
+    --fonte-titulo: 'Crimson Pro', 'Times New Roman', serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background-color: var(--cor-fundo);
+    color: var(--cor-texto);
+    font-family: var(--fonte-corpo);
+    font-size: 1.1rem;
+    line-height: 1.85;
+  }
+
+  /* Passagem principal */
+  tw-passage {
+    display: block;
+    max-width: 680px;
+    margin: 60px auto;
+    padding: 2.5rem 3rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+  }
+
+  /* Títulos */
+  h1, h2, h3 {
+    font-family: var(--fonte-titulo);
+    color: var(--cor-link);
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+
+  h1 { font-size: 2rem; }
+  h2 { font-size: 1.5rem; }
+
+  /* Links de escolha */
+  tw-link, .enchanted {
+    color: var(--cor-link);
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  tw-link:hover {
+    color: var(--cor-link-hover);
+    text-decoration-style: solid;
+  }
+
+  /* Caixas de destaque para comentários didáticos */
+  .dica {
+    background: rgba(192, 132, 252, 0.12);
+    border-left: 3px solid var(--cor-destaque);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    font-size: 0.88rem;
+    color: #d8b4fe;
+    font-style: italic;
+    font-family: monospace;
+  }
+
+  .codigo {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #fde68a;
+    display: block;
+    margin: 0.5rem 0 1rem;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .alerta {
+    background: rgba(248, 113, 113, 0.12);
+    border-left: 3px solid var(--cor-perigo);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: #fca5a5;
+  }
+
+  .sucesso-box {
+    background: rgba(134, 239, 172, 0.1);
+    border-left: 3px solid var(--cor-sucesso);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    color: #bbf7d0;
+  }
+
+  /* Barra de variáveis (painel didático) */
+  .painel-vars {
+    background: rgba(0,0,0,0.5);
+    border: 1px dashed rgba(240,192,96,0.4);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin: 1.5rem 0;
+    font-family: monospace;
+    font-size: 0.82rem;
+    color: #fde68a;
+  }
+
+  .painel-vars span { color: #c084fc; }
+
+  hr { border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 1.5rem 0; }
+
+  img { max-width: 100%; border-radius: 8px; margin: 1rem 0; }
+
+  /* Rodapé de navegação simulado */
+  .nav-footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: rgba(232,220,200,0.4);
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+  SIMULADOR DE TWINE
+  Este arquivo simula como o Twine renderiza passagens.
+  O código dentro de cada <section> é o conteúdo real
+  que você escreveria no editor do Twine.
+  ============================================================ -->
+
+<div id="app"></div>
+
+<script>
+// ============================================================
+// DADOS DAS PASSAGENS
+// Cada objeto representa uma "passage" do Twine.
+// O campo "code" mostra o código Harlowe original.
+// ============================================================
+
+const passagens = {
+
+  // ══════════════════════════════════════════════════════════
+  // PASSAGEM 1 — INÍCIO
+  // Conceito ensinado: criação de passagem, links básicos,
+  // definição de variáveis com (set:)
+  // ══════════════════════════════════════════════════════════
+  "inicio": {
+    titulo: "A Floresta das Escolhas",
+    code: `<!-- CONCEITO: Definir variáveis com (set:) -->
+(set: $nome to "Viajante")
+(set: $coragem to 0)
+(set: $itens to (a:))`,
+    render: (estado) => {
+      estado.nome = "Viajante";
+      estado.coragem = 0;
+      estado.itens = [];
+      return `
+        <h1>🌲 A Floresta das Escolhas</h1>
+        <p>Você para diante de uma floresta antiga. O vento move as folhas com um sussurro que parece chamar seu nome.</p>
+        <p>Você é um <strong>Viajante</strong> sem memória do caminho que percorreu até aqui. Só sabe que precisa encontrar a saída.</p>
+
+        <div class="dica">
+          📌 TWINE — Código desta passagem:<br>
+          <code class="codigo">(set: $nome to "Viajante")
+(set: $coragem to 0)
+(set: $itens to (a:))</code>
+          <strong>(set:)</strong> define uma variável. Use $ antes do nome.<br>
+          <strong>(a:)</strong> cria uma lista vazia (array).
+        </div>
+
+        <hr>
+        <p>Há dois caminhos à sua frente:</p>
+
+        <div class="dica">
+          📌 TWINE — Links entre passagens:<br>
+          <code class="codigo">[[Entrar pela trilha iluminada->trilha_clara]]
+[[Mergulhar na sombra densa->trilha_sombria]]</code>
+          Sintaxe: <strong>[[texto visível->nome da passagem]]</strong>
+        </div>
+
+        <p>
+          <a class="enchanted" onclick="irPara('trilha_clara')">🌤️ Entrar pela trilha iluminada</a><br><br>
+          <a class="enchanted" onclick="irPara('trilha_sombria')">🌑 Mergulhar na sombra densa</a>
+        </p>
+      `;
+    }
+  },
+
+  // ══════════════════════════════════════════════════════════
+  // PASSAGEM 2 — TRILHA CLARA
+  // Conceito: modificar variável, exibir variável com (print:)
+  // ══════════════════════════════════════════════════════════
+  "trilha_clara": {
+    titulo: "A Trilha Iluminada",
+    code: `(set: $coragem to $coragem + 1)`,
+    render: (estado) => {
+      estado.coragem += 1;
+      return `
+        <h2>☀️ A Trilha Iluminada</h2>
+        <p>A luz filtra pelas copas das árvores em feixes dourados. A trilha é estreita mas convidativa. Pássaros cantam ao longe.</p>
+        <p>Caminhar por aqui exige determinação — sua <strong>coragem</strong> aumenta.</p>
+
+        <div class="dica">
+          📌 TWINE — Modificar e exibir variáveis:<br>
+          <code class="codigo">(set: $coragem to $coragem + 1)
+
+Sua coragem: (print: $coragem)</code>
+          <strong>(set:)</strong> atualiza o valor.<br>
+          <strong>(print:)</strong> exibe o valor na tela.
+        </div>
+
+        <div class="painel-vars">
+          🔢 Estado atual das variáveis:<br>
+          <span>$nome</span> = "${estado.nome}" &nbsp;|&nbsp;
+          <span>$coragem</span> = ${estado.coragem} &nbsp;|&nbsp;
+          <span>$itens</span> = [${estado.itens.join(', ') || 'vazio'}]
+        </div>
+
+        <p>No meio do caminho, você vê algo brilhando entre as raízes:</p>
+        <p>
+          <a class="enchanted" onclick="irPara('encontrar_mapa')">🗺️ Examinar o objeto misterioso</a><br><br>
+          <a class="enchanted" onclick="irPara('clareira')">🌿 Ignorar e continuar pela trilha</a>
+        </p>
+      `;
+    }
+  },
+
+  // ══════════════════════════════════════════════════════════
+  // PASSAGEM 3 — TRILHA SOMBRIA
+  // Conceito: modificar variável negativamente
+  // ══════════════════════════════════════════════════════════
+  "trilha_sombria": {
+    titulo: "A Sombra Densa",
+    code: `(set: $coragem to $coragem - 1)`,
+    render: (estado) => {
+      estado.coragem -= 1;
+      return `
+        <h2>🌑 A Sombra Densa</h2>
+        <p>A escuridão engole cada passo. Sons desconhecidos ecoam entre as árvores retorcidas. Você sente um calafrio percorrer sua espinha.</p>
+        <p>O medo aperta — sua <strong>coragem</strong> diminui.</p>
+
+        <div class="dica">
+          📌 TWINE — Diminuir o valor de uma variável:<br>
+          <code class="codigo">(set: $coragem to $coragem - 1)</code>
+          Você pode usar +, -, *, / normalmente.
+        </div>
+
+        <div class="painel-vars">
+          🔢 Estado atual das variáveis:<br>
+          <span>$nome</span> = "${estado.nome}" &nbsp;|&nbsp;
+          <span>$coragem</span> = ${estado.coragem} &nbsp;|&nbsp;
+          <span>$itens</span> = [${estado.itens.join(', ') || 'vazio'}]
+        </div>
+
+        <p>De repente, você avista uma luz fraca à frente:</p>
+        <p>
+          <a class="enchanted" onclick="irPara('clareira')">💡 Seguir em direção à luz</a><br><br>
+          <a class="enchanted" onclick="irPara('inicio')">↩️ Recuar e tentar a outra trilha</a>
+        </p>
+      `;
+    }
+  },
+
+  // ══════════════════════════════════════════════════════════
+  // PASSAGEM 4 — ENCONTRAR MAPA
+  // Conceito: adicionar item a array com (a:) e (dm:)
+  // ══════════════════════════════════════════════════════════
+  "encontrar_mapa": {
+    titulo: "O Mapa Antigo",
+    code: `(set: $itens to $itens + (a: "mapa"))`,
+    render: (estado) => {
+      if (!estado.itens.includes("mapa")) {
+        estado.itens.push("mapa");
+      }
+      return `
+        <h2>🗺️ O Mapa Antigo</h2>
+
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Antique_world_map_AMH-9068-KB_edited.jpg/640px-Antique_world_map_AMH-9068-KB_edited.jpg"
+             alt="Mapa antigo do século XVI" style="max-height:220px; object-fit:cover; width:100%;">
+
+        <p>Entre as raízes, você encontra um <strong>mapa antigo</strong>, dobrado com cuidado, como se alguém o tivesse escondido propositalmente.</p>
+        <p>Você o guarda na bolsa. Talvez seja útil mais à frente.</p>
+
+        <div class="dica">
+          📌 TWINE — Adicionar item a uma lista:<br>
+          <code class="codigo">(set: $itens to $itens + (a: "mapa"))</code>
+          <strong>(a:)</strong> cria uma lista. Somando duas listas, você adiciona itens.<br><br>
+          📌 TWINE — Inserir imagem:<br>
+          <code class="codigo">(img: "url-da-imagem.jpg")</code>
+          Ou com HTML puro: &lt;img src="url"&gt;
+        </div>
+
+        <div class="painel-vars">
+          🔢 Estado atual das variáveis:<br>
+          <span>$nome</span> = "${estado.nome}" &nbsp;|&nbsp;
+          <span>$coragem</span> = ${estado.coragem} &nbsp;|&nbsp;
+          <span>$itens</span> = [${estado.itens.join(', ') || 'vazio'}]
+        </div>
+
+        <p>Com o mapa em mãos, você continua pela trilha:</p>
+        <p>
+          <a class="enchanted" onclick="irPara('clareira')">🌿 Seguir para a clareira</a>
+        </p>
+      `;
+    }
+  },
+
+  // ══════════════════════════════════════════════════════════
+  // PASSAGEM 5 — CLAREIRA
+  // Conceito: if/else com (if:) e (else:)
+  // ══════════════════════════════════════════════════════════
+  "clareira": {
+    titulo: "A Clareira",
+    code: `(if: $coragem >= 1)[
+  Você atravessa a clareira com firmeza.
+  [[Seguir para a saída->saida_heroi]]
+](else:)[
+  Suas pernas tremem. Você hesita.
+  [[Tentar mesmo assim->saida_fraco]]
+  [[Voltar ao início->inicio]]
+]`,
+    render: (estado) => {
+      const temMapa = estado.itens.includes("mapa");
+      const corajoso = estado.coragem >= 1;
+      return `
+        <h2>🌿 A Clareira</h2>
+        <p>Você chega a uma clareira aberta. No centro, uma figura encapuzada bloqueia o único caminho de saída da floresta.</p>
+        <p>— <em>"Para passar, você precisa de coragem verdadeira,"</em> ela diz.</p>
+
+        <div class="dica">
+          📌 TWINE — Condição com (if:) e (else:):<br>
+          <code class="codigo">(if: $coragem >= 1)[
+  Você avança com firmeza.
+  [[Seguir->saida_heroi]]
+](else:)[
+  Suas pernas tremem.
+  [[Tentar mesmo assim->saida_fraco]]
+]</code>
+          O conteúdo entre <strong>[ ]</strong> só aparece se a condição for verdadeira.
+        </div>
+
+        ${temMapa ? `
+        <div class="sucesso-box">
+          🗺️ O mapa que você encontrou brilha levemente. Parece mostrar um atalho!
+        </div>
+        ` : ''}
+
+        <div class="painel-vars">
+          🔢 Estado atual das variáveis:<br>
+          <span>$nome</span> = "${estado.nome}" &nbsp;|&nbsp;
+          <span>$coragem</span> = ${estado.coragem} &nbsp;|&nbsp;
+          <span>$itens</span> = [${estado.itens.join(', ') || 'vazio'}]
+        </div>
+
+        <hr>
+
+        ${corajoso ? `
+          <p>✅ Sua coragem (${estado.coragem}) é suficiente. Você dá um passo firme à frente.</p>
+          <p><a class="enchanted" onclick="irPara('saida_heroi')">🚀 Enfrentar a figura e seguir para a saída</a></p>
+        ` : `
+          <div class="alerta">
+            ⚠️ Sua coragem (${estado.coragem}) está baixa. A figura parece perceber sua hesitação.
+          </div>
+          <p>
+            <a class="enchanted" onclick="irPara('saida_fraco')">😰 Tentar passar mesmo assim</a><br><br>
+            <a class="enchanted" onclick="irPara('inicio')">↩️ Recuar e recomeçar</a>
+          </p>
+        `}
+      `;
+    }
+  },
+
+  // ══════════════════════════════════════════════════════════
+  // PASSAGEM 6A — SAÍDA DO HERÓI
+  // Conceito: exibir variável com (print:), link externo
+  // ══════════════════════════════════════════════════════════
+  "saida_heroi": {
+    titulo: "A Grande Saída",
+    code: `Parabéns, (print: $nome)!
+Você saiu com (print: $coragem) de coragem.
+
+[[Saiba mais sobre narrativas interativas->https://twinery.org]]`,
+    render: (estado) => {
+      return `
+        <h2>🏆 A Grande Saída</h2>
+        <p>A figura se afasta. Diante de você, a floresta se abre em um horizonte dourado.</p>
+        <p>Parabéns, <strong>${estado.nome}</strong>! Você saiu da Floresta das Escolhas com <strong>${estado.coragem} ponto(s) de coragem</strong>.</p>
+
+        ${estado.itens.includes("mapa") ? `
+        <div class="sucesso-box">
+          🗺️ O mapa antigo brilha uma última vez e desaparece. Ele cumpriu seu papel.
+        </div>
+        ` : ''}
+
+        <div class="dica">
+          📌 TWINE — Exibir variável na tela:<br>
+          <code class="codigo">Parabéns, (print: $nome)!
+Você terminou com (print: $coragem) de coragem.</code>
+          <strong>(print:)</strong> substitui o código pelo valor da variável.<br><br>
+          📌 TWINE — Link externo:<br>
+          <code class="codigo">[[Texto do link->https://twinery.org]]</code>
+          Use URL completa com https:// para links externos.
+        </div>
+
+        <div class="painel-vars">
+          🔢 Resumo final das variáveis:<br>
+          <span>$nome</span> = "${estado.nome}" &nbsp;|&nbsp;
+          <span>$coragem</span> = ${estado.coragem} &nbsp;|&nbsp;
+          <span>$itens</span> = [${estado.itens.join(', ') || 'nenhum'}]
+        </div>
+
+        <hr>
+        <p>🔗 Quer criar sua própria história?
+          <a href="https://twinery.org" target="_blank" class="enchanted">Acesse twinery.org</a>
+        </p>
+        <br>
+        <p><a class="enchanted" onclick="reiniciar()">🔄 Jogar novamente</a></p>
+      `;
+    }
+  },
+
+  // ══════════════════════════════════════════════════════════
+  // PASSAGEM 6B — SAÍDA FRACA
+  // Conceito: condicional com (if:) verificando item no array
+  // ══════════════════════════════════════════════════════════
+  "saida_fraco": {
+    titulo: "Uma Saída Incerta",
+    code: `(if: "mapa" is in $itens)[
+  O mapa te ajuda a encontrar outro caminho!
+](else:)[
+  Você se perde, mas eventualmente sai...
+]`,
+    render: (estado) => {
+      const temMapa = estado.itens.includes("mapa");
+      return `
+        <h2>${temMapa ? '🗺️ Uma Saída Inesperada' : '😔 Uma Saída Incerta'}</h2>
+
+        ${temMapa ? `
+          <p>Você hesita — mas o mapa antigo que carrega brilha e aponta um atalho escondido. Mesmo tremendo, você encontra a saída por outro caminho.</p>
+          <div class="sucesso-box">
+            O item que você coletou fez a diferença! Nunca subestime o que encontra no caminho.
+          </div>
+        ` : `
+          <p>Com coragem baixa e sem o mapa, você tenta passar — a figura bloqueia, mas eventualmente se cansa e deixa você ir. Você sai da floresta, mas com a sensação de que poderia ter ido melhor.</p>
+          <div class="alerta">
+            Você completou a história, mas há caminhos melhores por explorar.
+          </div>
+        `}
+
+        <div class="dica">
+          📌 TWINE — Verificar se item está em uma lista:<br>
+          <code class="codigo">(if: "mapa" is in $itens)[
+  O mapa te ajuda!
+](else:)[
+  Você está perdido...
+]</code>
+          <strong>is in</strong> verifica se um valor existe dentro de uma lista.
+        </div>
+
+        <div class="painel-vars">
+          🔢 Resumo final das variáveis:<br>
+          <span>$nome</span> = "${estado.nome}" &nbsp;|&nbsp;
+          <span>$coragem</span> = ${estado.coragem} &nbsp;|&nbsp;
+          <span>$itens</span> = [${estado.itens.join(', ') || 'nenhum'}]
+        </div>
+
+        <hr>
+        <p>🔗 Explore mais em <a href="https://twinery.org" target="_blank" class="enchanted">twinery.org</a></p>
+        <br>
+        <p><a class="enchanted" onclick="reiniciar()">🔄 Tentar outro caminho</a></p>
+      `;
+    }
+  }
+
+};
+
+// ============================================================
+// MOTOR DE SIMULAÇÃO
+// Gerencia estado e navegação entre passagens
+// ============================================================
+
+let estadoAtual = {};
+let historico = [];
+
+function irPara(passagem) {
+  historico.push(passagem);
+  renderizar(passagem);
+}
+
+function reiniciar() {
+  estadoAtual = {};
+  historico = [];
+  irPara('inicio');
+}
+
+function renderizar(id) {
+  const p = passagens[id];
+  if (!p) return;
+  const html = p.render(estadoAtual);
+  document.getElementById('app').innerHTML = `
+    <tw-passage>
+      ${html}
+      <div class="nav-footer">
+        Passagem: <strong>${id}</strong> &nbsp;·&nbsp;
+        ${historico.length > 1 ? `<a class="enchanted" onclick="voltarPassagem()" style="font-size:0.8rem">← voltar</a>` : ''}
+      </div>
+    </tw-passage>
+  `;
+  window.scrollTo(0, 0);
+}
+
+function voltarPassagem() {
+  if (historico.length <= 1) return;
+  historico.pop();
+  estadoAtual = {};
+  // Replay do histórico para reconstruir estado
+  const caminho = [...historico];
+  historico = [];
+  estadoAtual = {};
+  for (const p of caminho) {
+    passagens[p].render(estadoAtual);
+    historico.push(p);
+  }
+  renderizar(caminho[caminho.length - 1]);
+}
+
+// Iniciar na primeira passagem
+irPara('inicio');
+</script>
+</body>
+</html>

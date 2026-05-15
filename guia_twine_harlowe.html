@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia Twine Harlowe — Referência Rápida</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #22263a;
+  --border: rgba(255,255,255,0.08);
+  --text: #e2e8f0;
+  --muted: #8892aa;
+  --yellow: #fbbf24;
+  --purple: #a78bfa;
+  --teal: #34d399;
+  --coral: #fb7185;
+  --blue: #60a5fa;
+  --font: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 2rem 1rem 4rem;
+}
+
+.page { max-width: 860px; margin: 0 auto; }
+
+header {
+  text-align: center;
+  padding: 2.5rem 0 2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+
+header h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--yellow);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+}
+
+header p { color: var(--muted); font-size: 0.9rem; }
+
+.badge {
+  display: inline-block;
+  background: rgba(251,191,36,0.1);
+  color: var(--yellow);
+  border: 1px solid rgba(251,191,36,0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 2.5rem 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.grid { display: grid; gap: 1rem; }
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.card-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-yellow { background: var(--yellow); }
+.dot-purple { background: var(--purple); }
+.dot-teal { background: var(--teal); }
+.dot-coral { background: var(--coral); }
+.dot-blue { background: var(--blue); }
+
+pre {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.kw { color: var(--yellow); font-weight: 600; }      /* keyword / macro */
+.var { color: var(--purple); }                         /* variável */
+.str { color: var(--teal); }                           /* string */
+.num { color: var(--coral); }                          /* número */
+.cmt { color: var(--muted); font-style: italic; }      /* comentário */
+.lnk { color: var(--blue); }                           /* link */
+
+.desc {
+  font-size: 0.83rem;
+  color: var(--muted);
+  margin-top: 0.6rem;
+  line-height: 1.6;
+}
+
+.desc strong { color: var(--text); font-weight: 500; }
+
+.map-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 0;
+}
+
+/* Mapa de passagens */
+svg text { font-family: var(--mono); }
+
+.tip-box {
+  background: rgba(167,139,250,0.08);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-top: 1rem;
+}
+
+.tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.tip-text { font-size: 0.83rem; color: #c4b5fd; line-height: 1.6; }
+.tip-text strong { color: #ede9fe; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  margin-top: 0.5rem;
+}
+
+th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.4rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: top;
+}
+
+td:first-child { font-family: var(--mono); color: var(--yellow); font-size: 0.8rem; }
+td:last-child { color: var(--muted); }
+
+footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+footer a { color: var(--yellow); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<header>
+  <div class="badge">TWINE · FORMATO HARLOWE</div>
+  <h1>Guia de Referência Rápida</h1>
+  <p>Criação Digital — Hipermídia · Universidade de Caxias do Sul</p>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     SEÇÃO 1 — MAPA DA HISTÓRIA EXEMPLO
+════════════════════════════════════════════ -->
+
+<div class="section-title">🗺️ Mapa da história — "A Floresta das Escolhas"</div>
+
+<div class="map-wrap">
+  <svg viewBox="0 0 800 300" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-height:280px;">
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#8892aa"/>
+      </marker>
+      <marker id="arr-y" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+        <polygon points="0 0, 8 3, 0 6" fill="#fbbf24"/>
+      </marker>
+    </defs>
+
+    <!-- Nível 0: Início -->
+    <rect x="320" y="20" width="160" height="44" rx="8" fill="#22263a" stroke="#fbbf24" stroke-width="1.5"/>
+    <text x="400" y="38" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">inicio</text>
+    <text x="400" y="54" text-anchor="middle" fill="#8892aa" font-size="9">set: $nome, $coragem, $itens</text>
+
+    <!-- Nível 1: duas trilhas -->
+    <rect x="100" y="120" width="160" height="44" rx="8" fill="#22263a" stroke="#34d399" stroke-width="1.5"/>
+    <text x="180" y="138" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">trilha_clara</text>
+    <text x="180" y="154" text-anchor="middle" fill="#8892aa" font-size="9">$coragem + 1</text>
+
+    <rect x="540" y="120" width="160" height="44" rx="8" fill="#22263a" stroke="#fb7185" stroke-width="1.5"/>
+    <text x="620" y="138" text-anchor="middle" fill="#fb7185" font-size="11" font-weight="600">trilha_sombria</text>
+    <text x="620" y="154" text-anchor="middle" fill="#8892aa" font-size="9">$coragem - 1</text>
+
+    <!-- Nível 1b: encontrar mapa -->
+    <rect x="100" y="220" width="160" height="44" rx="8" fill="#22263a" stroke="#a78bfa" stroke-width="1.5"/>
+    <text x="180" y="238" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">encontrar_mapa</text>
+    <text x="180" y="254" text-anchor="middle" fill="#8892aa" font-size="9">$itens + "mapa"</text>
+
+    <!-- Nível 2: clareira -->
+    <rect x="320" y="220" width="160" height="44" rx="8" fill="#22263a" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="400" y="238" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600">clareira</text>
+    <text x="400" y="254" text-anchor="middle" fill="#8892aa" font-size="9">if $coragem >= 1</text>
+
+    <!-- Labels de saída (fora do SVG principal) -->
+    <text x="580" y="288" text-anchor="middle" fill="#fbbf24" font-size="9">saida_heroi / saida_fraco</text>
+
+    <!-- Setas -->
+    <!-- inicio → trilha_clara -->
+    <line x1="360" y1="64" x2="230" y2="120" stroke="#8892aa" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- inicio → trilha_sombria -->
+    <line x1="440" y1="64" x2="570" y2="120" stroke="#8892aa" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- trilha_clara → encontrar_mapa -->
+    <line x1="180" y1="164" x2="180" y2="220" stroke="#8892aa" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- trilha_clara → clareira -->
+    <line x1="260" y1="142" x2="320" y2="230" stroke="#8892aa" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- encontrar_mapa → clareira -->
+    <line x1="260" y1="242" x2="320" y2="242" stroke="#8892aa" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- trilha_sombria → clareira -->
+    <line x1="540" y1="142" x2="480" y2="230" stroke="#8892aa" stroke-width="1" marker-end="url(#arr)"/>
+    <!-- clareira → saídas -->
+    <line x1="400" y1="264" x2="400" y2="295" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arr-y)" stroke-dasharray="4,2"/>
+
+    <!-- Legenda -->
+    <rect x="0" y="20" width="80" height="16" rx="3" fill="none" stroke="#fbbf24" stroke-width="1"/>
+    <text x="40" y="32" text-anchor="middle" fill="#fbbf24" font-size="8">ponto de início</text>
+    <rect x="0" y="44" width="80" height="16" rx="3" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,2"/>
+    <text x="40" y="56" text-anchor="middle" fill="#8892aa" font-size="8">condicional</text>
+  </svg>
+
+  <div class="tip-box" style="margin-top:0.75rem;">
+    <span class="tip-icon">💡</span>
+    <span class="tip-text">A história tem <strong>7 passagens</strong> e <strong>3 níveis hierárquicos</strong>, atendendo aos requisitos mínimos da tarefa. Repare que a <strong>clareira</strong> é acessível por todos os caminhos — é o nó de convergência antes do fim.</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SEÇÃO 2 — SINTAXE PRINCIPAL
+════════════════════════════════════════════ -->
+
+<div class="section-title">⌨️ Sintaxe principal — Harlowe</div>
+
+<div class="grid grid-2">
+
+  <div class="card">
+    <div class="card-title"><span class="dot dot-yellow"></span> Links entre passagens</div>
+    <pre><span class="lnk">[[Texto do link->nome-da-passagem]]</span>
+
+<span class="cmt">-- Exemplos --</span>
+<span class="lnk">[[Entrar na floresta->inicio]]</span>
+<span class="lnk">[[Sair daqui->https://twinery.org]]</span>
+
+<span class="cmt">-- Sintaxe alternativa (nome=texto) --</span>
+<span class="lnk">[[nome-da-passagem|Texto do link]]</span></pre>
+    <p class="desc">O texto antes da seta <strong>→</strong> aparece para o leitor. O nome após a seta é o <strong>nome interno da passagem</strong> no Twine.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot dot-purple"></span> Variáveis — definir e atualizar</div>
+    <pre><span class="cmt">-- Criar / definir --</span>
+<span class="kw">(set:</span> <span class="var">$nome</span> to <span class="str">"Viajante"</span><span class="kw">)</span>
+<span class="kw">(set:</span> <span class="var">$coragem</span> to <span class="num">0</span><span class="kw">)</span>
+<span class="kw">(set:</span> <span class="var">$vivo</span> to <span class="num">true</span><span class="kw">)</span>
+
+<span class="cmt">-- Atualizar --</span>
+<span class="kw">(set:</span> <span class="var">$coragem</span> to <span class="var">$coragem</span> + <span class="num">1</span><span class="kw">)</span>
+<span class="kw">(set:</span> <span class="var">$coragem</span> to <span class="var">$coragem</span> - <span class="num">1</span><span class="kw">)</span></pre>
+    <p class="desc">Variáveis começam com <strong>$</strong>. Use <strong>(set:)</strong> tanto para criar quanto para alterar. Tipos: texto, número, booleano (true/false).</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot dot-teal"></span> Exibir variáveis na tela</div>
+    <pre><span class="cmt">-- Exibir valor --</span>
+Olá, <span class="kw">(print:</span> <span class="var">$nome</span><span class="kw">)</span>!
+Coragem: <span class="kw">(print:</span> <span class="var">$coragem</span><span class="kw">)</span>
+
+<span class="cmt">-- Atalho: apenas $variavel --</span>
+Olá, <span class="var">$nome</span>! Coragem: <span class="var">$coragem</span>
+
+<span class="cmt">-- Exibir no título da janela --</span>
+<span class="kw">(display:</span> <span class="str">"nome-da-passagem"</span><span class="kw">)</span></pre>
+    <p class="desc">Em Harlowe, você pode usar <strong>$variavel</strong> diretamente no texto — o Twine substitui pelo valor automaticamente.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot dot-coral"></span> Condições — if / else-if / else</div>
+    <pre><span class="kw">(if:</span> <span class="var">$coragem</span> >= <span class="num">2</span><span class="kw">)</span>[
+  Você é corajoso!
+  <span class="lnk">[[Avançar->saida_heroi]]</span>
+]<span class="kw">(else-if:</span> <span class="var">$coragem</span> is <span class="num">1</span><span class="kw">)</span>[
+  Você hesita, mas tenta.
+  <span class="lnk">[[Tentar->saida_fraco]]</span>
+]<span class="kw">(else:)</span>[
+  Você recua com medo.
+  <span class="lnk">[[Voltar->inicio]]</span>
+]</pre>
+    <p class="desc">O conteúdo entre <strong>[ ]</strong> só aparece quando a condição é verdadeira. Operadores: <strong>is</strong>, <strong>>=</strong>, <strong><=</strong>, <strong>></strong>, <strong><</strong>, <strong>is not</strong>.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot dot-blue"></span> Listas (arrays)</div>
+    <pre><span class="cmt">-- Criar lista vazia --</span>
+<span class="kw">(set:</span> <span class="var">$itens</span> to <span class="kw">(a:)</span><span class="kw">)</span>
+
+<span class="cmt">-- Adicionar item --</span>
+<span class="kw">(set:</span> <span class="var">$itens</span> to <span class="var">$itens</span> + <span class="kw">(a:</span> <span class="str">"mapa"</span><span class="kw">))</span>
+
+<span class="cmt">-- Verificar se item existe --</span>
+<span class="kw">(if:</span> <span class="str">"mapa"</span> is in <span class="var">$itens</span><span class="kw">)</span>[
+  Você tem o mapa!
+]</pre>
+    <p class="desc">Listas permitem criar <strong>inventários</strong>. Use <strong>(a:)</strong> para criar uma lista, <strong>+</strong> para adicionar itens, e <strong>is in</strong> para verificar.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="dot dot-yellow"></span> Mídia e estilos</div>
+    <pre><span class="cmt">-- Imagem --</span>
+&lt;img src=<span class="str">"url-da-imagem.jpg"</span> width=<span class="str">"100%"</span>&gt;
+
+<span class="cmt">-- Estilo inline --</span>
+<span class="kw">(text-colour:</span> <span class="str">"red"</span><span class="kw">)</span>[Texto vermelho]
+<span class="kw">(text-style:</span> <span class="str">"bold"</span><span class="kw">)</span>[Negrito]
+<span class="kw">(background:</span> <span class="str">"#1a1a2e"</span><span class="kw">)</span>[Fundo]
+
+<span class="cmt">-- CSS global (Story Stylesheet) --</span>
+tw-story { background: #1a1a2e; }
+tw-passage { color: #e8dcc8; }</pre>
+    <p class="desc">HTML funciona normalmente dentro do Twine. Para estilos globais, use o <strong>Story Stylesheet</strong> (menu da história).</p>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SEÇÃO 3 — TABELA DE OPERADORES
+════════════════════════════════════════════ -->
+
+<div class="section-title">🔢 Operadores e comparações</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Operador Harlowe</th>
+        <th>Equivalente</th>
+        <th>Exemplo de uso</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>is</td><td>== (igual)</td><td>(if: $coragem is 2)</td></tr>
+      <tr><td>is not</td><td>!= (diferente)</td><td>(if: $nome is not "Mago")</td></tr>
+      <tr><td>>=</td><td>maior ou igual</td><td>(if: $coragem >= 3)</td></tr>
+      <tr><td><=</td><td>menor ou igual</td><td>(if: $vida <= 0)</td></tr>
+      <tr><td>></td><td>maior que</td><td>(if: $ouro > 10)</td></tr>
+      <tr><td><</td><td>menor que</td><td>(if: $tempo < 5)</td></tr>
+      <tr><td>is in</td><td>contém (lista)</td><td>(if: "espada" is in $itens)</td></tr>
+      <tr><td>and</td><td>&& (E lógico)</td><td>(if: $coragem > 1 and $temMapa)</td></tr>
+      <tr><td>or</td><td>|| (OU lógico)</td><td>(if: $classe is "Mago" or $classe is "Druida")</td></tr>
+      <tr><td>not</td><td>! (negação)</td><td>(if: not $vivo)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SEÇÃO 4 — DICAS FINAIS
+════════════════════════════════════════════ -->
+
+<div class="section-title">✅ Checklist para a tarefa</div>
+
+<div class="grid grid-3">
+  <div class="card">
+    <div class="card-title"><span class="dot dot-teal"></span> Estrutura</div>
+    <p class="desc">
+      ✔ Mínimo 7 passagens<br>
+      ✔ Ou 3 níveis hierárquicos<br>
+      ✔ Sem caminhos sem saída<br>
+      ✔ Mapa coerente no editor
+    </p>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="dot dot-purple"></span> Visual</div>
+    <p class="desc">
+      ✔ Story Stylesheet preenchido<br>
+      ✔ Fonte alterada<br>
+      ✔ Cor de fundo e texto<br>
+      ✔ 1 imagem inserida
+    </p>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="dot dot-yellow"></span> Código</div>
+    <p class="desc">
+      ✔ Pelo menos 1 variável<br>
+      ✔ Pelo menos 1 (if:)<br>
+      ✔ 1 link externo (https://)<br>
+      ✔ Exportado como .html
+    </p>
+  </div>
+</div>
+
+<footer>
+  <p>Referência oficial: <a href="https://twine2.neocities.org/" target="_blank">twine2.neocities.org</a> &nbsp;·&nbsp;
+  Download Twine: <a href="https://twinery.org" target="_blank">twinery.org</a></p>
+  <p style="margin-top:0.5rem;">Hipermídia · Criação Digital · UCS · 2025</p>
+</footer>
+
+</div>
+</body>
+</html>
