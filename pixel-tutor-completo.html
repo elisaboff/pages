@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PIXEL — Tutor de Pensamento Computacional</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a14;--surface:#12121f;--surface2:#1a1a2e;--border:rgba(255,255,255,0.08);
+  --text:#e2e2f0;--muted:rgba(255,255,255,0.4);
+  --dec:#FF6B6B;--pat:#4ECDC4;--abs:#FFE66D;--alg:#A8E6CF;
+  --accent:#7C6FFF;--success:#56CFE1;--warn:#FF9F1C;
+}
+body{background:var(--bg);font-family:'Nunito',sans-serif;color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
+
+/* NAV */
+.nav{display:flex;align-items:center;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--border);gap:8px;flex-shrink:0;flex-wrap:wrap}
+.nav-logo{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--pat);letter-spacing:3px;margin-right:8px}
+.nav-tab{padding:6px 14px;border-radius:20px;border:1.5px solid transparent;font-size:12px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;background:transparent;color:var(--muted)}
+.nav-tab.active{background:var(--surface2);border-color:var(--border);color:var(--text)}
+.nav-tab:hover:not(.active){color:var(--text)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.xp-badge{background:linear-gradient(135deg,#7C6FFF,#56CFE1);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:800;color:white;font-family:'DM Mono',monospace}
+.student-name{font-size:12px;color:var(--muted)}
+
+/* VIEWS */
+.view{display:none;flex:1;overflow:hidden;flex-direction:column}
+.view.active{display:flex}
+
+/* ===== CHAT VIEW ===== */
+.chat-layout{display:flex;flex:1;overflow:hidden}
+.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:14px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;overflow-y:auto}
+.sidebar-title{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.pillar-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;border:1.5px solid;cursor:pointer;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;transition:all .2s;background:transparent}
+.pillar-btn:hover{transform:translateX(3px)}
+.pillar-progress{margin-top:auto}
+.prog-item{margin-bottom:10px}
+.prog-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;color:var(--muted)}
+.prog-bar{height:5px;border-radius:4px;background:rgba(255,255,255,0.08);overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s ease}
+.action-btns{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.action-btn{padding:8px 10px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text);font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;text-align:left}
+.action-btn:hover{background:var(--surface2);border-color:var(--accent)}
+
+.chat-main{display:flex;flex-direction:column;flex:1;overflow:hidden}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg-row{display:flex;align-items:flex-end;gap:8px;animation:fadeUp .25s ease}
+.msg-row.user{justify-content:flex-end}
+.bot-icon{font-size:20px;flex-shrink:0;margin-bottom:2px}
+.bubble{max-width:75%;padding:11px 15px;border-radius:18px;font-size:13.5px;line-height:1.65}
+.bubble.bot{background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:4px}
+.bubble.user{background:linear-gradient(135deg,var(--pat),#44b3aa);color:#0a0a14;font-weight:700;border-bottom-right-radius:4px}
+.typing{display:flex;gap:5px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--pat);animation:bounce 1.2s infinite}
+
+/* QUIZ CARD inline */
+.quiz-card{background:var(--surface);border:1.5px solid var(--accent);border-radius:16px;padding:16px;margin:4px 0;max-width:85%}
+.quiz-q{font-size:13px;font-weight:700;margin-bottom:12px;line-height:1.5}
+.quiz-opts{display:flex;flex-direction:column;gap:7px}
+.quiz-opt{padding:9px 14px;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text);font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;cursor:pointer;text-align:left;transition:all .2s}
+.quiz-opt:hover:not(:disabled){border-color:var(--accent);background:rgba(124,111,255,0.1)}
+.quiz-opt.correct{border-color:var(--pat)!important;background:rgba(78,205,196,0.15)!important;color:var(--pat)}
+.quiz-opt.wrong{border-color:var(--dec)!important;background:rgba(255,107,107,0.1)!important;color:var(--dec)}
+.quiz-feedback{margin-top:10px;font-size:12px;font-weight:700;padding:8px 12px;border-radius:8px}
+.quiz-feedback.ok{background:rgba(78,205,196,0.15);color:var(--pat)}
+.quiz-feedback.fail{background:rgba(255,107,107,0.1);color:var(--dec)}
+
+/* FLOWCHART */
+.flow-card{background:var(--surface);border:1.5px solid var(--abs);border-radius:16px;padding:14px;max-width:90%;margin:4px 0}
+.flow-title{font-size:12px;font-weight:800;color:var(--abs);margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.flow-steps{display:flex;flex-direction:column;align-items:center}
+.flow-step{display:flex;flex-direction:column;align-items:center}
+.flow-box{padding:8px 16px;border-radius:8px;font-size:11px;font-weight:700;text-align:center;border:1.5px solid;min-width:140px;max-width:200px}
+.flow-box.inicio,.flow-box.fim{border-radius:20px}
+.flow-box.inicio{background:rgba(78,205,196,0.15);border-color:var(--pat);color:var(--pat)}
+.flow-box.processo{background:rgba(168,230,207,0.1);border-color:var(--alg);color:var(--alg)}
+.flow-box.decisao{background:rgba(255,230,109,0.1);border-color:var(--abs);color:var(--abs)}
+.flow-box.fim{background:rgba(255,107,107,0.12);border-color:var(--dec);color:var(--dec)}
+.flow-arrow{font-size:16px;color:var(--muted);margin:2px 0}
+
+/* PSEUDOCODE */
+.pseudo-card{background:#0f0f1a;border:1.5px solid var(--alg);border-radius:14px;padding:14px;max-width:88%;margin:4px 0;font-family:'DM Mono',monospace}
+.pseudo-title{font-size:10px;font-weight:500;color:var(--alg);margin-bottom:10px;letter-spacing:2px;text-transform:uppercase}
+.pseudo-line{font-size:12px;line-height:1.8;color:#c8ffd4}
+.pseudo-line.kw{color:var(--abs)}
+.pseudo-line.comment{color:var(--muted)}
+.pseudo-line.indent1{padding-left:18px}
+.pseudo-line.indent2{padding-left:36px}
+
+/* CHAT INPUT */
+.chat-input-area{padding:10px 14px;background:var(--surface);border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+.chat-input{flex:1;background:rgba(255,255,255,0.06);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--text);font-family:'Nunito',sans-serif;outline:none}
+.chat-input:focus{border-color:rgba(124,111,255,.4)}
+.send-btn{width:42px;height:42px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--pat),var(--accent));color:white;font-size:16px;cursor:pointer;flex-shrink:0;transition:opacity .2s}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ===== QUIZ VIEW ===== */
+.quiz-view-inner{flex:1;overflow-y:auto;padding:20px}
+.quiz-header{text-align:center;margin-bottom:24px}
+.quiz-header h2{font-size:20px;font-weight:900;margin-bottom:6px}
+.quiz-header p{color:var(--muted);font-size:13px}
+.pillar-select{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.ps-card{padding:16px;border-radius:16px;border:2px solid;cursor:pointer;text-align:center;transition:all .2s;font-family:'Nunito',sans-serif;background:transparent}
+.ps-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.ps-emoji{font-size:28px;margin-bottom:6px}
+.ps-name{font-size:13px;font-weight:800}
+.ps-score{font-size:11px;margin-top:4px;opacity:.7}
+.quiz-active{background:var(--surface);border-radius:20px;padding:20px}
+.quiz-progress-bar{height:4px;background:rgba(255,255,255,.08);border-radius:4px;margin-bottom:20px;overflow:hidden}
+.quiz-progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--pat));border-radius:4px;transition:width .4s}
+.quiz-number{font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:700}
+.quiz-question{font-size:16px;font-weight:800;margin-bottom:18px;line-height:1.4}
+.quiz-options{display:flex;flex-direction:column;gap:10px}
+.quiz-option{padding:13px 16px;border-radius:13px;border:2px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Nunito',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;text-align:left;transition:all .2s}
+.quiz-option:hover:not(:disabled){border-color:var(--accent);transform:translateX(4px)}
+.quiz-option.correct{border-color:var(--pat)!important;background:rgba(78,205,196,.15)!important;color:var(--pat)}
+.quiz-option.wrong{border-color:var(--dec)!important;background:rgba(255,107,107,.1)!important;color:var(--dec)}
+.quiz-result{text-align:center;padding:30px 20px;background:var(--surface);border-radius:20px}
+.quiz-score-big{font-size:52px;font-weight:900;font-family:'DM Mono',monospace;background:linear-gradient(135deg,var(--pat),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.quiz-score-label{font-size:14px;color:var(--muted);margin-bottom:20px}
+.result-stars{font-size:32px;margin-bottom:16px}
+.restart-btn{padding:12px 28px;border-radius:14px;border:none;background:linear-gradient(135deg,var(--accent),var(--pat));color:white;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer}
+
+/* ===== PROFESSOR VIEW ===== */
+.teacher-inner{flex:1;overflow-y:auto;padding:20px}
+.teacher-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.teacher-header h2{font-size:18px;font-weight:900}
+.teacher-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px}
+.stat-card h3{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+.stat-value{font-size:28px;font-weight:900;font-family:'DM Mono',monospace}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px}
+.pillar-breakdown{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+.pillar-breakdown h3{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:14px}
+.pb-item{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.pb-emoji{font-size:18px;width:28px;text-align:center}
+.pb-name{font-size:12px;font-weight:700;width:90px}
+.pb-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:6px;overflow:hidden}
+.pb-bar{height:100%;border-radius:6px;transition:width .6s ease}
+.pb-pct{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);width:36px;text-align:right}
+.sessions-list{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px}
+.sessions-list h3{font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.session-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.session-item:last-child{border-bottom:none}
+.session-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.session-info{flex:1}
+.session-topic{font-size:12px;font-weight:700}
+.session-time{font-size:10px;color:var(--muted)}
+.session-xp{font-size:11px;font-weight:800;font-family:'DM Mono',monospace;color:var(--accent)}
+.reset-btn{padding:8px 16px;border-radius:10px;border:1.5px solid var(--dec);background:transparent;color:var(--dec);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s}
+.reset-btn:hover{background:rgba(255,107,107,.1)}
+
+/* ===== DESAFIOS VIEW ===== */
+.challenges-inner{flex:1;overflow-y:auto;padding:20px}
+.ch-header{margin-bottom:20px}
+.ch-header h2{font-size:20px;font-weight:900;margin-bottom:4px}
+.ch-header p{font-size:13px;color:var(--muted)}
+.ch-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ch-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:16px;cursor:pointer;transition:all .25s}
+.ch-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.ch-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:800;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px}
+.ch-title{font-size:13px;font-weight:800;margin-bottom:6px}
+.ch-desc{font-size:11px;color:var(--muted);line-height:1.5}
+.ch-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.ch-xp{font-size:11px;font-weight:800;font-family:'DM Mono',monospace}
+.ch-done{font-size:14px}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;width:100%;max-width:540px;max-height:88vh;overflow-y:auto;padding:24px}
+.modal-title{font-size:16px;font-weight:900;margin-bottom:6px}
+.modal-desc{font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.modal-section-title{font-size:10px;font-weight:800;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.pseudo-editor{width:100%;background:#0a0a14;border:1.5px solid var(--alg);border-radius:12px;padding:14px;color:#c8ffd4;font-family:'DM Mono',monospace;font-size:12px;line-height:1.8;resize:vertical;min-height:130px;outline:none}
+.modal-btns{display:flex;gap:10px;margin-top:16px}
+.modal-btn{flex:1;padding:11px;border-radius:12px;border:none;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;cursor:pointer;transition:all .2s}
+.modal-btn.primary{background:linear-gradient(135deg,var(--accent),var(--pat));color:white}
+.modal-btn.secondary{background:var(--surface2);border:1.5px solid var(--border);color:var(--muted)}
+.ai-feedback{margin-top:14px;padding:14px;border-radius:12px;background:rgba(124,111,255,.1);border:1.5px solid rgba(124,111,255,.3);font-size:13px;line-height:1.7}
+
+/* UTILS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
+strong{color:var(--pat)}
+code{font-family:'DM Mono',monospace;background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px;font-size:12px}
+
+/* API KEY MODAL */
+.apikey-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px}
+.apikey-box{background:var(--surface);border:1.5px solid var(--accent);border-radius:20px;padding:28px;max-width:460px;width:100%}
+.apikey-box h2{font-size:18px;font-weight:900;margin-bottom:8px;color:var(--pat)}
+.apikey-box p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.apikey-input{width:100%;background:#0a0a14;border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;outline:none;margin-bottom:12px}
+.apikey-input:focus{border-color:var(--accent)}
+.apikey-btn{width:100%;padding:12px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),var(--pat));color:white;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer}
+.apikey-note{font-size:11px;color:var(--muted);margin-top:10px;text-align:center}
+</style>
+</head>
+<body>
+
+<!-- API KEY MODAL -->
+<div class="apikey-overlay" id="apikey-overlay">
+  <div class="apikey-box">
+    <h2>👾 PIXEL — Configuração Inicial</h2>
+    <p>Para usar o tutor inteligente, você precisa de uma chave da API da Anthropic. Ela é usada apenas localmente no seu navegador e não é enviada a nenhum outro servidor.</p>
+    <p style="margin-bottom:8px"><strong>Como obter:</strong> Acesse <a href="https://console.anthropic.com" target="_blank" style="color:var(--pat)">console.anthropic.com</a> → API Keys → Create Key</p>
+    <input class="apikey-input" id="apikey-input" type="password" placeholder="sk-ant-api03-..."/>
+    <button class="apikey-btn" onclick="saveApiKey()">Salvar e Começar 🚀</button>
+    <div class="apikey-note">A chave fica salva no localStorage do seu navegador.</div>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-logo">PIXEL</div>
+  <button class="nav-tab active" onclick="showView('chat', this)">💬 Tutor</button>
+  <button class="nav-tab" onclick="showView('quiz', this)">🎯 Quiz</button>
+  <button class="nav-tab" onclick="showView('challenges', this)">⚡ Desafios</button>
+  <button class="nav-tab" onclick="showView('teacher', this)">📊 Professor</button>
+  <div class="nav-right">
+    <div class="xp-badge" id="xp-display">⭐ 0 XP</div>
+    <div class="student-name" id="student-label">Aluno</div>
+  </div>
+</div>
+
+<!-- CHAT VIEW -->
+<div class="view active" id="view-chat">
+  <div class="chat-layout">
+    <div class="sidebar">
+      <div class="sidebar-title">Pilares</div>
+      <button class="pillar-btn" style="border-color:var(--dec);color:var(--dec)" onclick="sendTopic('Decomposição','dec')">🧩 Decomposição</button>
+      <button class="pillar-btn" style="border-color:var(--pat);color:var(--pat)" onclick="sendTopic('Padrões','pat')">🔁 Padrões</button>
+      <button class="pillar-btn" style="border-color:var(--abs);color:var(--abs)" onclick="sendTopic('Abstração','abs')">🔍 Abstração</button>
+      <button class="pillar-btn" style="border-color:var(--alg);color:var(--alg)" onclick="sendTopic('Algoritmos','alg')">📋 Algoritmos</button>
+      <div style="margin-top:8px">
+        <div class="sidebar-title">Ações rápidas</div>
+        <div class="action-btns">
+          <button class="action-btn" onclick="requestQuiz()">🎯 Mini-quiz agora</button>
+          <button class="action-btn" onclick="requestFlowchart()">📊 Ver fluxograma</button>
+          <button class="action-btn" onclick="requestPseudo()">📋 Ver pseudocódigo</button>
+          <button class="action-btn" onclick="showView('challenges', null)">⚡ Desafios</button>
+        </div>
+      </div>
+      <div class="pillar-progress" id="sidebar-progress"></div>
+    </div>
+    <div class="chat-main">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-area">
+        <input class="chat-input" id="chat-input" placeholder="Escreva sua dúvida..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"/>
+        <button class="send-btn" id="send-btn" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ VIEW -->
+<div class="view" id="view-quiz">
+  <div class="quiz-view-inner">
+    <div class="quiz-header">
+      <h2>🎯 Avaliação por Pilar</h2>
+      <p>Escolha um pilar. A IA gera 5 questões únicas a cada vez.</p>
+    </div>
+    <div id="quiz-content"></div>
+  </div>
+</div>
+
+<!-- DESAFIOS VIEW -->
+<div class="view" id="view-challenges">
+  <div class="challenges-inner">
+    <div class="ch-header">
+      <h2>⚡ Desafios de Pseudocódigo</h2>
+      <p>Escreva algoritmos em linguagem natural e receba feedback da IA</p>
+    </div>
+    <div class="ch-grid" id="challenges-grid"></div>
+  </div>
+</div>
+
+<!-- PROFESSOR VIEW -->
+<div class="view" id="view-teacher">
+  <div class="teacher-inner" id="teacher-inner"></div>
+</div>
+
+<!-- CHALLENGE MODAL -->
+<div class="modal-overlay" id="challenge-modal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+// ============================================================
+// CONFIGURAÇÃO DA API KEY (arquivo local — usa localStorage)
+// ============================================================
+let API_KEY = localStorage.getItem('pixel_api_key') || '';
+
+function saveApiKey() {
+  const k = document.getElementById('apikey-input').value.trim();
+  if (!k.startsWith('sk-')) { alert('Chave inválida. Deve começar com sk-ant-...'); return; }
+  API_KEY = k;
+  localStorage.setItem('pixel_api_key', k);
+  document.getElementById('apikey-overlay').style.display = 'none';
+  init();
+}
+
+// Verifica se já tem chave salva
+if (API_KEY) {
+  document.getElementById('apikey-overlay').style.display = 'none';
+}
+
+// ============================================================
+// ESTADO E PERSISTÊNCIA (localStorage para arquivo local)
+// ============================================================
+const STORAGE_KEY = 'pixel_tutor_state_v2';
+
+function defaultState() {
+  return {
+    xp: 0,
+    studentName: 'Estudante',
+    pillarXP: { dec: 0, pat: 0, abs: 0, alg: 0 },
+    sessions: [],
+    completedChallenges: [],
+    quizScores: { dec: [], pat: [], abs: [], alg: [] },
+    chatHistory: []
+  };
+}
+
+let state = defaultState();
+
+function saveState() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state = { ...defaultState(), ...JSON.parse(raw) };
+  } catch(e) {}
+}
+
+// ============================================================
+// PILARES
+// ============================================================
+const PILLAR_MAP = {
+  dec: { name: 'Decomposição',          emoji: '🧩', color: 'var(--dec)' },
+  pat: { name: 'Padrões',               emoji: '🔁', color: 'var(--pat)' },
+  abs: { name: 'Abstração',             emoji: '🔍', color: 'var(--abs)' },
+  alg: { name: 'Algoritmos',            emoji: '📋', color: 'var(--alg)' }
+};
+
+// ============================================================
+// SYSTEM PROMPT
+// ============================================================
+const SYSTEM_PROMPT = `Você é o PIXEL, tutor inteligente de Pensamento Computacional para alunos do 8º ano do ensino fundamental brasileiro (13-14 anos).
+
+PILARES que você ensina:
+1. Decomposição – dividir problemas complexos em partes menores
+2. Reconhecimento de Padrões – identificar repetições e similaridades
+3. Abstração – focar no essencial, ignorar detalhes irrelevantes
+4. Algoritmos – criar sequências de passos lógicos para resolver problemas
+
+COMPORTAMENTO:
+- Linguagem acessível, exemplos do cotidiano adolescente (jogos, TikTok, Roblox, música, esportes)
+- Encoraje antes de corrigir, jamais critique diretamente
+- Faça perguntas socráticas antes de revelar respostas
+- Respostas curtas (máx 3 parágrafos), em português brasileiro
+- Use emojis ocasionalmente para deixar leve
+
+FORMATOS ESPECIAIS — quando solicitado, responda SOMENTE com o JSON abaixo (sem texto extra, sem markdown):
+
+Quiz:
+{"type":"quiz","question":"...","options":["A)...","B)...","C)...","D)..."],"correct":0,"pillar":"dec","explanation":"...","xp":10}
+(pillar: dec/pat/abs/alg; correct: índice 0-3)
+
+Fluxograma:
+{"type":"flowchart","title":"...","steps":[{"shape":"inicio","text":"..."},{"shape":"processo","text":"..."},{"shape":"decisao","text":"...?"},{"shape":"processo","text":"..."},{"shape":"fim","text":"..."}]}
+
+Pseudocódigo:
+{"type":"pseudocode","title":"...","lines":[{"text":"INÍCIO","indent":0,"kw":true},{"text":"// comentário","indent":0,"comment":true},{"text":"passo ← valor","indent":1},{"text":"FIM","indent":0,"kw":true}]}
+
+Para mensagens normais: texto simples com **negrito** onde apropriado. Nunca misture JSON com texto.`;
+
+// ============================================================
+// API ANTHROPIC
+// ============================================================
+async function callAPI(userMessage, systemOverride) {
+  const msgs = [...state.chatHistory.slice(-12), { role: 'user', content: userMessage }];
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemOverride || SYSTEM_PROMPT,
+      messages: msgs
+    })
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || 'Erro na API');
+  }
+  const data = await res.json();
+  return data.content?.[0]?.text || '';
+}
+
+// ============================================================
+// NAVEGAÇÃO
+// ============================================================
+function showView(id, tabEl) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  if (tabEl) tabEl.classList.add('active');
+  if (id === 'quiz')       renderQuizPillarSelect();
+  if (id === 'teacher')    renderTeacher();
+  if (id === 'challenges') renderChallenges();
+}
+
+// ============================================================
+// XP & PROGRESSO
+// ============================================================
+function addXP(amount, pillar) {
+  state.xp += amount;
+  if (pillar && state.pillarXP[pillar] !== undefined) state.pillarXP[pillar] += amount;
+  updateXPDisplay();
+  if (pillar) logSession(pillar, amount);
+  saveState();
+}
+
+function updateXPDisplay() {
+  document.getElementById('xp-display').textContent = '⭐ ' + state.xp + ' XP';
+  renderSidebarProgress();
+}
+
+function logSession(topic, xp) {
+  const labels = {
+    dec:'🧩 Decomposição', pat:'🔁 Padrões',
+    abs:'🔍 Abstração', alg:'📋 Algoritmos',
+    quiz:'🎯 Quiz', challenge:'⚡ Desafio'
+  };
+  state.sessions.unshift({
+    topic: labels[topic] || topic,
+    xp,
+    time: new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })
+  });
+  if (state.sessions.length > 30) state.sessions.pop();
+}
+
+function renderSidebarProgress() {
+  const maxXP = Math.max(...Object.values(state.pillarXP), 50);
+  const html = Object.entries(PILLAR_MAP).map(([k,v]) => {
+    const pct = Math.min(100, Math.round((state.pillarXP[k] / maxXP) * 100));
+    return `<div class="prog-item">
+      <div class="prog-label"><span>${v.emoji} ${v.name}</span><span>${state.pillarXP[k]}xp</span></div>
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${v.color}"></div></div>
+    </div>`;
+  }).join('');
+  const el = document.getElementById('sidebar-progress');
+  if (el) el.innerHTML = '<div class="sidebar-title" style="margin-top:14px">Progresso</div>' + html;
+}
+
+// ============================================================
+// CHAT
+// ============================================================
+let chatLoading = false;
+
+function appendMsg(role, contentOrEl) {
+  const msgs = document.getElementById('chat-messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row' + (role === 'user' ? ' user' : '');
+  if (role === 'assistant') {
+    const icon = document.createElement('div');
+    icon.className = 'bot-icon'; icon.textContent = '👾';
+    row.appendChild(icon);
+  }
+  if (typeof contentOrEl === 'string') {
+    const bub = document.createElement('div');
+    bub.className = 'bubble ' + role;
+    bub.innerHTML = mdToHtml(contentOrEl);
+    row.appendChild(bub);
+  } else {
+    row.appendChild(contentOrEl);
+  }
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+  return row;
+}
+
+function mdToHtml(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    .replace(/\n/g, '<br/>');
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chat-messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row'; row.id = 'typing-row';
+  const icon = document.createElement('div'); icon.className = 'bot-icon'; icon.textContent = '👾';
+  const bub = document.createElement('div'); bub.className = 'bubble bot typing';
+  [0, 200, 400].forEach(d => {
+    const dot = document.createElement('span');
+    dot.className = 'dot'; dot.style.animationDelay = d + 'ms';
+    bub.appendChild(dot);
+  });
+  row.appendChild(icon); row.appendChild(bub);
+  msgs.appendChild(row); msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-row');
+  if (t) t.remove();
+}
+
+// Renderização especial de JSON
+function renderSpecial(data) {
+  if (data.type === 'quiz')       return renderInlineQuiz(data);
+  if (data.type === 'flowchart')  return renderFlowchart(data);
+  if (data.type === 'pseudocode') return renderPseudocode(data);
+  return null;
+}
+
+function renderInlineQuiz(data) {
+  const card = document.createElement('div'); card.className = 'quiz-card';
+  const q = document.createElement('div'); q.className = 'quiz-q';
+  q.textContent = '🎯 ' + data.question;
+  card.appendChild(q);
+  const opts = document.createElement('div'); opts.className = 'quiz-opts';
+  let answered = false;
+  data.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt'; btn.textContent = opt;
+    btn.onclick = () => {
+      if (answered) return; answered = true;
+      opts.querySelectorAll('.quiz-opt').forEach(b => b.disabled = true);
+      const correct = i === data.correct;
+      btn.classList.add(correct ? 'correct' : 'wrong');
+      if (!correct) opts.children[data.correct].classList.add('correct');
+      const fb = document.createElement('div');
+      fb.className = 'quiz-feedback ' + (correct ? 'ok' : 'fail');
+      fb.textContent = (correct ? '✅ Correto! ' : '❌ ') + data.explanation;
+      card.appendChild(fb);
+      addXP(correct ? (data.xp || 10) : 2, data.pillar);
+      state.chatHistory.push({ role: 'user', content: (correct ? 'Acertei' : 'Errei') + ' o quiz: ' + data.question });
+      saveState();
+    };
+    opts.appendChild(btn);
+  });
+  card.appendChild(opts);
+  return card;
+}
+
+function renderFlowchart(data) {
+  const card = document.createElement('div'); card.className = 'flow-card';
+  const title = document.createElement('div'); title.className = 'flow-title'; title.textContent = data.title;
+  card.appendChild(title);
+  const steps = document.createElement('div'); steps.className = 'flow-steps';
+  data.steps.forEach((step, i) => {
+    const wrap = document.createElement('div'); wrap.className = 'flow-step';
+    const box = document.createElement('div'); box.className = 'flow-box ' + step.shape; box.textContent = step.text;
+    wrap.appendChild(box);
+    if (i < data.steps.length - 1) {
+      const arr = document.createElement('div'); arr.className = 'flow-arrow'; arr.textContent = '↓';
+      wrap.appendChild(arr);
+    }
+    steps.appendChild(wrap);
+  });
+  card.appendChild(steps);
+  addXP(3, null);
+  return card;
+}
+
+function renderPseudocode(data) {
+  const card = document.createElement('div'); card.className = 'pseudo-card';
+  const title = document.createElement('div'); title.className = 'pseudo-title'; title.textContent = data.title;
+  card.appendChild(title);
+  data.lines.forEach(line => {
+    const div = document.createElement('div');
+    let cls = 'pseudo-line';
+    if (line.kw)      cls += ' kw';
+    if (line.comment) cls += ' comment';
+    if (line.indent === 1) cls += ' indent1';
+    if (line.indent === 2) cls += ' indent2';
+    div.className = cls; div.textContent = line.text;
+    card.appendChild(div);
+  });
+  addXP(3, null);
+  return card;
+}
+
+async function sendChat(userText) {
+  if (chatLoading) return;
+  if (!API_KEY) { document.getElementById('apikey-overlay').style.display = 'flex'; return; }
+  const input = document.getElementById('chat-input');
+  const text = userText || input.value.trim();
+  if (!text) return;
+  input.value = '';
+  chatLoading = true;
+  document.getElementById('send-btn').disabled = true;
+
+  appendMsg('user', text);
+  state.chatHistory.push({ role: 'user', content: text });
+  showTyping();
+
+  try {
+    const reply = await callAPI(text);
+    removeTyping();
+    let parsed = null;
+    try { parsed = JSON.parse(reply.trim()); } catch {}
+    if (parsed) {
+      const el = renderSpecial(parsed);
+      if (el) appendMsg('assistant', el);
+      else appendMsg('assistant', reply);
+    } else {
+      appendMsg('assistant', reply);
+      state.chatHistory.push({ role: 'assistant', content: reply });
+      addXP(2, null);
+    }
+  } catch(e) {
+    removeTyping();
+    appendMsg('assistant', '❌ Erro: ' + e.message + '. Verifique sua chave de API.');
+  }
+  chatLoading = false;
+  document.getElementById('send-btn').disabled = false;
+  saveState();
+}
+
+function sendTopic(name, pillar) {
+  sendChat('Quero aprender sobre ' + name + '! Me explica com exemplos do dia a dia de adolescente.');
+  addXP(1, pillar);
+}
+
+function requestQuiz() {
+  sendChat('Me dá um mini-quiz! Responda SOMENTE com o JSON do quiz, sem texto extra.');
+}
+function requestFlowchart() {
+  sendChat('Cria um fluxograma de exemplo sobre algum conceito de Pensamento Computacional. Responda SOMENTE com o JSON do fluxograma.');
+}
+function requestPseudo() {
+  sendChat('Mostra um exemplo de pseudocódigo de algoritmo simples do dia a dia. Responda SOMENTE com o JSON do pseudocódigo.');
+}
+
+// ============================================================
+// QUIZ VIEW
+// ============================================================
+let quizState = { pillar: null, questions: [], current: 0, score: 0 };
+
+function renderQuizPillarSelect() {
+  const html = `<div class="pillar-select">
+    ${Object.entries(PILLAR_MAP).map(([k,v]) => {
+      const scores = state.quizScores[k] || [];
+      const best = scores.length ? Math.max(...scores) + '/5' : 'Nunca jogado';
+      return `<div class="ps-card" style="border-color:${v.color};color:${v.color}" onclick="startQuiz('${k}')">
+        <div class="ps-emoji">${v.emoji}</div>
+        <div class="ps-name">${v.name}</div>
+        <div class="ps-score">${scores.length ? 'Melhor: ' + best : best}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+  document.getElementById('quiz-content').innerHTML = html;
+}
+
+async function startQuiz(pillar) {
+  if (!API_KEY) { document.getElementById('apikey-overlay').style.display = 'flex'; return; }
+  quizState = { pillar, questions: [], current: 0, score: 0 };
+  document.getElementById('quiz-content').innerHTML =
+    '<div style="text-align:center;padding:40px;color:var(--muted)">🤔 Gerando 5 questões com IA...</div>';
+  try {
+    const prompt = `Gere exatamente 5 questões de múltipla escolha sobre ${PILLAR_MAP[pillar].name} no Pensamento Computacional para alunos do 8º ano. Use exemplos práticos e cotidianos. Responda SOMENTE com um array JSON válido, sem texto extra, sem markdown:
+[{"question":"...","options":["A) ...","B) ...","C) ...","D) ..."],"correct":0,"explanation":"explicação curta"},...]`;
+    const reply = await callAPI(prompt, SYSTEM_PROMPT);
+    const clean = reply.replace(/```json|```/g, '').trim();
+    quizState.questions = JSON.parse(clean);
+    renderQuizQuestion();
+  } catch(e) {
+    document.getElementById('quiz-content').innerHTML =
+      `<div style="text-align:center;padding:40px;color:var(--dec)">❌ Erro ao gerar questões: ${e.message}</div>
+       <div style="text-align:center;margin-top:16px"><button onclick="renderQuizPillarSelect()" style="padding:10px 20px;border-radius:10px;border:none;background:var(--accent);color:white;cursor:pointer;font-family:Nunito,sans-serif;font-weight:700">← Voltar</button></div>`;
+  }
+}
+
+function renderQuizQuestion() {
+  const { questions, current } = quizState;
+  if (current >= questions.length) { renderQuizResult(); return; }
+  const q = questions[current];
+  const pct = (current / questions.length) * 100;
+  document.getElementById('quiz-content').innerHTML = `
+    <div class="quiz-active">
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" style="width:${pct}%"></div></div>
+      <div class="quiz-number">Questão ${current + 1} de ${questions.length} — ${PILLAR_MAP[quizState.pillar].emoji} ${PILLAR_MAP[quizState.pillar].name}</div>
+      <div class="quiz-question">${q.question}</div>
+      <div class="quiz-options" id="quiz-opts">
+        ${q.options.map((o,i) => `<button class="quiz-option" onclick="answerQuiz(${i})">${o}</button>`).join('')}
+      </div>
+      <div id="quiz-next" style="display:none;margin-top:14px">
+        <div id="quiz-fb" style="font-size:13px;padding:10px 14px;border-radius:10px;margin-bottom:10px;line-height:1.5"></div>
+        <button onclick="nextQuestion()" style="padding:10px 22px;border-radius:12px;border:none;background:linear-gradient(135deg,var(--accent),var(--pat));color:white;font-family:Nunito,sans-serif;font-size:13px;font-weight:800;cursor:pointer">
+          ${current < questions.length - 1 ? 'Próxima →' : 'Ver resultado'}
+        </button>
+      </div>
+    </div>`;
+}
+
+function answerQuiz(idx) {
+  const q = quizState.questions[quizState.current];
+  const opts = document.querySelectorAll('.quiz-option');
+  opts.forEach(o => o.disabled = true);
+  const correct = idx === q.correct;
+  opts[idx].classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) opts[q.correct].classList.add('correct');
+  if (correct) quizState.score++;
+  const fb = document.getElementById('quiz-fb');
+  fb.textContent = correct ? '✅ Correto! ' + q.explanation : '❌ ' + q.explanation;
+  fb.style.background = correct ? 'rgba(78,205,196,.15)' : 'rgba(255,107,107,.1)';
+  fb.style.color = correct ? 'var(--pat)' : 'var(--dec)';
+  document.getElementById('quiz-next').style.display = 'block';
+}
+
+function nextQuestion() {
+  quizState.current++;
+  renderQuizQuestion();
+}
+
+function renderQuizResult() {
+  const { score, questions, pillar } = quizState;
+  const total = questions.length;
+  const pct = Math.round((score / total) * 100);
+  const stars = score >= 5 ? '⭐⭐⭐' : score >= 3 ? '⭐⭐' : '⭐';
+  const xpEarned = score * 15;
+  if (!state.quizScores[pillar]) state.quizScores[pillar] = [];
+  state.quizScores[pillar].push(score);
+  addXP(xpEarned, pillar);
+  logSession('quiz', xpEarned);
+  const msg = pct >= 80 ? 'Excelente! Você domina este pilar! 🚀'
+             : pct >= 60 ? 'Bom trabalho! Continue praticando! 💪'
+             :              'Continue tentando! A prática leva à perfeição! 🌱';
+  document.getElementById('quiz-content').innerHTML = `
+    <div class="quiz-result">
+      <div class="result-stars">${stars}</div>
+      <div class="quiz-score-big">${score}/${total}</div>
+      <div class="quiz-score-label">${pct}% de acerto · ${PILLAR_MAP[pillar].emoji} ${PILLAR_MAP[pillar].name}</div>
+      <p style="margin-bottom:16px;font-size:14px">${msg}</p>
+      <p style="font-size:13px;color:var(--accent);font-weight:800;margin-bottom:24px">+${xpEarned} XP ganhos!</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="restart-btn" onclick="startQuiz('${pillar}')">🔁 Repetir</button>
+        <button class="restart-btn" style="background:var(--surface2);border:1.5px solid var(--border)" onclick="renderQuizPillarSelect()">← Escolher pilar</button>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// DESAFIOS
+// ============================================================
+const CHALLENGES = [
+  { id:'ch1', title:'Rotina Matinal',     desc:'Escreva um algoritmo em linguagem natural para sua rotina de manhã, do despertar até sair de casa.',                        pillar:'alg', badge:'Iniciante', badgeColor:'var(--alg)', xp:20 },
+  { id:'ch2', title:'Busca no Cardápio',  desc:'Você tem uma lista de 10 pratos com preços. Crie um algoritmo para encontrar o prato mais barato.',                         pillar:'alg', badge:'Iniciante', badgeColor:'var(--alg)', xp:20 },
+  { id:'ch3', title:'Padrão do Tabuleiro',desc:'Identifique e descreva o padrão de cores de um tabuleiro de xadrez 8×8 usando lógica.',                                    pillar:'pat', badge:'Médio',     badgeColor:'var(--pat)', xp:30 },
+  { id:'ch4', title:'Decompor um App',    desc:'Escolha um app que você usa (ex: Instagram) e decomponha em pelo menos 5 funcionalidades menores.',                         pillar:'dec', badge:'Médio',     badgeColor:'var(--dec)', xp:30 },
+  { id:'ch5', title:'Abstrair um Mapa',   desc:'O que é essencial e o que pode ser removido de um mapa de metrô? Justifique sua escolha.',                                  pillar:'abs', badge:'Avançado',  badgeColor:'var(--abs)', xp:40 },
+  { id:'ch6', title:'Jogo Pedra-Papel',   desc:'Crie o algoritmo completo de uma rodada do Pedra, Papel, Tesoura entre dois jogadores, incluindo verificação do vencedor.', pillar:'alg', badge:'Avançado',  badgeColor:'var(--alg)', xp:40 },
+];
+
+function renderChallenges() {
+  const html = CHALLENGES.map(ch => {
+    const done = state.completedChallenges.includes(ch.id);
+    return `<div class="ch-card" onclick="openChallenge('${ch.id}')">
+      <div class="ch-badge" style="background:${ch.badgeColor}22;color:${ch.badgeColor};border:1px solid ${ch.badgeColor}">${ch.badge}</div>
+      <div class="ch-title">${ch.title}</div>
+      <div class="ch-desc">${ch.desc}</div>
+      <div class="ch-footer">
+        <div class="ch-xp" style="color:${ch.badgeColor}">+${ch.xp} XP</div>
+        <div class="ch-done">${done ? '✅' : '⬜'}</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('challenges-grid').innerHTML = html;
+}
+
+function openChallenge(id) {
+  const ch = CHALLENGES.find(c => c.id === id);
+  const done = state.completedChallenges.includes(id);
+  document.getElementById('modal-content').innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="font-size:30px">${PILLAR_MAP[ch.pillar].emoji}</div>
+      <div>
+        <div class="modal-title">${ch.title}</div>
+        <div style="font-size:11px;color:var(--muted)">${ch.badge} · +${ch.xp} XP · ${PILLAR_MAP[ch.pillar].name}</div>
+      </div>
+    </div>
+    <div class="modal-desc">${ch.desc}</div>
+    <div style="margin-bottom:16px">
+      <div class="modal-section-title">📋 Escreva seu pseudocódigo / algoritmo em linguagem natural</div>
+      <textarea class="pseudo-editor" id="ch-answer" placeholder="INÍCIO&#10;  Passo 1: ...&#10;  Passo 2: ...&#10;  SE (condição) ENTÃO&#10;    Passo 3a&#10;  SENÃO&#10;    Passo 3b&#10;FIM"></textarea>
+    </div>
+    <div id="ch-ai-feedback"></div>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" onclick="closeModal()">Cancelar</button>
+      <button class="modal-btn primary" id="submit-ch-btn" onclick="submitChallenge('${id}')">🤖 Avaliar com IA</button>
+    </div>
+    ${done ? '<div style="text-align:center;margin-top:10px;font-size:12px;color:var(--pat)">✅ Já concluído! Pode tentar novamente.</div>' : ''}`;
+  document.getElementById('challenge-modal').style.display = 'flex';
+}
+
+async function submitChallenge(id) {
+  if (!API_KEY) { closeModal(); document.getElementById('apikey-overlay').style.display = 'flex'; return; }
+  const ch = CHALLENGES.find(c => c.id === id);
+  const answer = document.getElementById('ch-answer').value.trim();
+  if (!answer || answer.length < 15) { alert('Escreva seu algoritmo antes de enviar! (mínimo 15 caracteres)'); return; }
+  const btn = document.getElementById('submit-ch-btn');
+  btn.disabled = true; btn.textContent = '⏳ Avaliando...';
+  const fb = document.getElementById('ch-ai-feedback');
+  fb.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:10px 0">🤔 Analisando sua solução com IA...</div>';
+  try {
+    const prompt = `Você é o PIXEL avaliando o desafio "${ch.title}" de Pensamento Computacional (${PILLAR_MAP[ch.pillar].name}) de um aluno do 8º ano.
+Desafio proposto: ${ch.desc}
+Resposta do aluno:
+${answer}
+Avalie em 3 parágrafos curtos: 1) Elogie o que está bom, 2) Sugira uma melhoria específica, 3) Dê uma dica final encorajadora. Português brasileiro, tom amigável de tutor.`;
+    const reply = await callAPI(prompt, 'Você é o PIXEL, tutor de Pensamento Computacional. Responda em português brasileiro de forma encorajadora e construtiva.');
+    fb.innerHTML = `<div class="ai-feedback"><strong>🤖 Feedback do PIXEL:</strong><br/><br/>${reply.replace(/\n/g,'<br/>')}</div>`;
+    if (!state.completedChallenges.includes(id)) {
+      state.completedChallenges.push(id);
+      addXP(ch.xp, ch.pillar);
+      logSession('challenge', ch.xp);
+    }
+    renderChallenges();
+    saveState();
+  } catch(e) {
+    fb.innerHTML = `<div style="color:var(--dec);font-size:13px;padding:10px">❌ Erro ao gerar feedback: ${e.message}</div>`;
+  }
+  btn.disabled = false; btn.textContent = '🤖 Avaliar com IA';
+}
+
+function closeModal() {
+  document.getElementById('challenge-modal').style.display = 'none';
+}
+
+// ============================================================
+// PAINEL DO PROFESSOR
+// ============================================================
+function renderTeacher() {
+  const completedCount = state.completedChallenges.length;
+  const allQuizzes = Object.values(state.quizScores).flat();
+  const avgScore = allQuizzes.length
+    ? (allQuizzes.reduce((a,b)=>a+b,0)/allQuizzes.length).toFixed(1)
+    : '—';
+  const maxPillarXP = Math.max(...Object.values(state.pillarXP), 1);
+  const topPillar = Object.entries(state.pillarXP).sort((a,b)=>b[1]-a[1])[0];
+
+  const pillarBars = Object.entries(PILLAR_MAP).map(([k,v]) => {
+    const xp = state.pillarXP[k] || 0;
+    const pct = Math.round((xp / maxPillarXP) * 100);
+    const quizzes = state.quizScores[k] || [];
+    const best = quizzes.length ? Math.max(...quizzes) + '/5' : '—';
+    return `<div class="pb-item">
+      <div class="pb-emoji">${v.emoji}</div>
+      <div class="pb-name">${v.name}</div>
+      <div class="pb-bar-wrap"><div class="pb-bar" style="width:${pct}%;background:${v.color}"></div></div>
+      <div class="pb-pct">${xp}xp</div>
+      <div style="font-size:10px;color:var(--muted);width:40px;text-align:right">Quiz: ${best}</div>
+    </div>`;
+  }).join('');
+
+  const sessionsList = state.sessions.slice(0,12).map(s => {
+    const pillar = Object.values(PILLAR_MAP).find(p => s.topic.includes(p.name));
+    const color = pillar ? pillar.color : 'var(--accent)';
+    return `<div class="session-item">
+      <div class="session-dot" style="background:${color}"></div>
+      <div class="session-info">
+        <div class="session-topic">${s.topic}</div>
+        <div class="session-time">${s.time}</div>
+      </div>
+      <div class="session-xp">+${s.xp}xp</div>
+    </div>`;
+  }).join('') || '<div style="color:var(--muted);font-size:13px;padding:8px 0">Nenhuma atividade ainda.</div>';
+
+  const quizHistory = Object.entries(state.quizScores)
+    .filter(([,scores]) => scores.length > 0)
+    .map(([k,scores]) =>
+      `<div style="margin-bottom:8px;font-size:12px">
+        <strong>${PILLAR_MAP[k].emoji} ${PILLAR_MAP[k].name}:</strong>
+        <span style="color:var(--muted);margin-left:6px">${scores.map(s=>s+'/5').join(' · ')}</span>
+       </div>`).join('');
+
+  const weakPillar = Object.entries(state.pillarXP).sort((a,b)=>a[1]-b[1])[0];
+  const suggestion = state.xp === 0
+    ? 'O aluno ainda não iniciou atividades.'
+    : `Pilar mais forte: ${PILLAR_MAP[topPillar[0]].emoji} ${PILLAR_MAP[topPillar[0]].name}. Pilar com menor engajamento: ${PILLAR_MAP[weakPillar[0]].emoji} ${PILLAR_MAP[weakPillar[0]].name} — recomenda-se propor mais atividades sobre este tema.`;
+
+  document.getElementById('teacher-inner').innerHTML = `
+    <div class="teacher-header">
+      <h2>📊 Painel do Professor</h2>
+      <button class="reset-btn" onclick="if(confirm('Resetar todo o progresso do aluno?')){resetProgress()}">🗑 Reset</button>
+    </div>
+    <div style="background:rgba(124,111,255,.1);border:1px solid rgba(124,111,255,.3);border-radius:12px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:var(--text)">
+      💡 <strong>Diagnóstico:</strong> ${suggestion}
+    </div>
+    <div class="teacher-grid">
+      <div class="stat-card">
+        <h3>Total XP</h3>
+        <div class="stat-value" style="color:var(--accent)">${state.xp}</div>
+        <div class="stat-sub">pontos acumulados</div>
+      </div>
+      <div class="stat-card">
+        <h3>Interações</h3>
+        <div class="stat-value" style="color:var(--pat)">${state.sessions.length}</div>
+        <div class="stat-sub">atividades registradas</div>
+      </div>
+      <div class="stat-card">
+        <h3>Desafios</h3>
+        <div class="stat-value" style="color:var(--alg)">${completedCount}/${CHALLENGES.length}</div>
+        <div class="stat-sub">concluídos</div>
+      </div>
+      <div class="stat-card">
+        <h3>Média Quiz</h3>
+        <div class="stat-value" style="color:var(--abs)">${avgScore}</div>
+        <div class="stat-sub">acertos por quiz</div>
+      </div>
+    </div>
+    <div class="pillar-breakdown">
+      <h3>Engajamento & Desempenho por Pilar</h3>
+      ${pillarBars}
+    </div>
+    ${quizHistory ? `<div class="pillar-breakdown"><h3>Histórico de Quizzes</h3>${quizHistory}</div>` : ''}
+    <div class="sessions-list">
+      <h3>Últimas Atividades</h3>
+      ${sessionsList}
+    </div>`;
+}
+
+function resetProgress() {
+  state = defaultState();
+  saveState();
+  updateXPDisplay();
+  renderTeacher();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  loadState();
+  updateXPDisplay();
+  document.getElementById('student-label').textContent = state.studentName;
+
+  // Mensagem de boas-vindas
+  const welcome = state.xp === 0
+    ? 'Ei, olá! 👾 Eu sou o **PIXEL**, seu tutor de Pensamento Computacional!\n\nAqui você vai aprender os 4 pilares do PC: **Decomposição**, **Padrões**, **Abstração** e **Algoritmos** — com quizzes, desafios e exemplos do seu dia a dia!\n\nUse os botões da barra lateral ou me faça uma pergunta. Por onde quer começar? 🚀'
+    : `Bem-vindo de volta! 👾 Você já tem **${state.xp} XP** — continue de onde parou!\n\nO que vamos explorar hoje?`;
+
+  appendMsg('assistant', welcome);
+  renderSidebarProgress();
+}
+
+// Inicia automaticamente se já tiver chave
+if (API_KEY) {
+  init();
+}
+</script>
+</body>
+</html>
