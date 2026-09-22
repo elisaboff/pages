@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Neurônio artificial: vou à formatura?</title>
+<style>
+  :root{
+    --bg:#f4f3ef;
+    --card:#ffffff;
+    --border:#e2e0d8;
+    --text:#2c2c2a;
+    --text-muted:#6b6a63;
+    --accent:#3c3489;
+    --accent-light:#eeedfe;
+    --positive:#0f6e56;
+    --positive-light:#e1f5ee;
+    --negative:#993c1d;
+    --negative-light:#faece7;
+    --amber:#854f0b;
+    --amber-light:#faeeda;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    padding:32px 16px 64px;
+    line-height:1.55;
+  }
+  .wrap{max-width:760px;margin:0 auto;}
+  h1{font-size:24px;font-weight:600;margin:0 0 6px;}
+  .subtitle{color:var(--text-muted);font-size:15px;margin:0 0 28px;max-width:600px;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:22px 24px;
+    margin-bottom:20px;
+  }
+  .card h2{font-size:16px;font-weight:600;margin:0 0 14px;}
+  .input-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:12px 0;
+    border-bottom:1px solid var(--border);
+  }
+  .input-row:last-child{border-bottom:none;}
+  .input-text{flex:1;}
+  .input-text .label{font-size:14.5px;font-weight:500;}
+  .input-text .weight-tag{
+    display:inline-block;
+    font-size:12px;
+    font-weight:600;
+    padding:2px 8px;
+    border-radius:20px;
+    margin-top:5px;
+  }
+  .weight-pos{background:var(--positive-light);color:var(--positive);}
+  .weight-neg{background:var(--negative-light);color:var(--negative);}
+  /* toggle switch */
+  .switch{position:relative;width:46px;height:26px;flex-shrink:0;}
+  .switch input{opacity:0;width:0;height:0;}
+  .slider-track{
+    position:absolute;cursor:pointer;inset:0;
+    background:#cfcdc3;border-radius:26px;transition:.2s;
+  }
+  .slider-track:before{
+    content:"";position:absolute;height:20px;width:20px;left:3px;bottom:3px;
+    background:white;border-radius:50%;transition:.2s;
+  }
+  input:checked + .slider-track{background:var(--accent);}
+  input:checked + .slider-track:before{transform:translateX(20px);}
+
+  .bias-row{display:flex;align-items:center;gap:14px;}
+  .bias-row input[type=range]{flex:1;accent-color:var(--amber);}
+  .bias-value{
+    min-width:44px;text-align:center;font-weight:600;font-size:14px;
+    background:var(--amber-light);color:var(--amber);border-radius:8px;padding:4px 6px;
+  }
+
+  .seg-control{display:flex;gap:8px;}
+  .seg-btn{
+    flex:1;padding:10px 12px;border-radius:10px;border:1px solid var(--border);
+    background:var(--card);cursor:pointer;font-size:14px;font-weight:500;color:var(--text);
+    transition:.15s;text-align:center;
+  }
+  .seg-btn.active{
+    background:var(--accent);border-color:var(--accent);color:white;
+  }
+
+  .result-card{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:24px;text-align:center;
+  }
+  .sum-line{font-size:13px;color:var(--text-muted);margin-bottom:4px;}
+  .sum-value{font-size:14px;font-weight:600;margin-bottom:18px;}
+  .decision-label{font-size:22px;font-weight:600;margin-bottom:6px;}
+  .decision-explain{font-size:13.5px;color:var(--text-muted);margin-bottom:18px;}
+  .prob-bar-outer{
+    width:100%;height:22px;background:#eceae2;border-radius:11px;overflow:hidden;margin-bottom:6px;
+  }
+  .prob-bar-inner{
+    height:100%;background:var(--accent);border-radius:11px;transition:width .25s ease;
+    display:flex;align-items:center;justify-content:flex-end;color:white;font-size:11px;font-weight:600;padding-right:8px;
+  }
+  .curve-wrap{margin-top:20px;}
+  .curve-caption{font-size:12px;color:var(--text-muted);text-align:center;margin-top:6px;}
+  svg{display:block;width:100%;height:auto;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Neurônio artificial: vou à formatura do meu amigo?</h1>
+  <p class="subtitle">Ajuste as entradas e o seu humor do dia, depois troque a função de ativação entre <strong>degrau</strong> e <strong>sigmoide</strong> para ver a decisão deixar de ser binária (vou / não vou) e virar uma probabilidade.</p>
+
+  <div class="card">
+    <h2>Entradas</h2>
+    <div class="input-row">
+      <div class="input-text">
+        <div class="label">É a festa de um amigo bem próximo</div>
+        <span class="weight-tag weight-pos" id="w-proximo-tag">peso +5</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="in-proximo" checked>
+        <span class="slider-track"></span>
+      </label>
+    </div>
+    <div class="input-row">
+      <div class="input-text">
+        <div class="label">Confirmou presença uma pessoa que tenho interesse em encontrar</div>
+        <span class="weight-tag weight-pos" id="w-interesse-tag">peso +3</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="in-interesse">
+        <span class="slider-track"></span>
+      </label>
+    </div>
+    <div class="input-row">
+      <div class="input-text">
+        <div class="label">Tenho um relatório para entregar no dia seguinte</div>
+        <span class="weight-tag weight-neg" id="w-relatorio-tag">peso -4</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="in-relatorio" checked>
+        <span class="slider-track"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Bias: meu humor no dia</h2>
+    <div class="bias-row">
+      <span style="font-size:13px;color:var(--text-muted);">preguiçoso</span>
+      <input type="range" id="bias" min="-5" max="5" step="1" value="-1">
+      <span style="font-size:13px;color:var(--text-muted);">animado</span>
+      <span class="bias-value" id="bias-value">-1</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Função de ativação</h2>
+    <div class="seg-control">
+      <button class="seg-btn active" id="btn-degrau" onclick="setActivation('degrau')">Degrau (binário)</button>
+      <button class="seg-btn" id="btn-sigmoide" onclick="setActivation('sigmoide')">Sigmoide (probabilidade)</button>
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="sum-line">combinação linear: wᵀx + b</div>
+    <div class="sum-value" id="sum-display">soma = 3</div>
+
+    <div id="degrau-result">
+      <div class="decision-label" id="decision-label">VOU! 🎉</div>
+      <div class="decision-explain">saída binária: 0 (não vou) ou 1 (vou) — não existe "meio termo"</div>
+    </div>
+
+    <div id="sigmoide-result" style="display:none;">
+      <div class="decision-label" id="prob-label">88% de chance de ir</div>
+      <div class="prob-bar-outer">
+        <div class="prob-bar-inner" id="prob-bar" style="width:88%;">88%</div>
+      </div>
+      <div class="decision-explain">saída contínua entre 0 e 1 — pode ser lida como uma probabilidade</div>
+    </div>
+
+    <div class="curve-wrap">
+      <svg viewBox="0 0 400 150" id="curve-svg">
+        <line x1="20" y1="20" x2="20" y2="130" stroke="#cfcdc3" stroke-width="1"/>
+        <line x1="20" y1="130" x2="380" y2="130" stroke="#cfcdc3" stroke-width="1"/>
+        <text x="14" y="18" font-size="9" fill="#6b6a63" text-anchor="end">1</text>
+        <text x="14" y="133" font-size="9" fill="#6b6a63" text-anchor="end">0</text>
+        <path id="curve-degrau" d="" fill="none" stroke="#3c3489" stroke-width="2"/>
+        <path id="curve-sigmoide" d="" fill="none" stroke="#3c3489" stroke-width="2" style="display:none;"/>
+        <circle id="curve-marker" cx="0" cy="0" r="5" fill="#d85a30" stroke="white" stroke-width="1.5"/>
+      </svg>
+      <div class="curve-caption">a bolinha laranja marca onde a soma atual (wᵀx + b) cai na curva da função de ativação</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const weights = { proximo: 5, interesse: 3, relatorio: -4 };
+let activation = 'degrau';
+
+function sigmoid(x){ return 1 / (1 + Math.exp(-x)); }
+
+// mapeia x (-13..13) e y (0..1) para coordenadas do SVG (400x150, área útil x:20-380, y:20-130)
+function mapX(x){ return 20 + ((x + 13) / 26) * 360; }
+function mapY(y){ return 130 - y * 110; }
+
+function buildSigmoidPath(){
+  let d = '';
+  for (let x = -13; x <= 13; x += 0.5){
+    const px = mapX(x), py = mapY(sigmoid(x));
+    d += (x === -13 ? 'M' : 'L') + px.toFixed(1) + ' ' + py.toFixed(1) + ' ';
+  }
+  return d;
+}
+
+function buildDegrauPath(){
+  const yLow = mapY(0), yHigh = mapY(1), xZero = mapX(0);
+  return `M${mapX(-13)} ${yLow} L${xZero} ${yLow} L${xZero} ${yHigh} L${mapX(13)} ${yHigh}`;
+}
+
+document.getElementById('curve-sigmoide').setAttribute('d', buildSigmoidPath());
+document.getElementById('curve-degrau').setAttribute('d', buildDegrauPath());
+
+function setActivation(fn){
+  activation = fn;
+  document.getElementById('btn-degrau').classList.toggle('active', fn === 'degrau');
+  document.getElementById('btn-sigmoide').classList.toggle('active', fn === 'sigmoide');
+  document.getElementById('curve-degrau').style.display = fn === 'degrau' ? 'block' : 'none';
+  document.getElementById('curve-sigmoide').style.display = fn === 'sigmoide' ? 'block' : 'none';
+  document.getElementById('degrau-result').style.display = fn === 'degrau' ? 'block' : 'none';
+  document.getElementById('sigmoide-result').style.display = fn === 'sigmoide' ? 'block' : 'none';
+  update();
+}
+
+function update(){
+  const x1 = document.getElementById('in-proximo').checked ? 1 : 0;
+  const x2 = document.getElementById('in-interesse').checked ? 1 : 0;
+  const x3 = document.getElementById('in-relatorio').checked ? 1 : 0;
+  const bias = parseInt(document.getElementById('bias').value, 10);
+
+  document.getElementById('bias-value').textContent = bias;
+
+  const soma = x1 * weights.proximo + x2 * weights.interesse + x3 * weights.relatorio + bias;
+  document.getElementById('sum-display').textContent = `soma = ${soma}`;
+
+  if (activation === 'degrau'){
+    const saida = soma > 0 ? 1 : 0;
+    document.getElementById('decision-label').textContent = saida === 1 ? 'VOU! 🎉' : 'NÃO VOU';
+    document.getElementById('decision-label').style.color = saida === 1 ? 'var(--positive)' : 'var(--negative)';
+  } else {
+    const p = sigmoid(soma);
+    const pct = Math.round(p * 100);
+    document.getElementById('prob-label').textContent = `${pct}% de chance de ir`;
+    document.getElementById('prob-bar').style.width = pct + '%';
+    document.getElementById('prob-bar').textContent = pct + '%';
+  }
+
+  const clampedX = Math.max(-13, Math.min(13, soma));
+  const y = activation === 'degrau' ? (soma > 0 ? 1 : 0) : sigmoid(soma);
+  document.getElementById('curve-marker').setAttribute('cx', mapX(clampedX));
+  document.getElementById('curve-marker').setAttribute('cy', mapY(y));
+}
+
+['in-proximo','in-interesse','in-relatorio','bias'].forEach(id => {
+  document.getElementById(id).addEventListener('input', update);
+});
+
+update();
+</script>
+</body>
+</html>
