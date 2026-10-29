@@ -1,0 +1,730 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Tutorial Photoshop para Projeto Temático II</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500;62..125,700;62..125,800&family=Public+Sans:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: folha de impressão — marcas de corte no cabeçalho, barra CMYK como assinatura, índice lateral + módulos em coluna de leitura */
+:root{
+  --paper:#ECF0F2; --card:#FFFFFF; --ink:#13181C; --muted:#56636D; --line:#CBD4DA;
+  --cyan:#0089BD; --cyan-soft:#DCEFF7; --magenta:#C8006A; --mag-soft:#FBE3EF;
+  --yellow:#F0BE00; --yel-soft:#FFF5CC; --k:#13181C;
+  --f-display:"Archivo","Arial Narrow",Arial,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0F1316; --card:#171D21; --ink:#E5EBEE; --muted:#93A1AB; --line:#2A333A;
+  --cyan:#3DB7E6; --cyan-soft:#10303E; --magenta:#FF5AA5; --mag-soft:#3A1428;
+  --yellow:#F5CB2E; --yel-soft:#352C08; --k:#E5EBEE; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0F1316; --card:#171D21; --ink:#E5EBEE; --muted:#93A1AB; --line:#2A333A;
+  --cyan:#3DB7E6; --cyan-soft:#10303E; --magenta:#FF5AA5; --mag-soft:#3A1428;
+  --yellow:#F5CB2E; --yel-soft:#352C08; --k:#E5EBEE; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+a{color:var(--cyan)}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+
+/* ---------- cabeçalho ---------- */
+.sheet{max-width:1180px;margin:0 auto}
+.hero{position:relative;margin:28px 0 20px;padding:40px 36px 30px;background:var(--card);border:1px solid var(--line)}
+.hero::before,.hero::after,.hero .c1,.hero .c2{content:"";position:absolute;width:22px;height:22px;border-color:var(--ink)}
+.hero::before{top:-12px;left:-12px;border-right:1px solid;border-bottom:1px solid}
+.hero::after{top:-12px;right:-12px;border-left:1px solid;border-bottom:1px solid}
+.hero .c1{bottom:-12px;left:-12px;border-right:1px solid;border-top:1px solid}
+.hero .c2{bottom:-12px;right:-12px;border-left:1px solid;border-top:1px solid}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-display);font-stretch:125%;font-weight:800;font-size:clamp(34px,6vw,64px);line-height:1;margin:10px 0 14px;text-wrap:balance;letter-spacing:-.01em}
+h1 .x{color:var(--magenta)}
+.lede{max-width:62ch;font-size:18px;color:var(--muted);margin:0 0 22px}
+.specs{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums}
+.specs span{white-space:nowrap}
+.specs b{color:var(--ink);font-weight:600}
+.cmyk{display:flex;gap:0;margin-top:22px;height:14px;max-width:340px}
+.cmyk i{flex:1}
+.cmyk i:nth-child(1){background:#00A3DA}.cmyk i:nth-child(2){background:#D6007D}.cmyk i:nth-child(3){background:#FFE600}.cmyk i:nth-child(4){background:#111}
+.cmyk i:nth-child(5){background:#00A3DA;opacity:.5}.cmyk i:nth-child(6){background:#D6007D;opacity:.5}.cmyk i:nth-child(7){background:#FFE600;opacity:.5}.cmyk i:nth-child(8){background:#111;opacity:.5}
+.cmyk i:nth-child(9){background:#E8E8E8}
+
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;margin:0 0 24px}
+.seg{display:inline-flex;border:1px solid var(--line);background:var(--card)}
+.seg button{font:600 13px var(--f-body);border:0;background:transparent;color:var(--muted);padding:7px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.tlabel{font-size:13px;color:var(--muted);margin-right:6px}
+.progress-wrap{flex:1;min-width:200px;display:flex;align-items:center;gap:10px;font:600 13px var(--f-mono)}
+.bar{flex:1;height:8px;background:var(--line);position:relative}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--cyan);width:0;transition:width .3s}
+
+/* ---------- grade ---------- */
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:40px;align-items:start}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - 32px);overflow:auto;font-size:14px}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+nav.toc a{display:grid;grid-template-columns:28px 1fr 14px;gap:6px;align-items:baseline;padding:6px 8px;color:var(--ink);text-decoration:none;border-left:3px solid transparent}
+nav.toc a:hover{background:var(--card)}
+nav.toc a.active{border-left-color:var(--magenta);background:var(--card)}
+nav.toc .n{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+nav.toc .ok{width:10px;height:10px;border:1px solid var(--line);align-self:center}
+nav.toc a.done .ok{background:var(--cyan);border-color:var(--cyan)}
+nav.toc .grp{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:14px 8px 4px}
+
+main{min-width:0}
+section.mod{background:var(--card);border:1px solid var(--line);padding:30px 34px 26px;margin-bottom:22px;scroll-margin-top:16px}
+.modhead{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+.modnum{font:600 13px var(--f-mono);color:var(--magenta);letter-spacing:.06em}
+h2{font-family:var(--f-display);font-stretch:112%;font-weight:800;font-size:clamp(24px,3.4vw,32px);line-height:1.1;margin:4px 0 6px;text-wrap:balance}
+h3{font-family:var(--f-display);font-stretch:100%;font-weight:700;font-size:19px;margin:26px 0 8px}
+.goal{color:var(--muted);margin:0 0 6px;max-width:68ch}
+.tag{display:inline-block;font:600 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--line);color:var(--muted);margin-right:6px;vertical-align:middle}
+.tag.adv{border-color:var(--magenta);color:var(--magenta)}
+.tag.ext{border-color:var(--cyan);color:var(--cyan)}
+p,li{max-width:70ch}
+
+ol.steps{counter-reset:s;list-style:none;padding:0;margin:12px 0;display:grid;gap:10px}
+ol.steps>li{counter-increment:s;display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px}
+ol.steps>li::before{content:counter(s);font:700 14px var(--f-mono);width:28px;height:28px;display:grid;place-items:center;border:1.5px solid var(--ink);margin-top:1px}
+ul.plain{padding-left:20px;margin:8px 0}
+ul.plain li{margin:4px 0}
+
+.m{font:600 13px var(--f-mono);background:var(--cyan-soft);color:var(--ink);padding:1px 6px;white-space:normal;border-bottom:1px solid var(--cyan)}
+kbd{font:600 12px var(--f-mono);padding:1px 6px;border:1px solid var(--line);border-bottom-width:2px;background:var(--paper);color:var(--ink);white-space:nowrap}
+
+.note{padding:12px 16px;margin:14px 0;border-left:4px solid;font-size:15px}
+.note b:first-child{display:block;font:700 12px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.tip{background:var(--yel-soft);border-color:var(--yellow)}
+.warn{background:var(--mag-soft);border-color:var(--magenta)}
+.why{background:var(--cyan-soft);border-color:var(--cyan)}
+
+.donebox{display:flex;align-items:center;gap:10px;margin-top:22px;padding-top:16px;border-top:1px dashed var(--line);font-weight:600;font-size:15px;cursor:pointer}
+.donebox input{width:20px;height:20px;accent-color:var(--cyan)}
+
+table{border-collapse:collapse;width:100%;font-size:14px}
+.tw{overflow-x:auto;margin:12px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+td:first-child{white-space:nowrap}
+
+/* calculadoras */
+.calc{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;padding:16px;border:1px solid var(--line);background:var(--paper);margin:14px 0}
+.calc label{display:grid;gap:4px;font-size:13px;color:var(--muted);font-weight:600}
+.calc input,.calc select{font:600 15px var(--f-mono);padding:7px 9px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%;font-variant-numeric:tabular-nums}
+.out{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px 28px;padding-top:10px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.out div{display:grid}
+.out small{font-size:12px;color:var(--muted)}
+.out strong{font:700 20px var(--f-mono)}
+.verdict{grid-column:1/-1;font-size:14px;font-weight:600}
+.verdict.ok{color:var(--cyan)} .verdict.bad{color:var(--magenta)}
+
+.search{font:15px var(--f-body);padding:9px 12px;border:1px solid var(--line);background:var(--card);color:var(--ink);width:100%;max-width:420px}
+.checklist{list-style:none;padding:0;display:grid;gap:8px}
+.checklist label{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
+.checklist input{margin-top:5px;width:18px;height:18px;accent-color:var(--cyan);flex:none}
+.modes{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:12px 0}
+.modes div{border:1px solid var(--line);padding:10px 12px;font-size:14px}
+.modes b{display:block;font-family:var(--f-display);font-size:16px}
+footer{max-width:1180px;margin:30px auto 0;font-size:13px;color:var(--muted)}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:minmax(0,1fr);gap:16px}
+  nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);max-height:none;overflow-x:auto;padding:8px 0;border-bottom:1px solid var(--line)}
+  nav.toc ol{display:flex;gap:4px}
+  nav.toc .grp{display:none}
+  nav.toc a{grid-template-columns:auto auto;white-space:nowrap;border-left:0;border-bottom:3px solid transparent;padding:6px 10px}
+  nav.toc a .t{display:none}
+  nav.toc a.active{border-bottom-color:var(--magenta)}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+  section.mod{padding:22px 18px}
+  .hero{padding:28px 20px 22px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="sheet">
+  <header class="hero">
+    <span class="c1"></span><span class="c2"></span>
+    <div class="eyebrow">Projeto Temático: Imagem Digital · Profª. Elisa Boff · UCS · Photoshop 27.2</div>
+    <h1>Tutorial Photoshop para Fotomontagem</h1>
+    <p class="lede">Passo a passo para montar o pôster no Photoshop do laboratório: do documento em branco ao arquivo que vai para a gráfica. Marque cada módulo como concluído para acompanhar seu progresso.</p>
+    <div class="specs">
+      <span>Formato <b>60 × 90 cm vertical</b></span>
+      <span>300 ppi <b>7087 × 10630 px</b></span>
+      <span>mín. 150 ppi <b>3543 × 5315 px</b></span>
+      <span>Impressão <b>CMYK</b></span>
+      <span>Digital <b>sRGB</b></span>
+    </div>
+    <div class="cmyk" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  </header>
+
+  <div class="toolbar">
+    <div><span class="tlabel">Menus em</span>
+      <span class="seg" role="group" aria-label="Idioma dos menus">
+        <button id="lang-pt" aria-pressed="true">Português</button><button id="lang-en" aria-pressed="false">English</button>
+      </span></div>
+    <div><span class="tlabel">Teclado</span>
+      <span class="seg" role="group" aria-label="Sistema">
+        <button id="os-win" aria-pressed="true">Windows</button><button id="os-mac" aria-pressed="false">Mac</button>
+      </span></div>
+    <div class="progress-wrap"><span id="pct">0%</span><div class="bar"><i id="barfill"></i></div><span id="cnt">0/14</span></div>
+  </div>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Módulos"><ol id="toc"></ol></nav>
+    <main>
+
+<!-- 00 -->
+<section class="mod" id="planejar" data-group="Preparação">
+  <div class="modnum">00</div>
+  <h2>Antes de abrir o Photoshop</h2>
+  <p class="goal">Uma fotomontagem convincente é decidida na hora de fotografar. Corrigir depois custa horas.</p>
+  <h3>A ideia</h3>
+  <p>O projeto pede metáfora visual, surpresa ou ponto de vista próprio. Antes de fotografar, escrevam em uma frase: <em>“mostramos [problema] como se fosse [outra coisa]”</em>. Se a frase descreve só o problema (“um rio poluído”), a ideia ainda é ilustração literal.</p>
+  <h3>Fotografar pensando na montagem</h3>
+  <ul class="plain">
+    <li><b>Mesma direção de luz</b> em todas as fotos que vão se juntar. Anote: “luz vindo da esquerda, alta”. É o erro que mais denuncia uma montagem.</li>
+    <li><b>Mesma altura e ângulo de câmera</b> entre objeto e cenário. Um objeto fotografado de cima não “senta” num cenário fotografado na altura dos olhos.</li>
+    <li><b>Fundo liso e contrastante</b> atrás do que será recortado (parede clara, tecido). Facilita muito a remoção de fundo.</li>
+    <li><b>Resolução máxima</b> da câmera ou celular, sem zoom digital. Se der, fotografe em RAW (DNG).</li>
+    <li>Fotografe <b>elementos soltos</b> (texturas, sombras, céu) para ter material de montagem.</li>
+  </ul>
+  <h3>Minha foto aguenta o pôster?</h3>
+  <p>Digite a largura e a altura da foto em pixels (veja nas propriedades do arquivo) para saber até que tamanho ela imprime bem.</p>
+  <div class="calc" id="calcfoto">
+    <label for="fw">Largura da foto (px)<input id="fw" type="number" value="4000" min="1"></label>
+    <label for="fh">Altura da foto (px)<input id="fh" type="number" value="3000" min="1"></label>
+    <label for="fneed">Vai ocupar no pôster (cm de largura)<input id="fneed" type="number" value="60" min="1"></label>
+    <div class="out">
+      <div><small>Largura máx. a 300 ppi</small><strong id="f300">—</strong></div>
+      <div><small>Largura máx. a 150 ppi</small><strong id="f150">—</strong></div>
+      <div><small>ppi efetivo no uso pretendido</small><strong id="feff">—</strong></div>
+    </div>
+    <div class="verdict" id="fverd"></div>
+  </div>
+  <div class="note why"><b>Por que isso importa</b>Uma foto de celular de 12 MP (4000 px) cobre só 34 cm a 300 ppi. Como fundo de página inteira (60 cm) ela fica com cerca de 170 ppi efetivos, o que ainda é aceitável para um pôster visto de longe. Já um elemento recortado de uma parte pequena da foto pode ficar abaixo de 100 ppi e aparecer borrado.</div>
+  <label class="donebox"><input type="checkbox" data-done="planejar"> Concluí este módulo</label>
+</section>
+
+<!-- 01 -->
+<section class="mod" id="documento" data-group="Básico">
+  <div class="modnum">01</div>
+  <h2>Criar e configurar o documento</h2>
+  <p class="goal">Pôster 60 × 90 cm, vertical, 300 ppi, trabalhando em RGB e convertendo para CMYK só no fim.</p>
+  <ol class="steps">
+    <li><div>Abra <span class="m" data-en="File › New…">Arquivo › Novo…</span> (<kbd>Ctrl</kbd>+<kbd>N</kbd>). No topo da janela, clique na aba <b>Imprimir</b> só para ver as opções; vamos digitar os valores à mão no painel da direita.</div></li>
+    <li><div>Mude a unidade para <b>Centímetros</b>. Largura <b>60</b>, Altura <b>90</b>. Confira se a orientação ficou vertical.</div></li>
+    <li><div>Resolução: <b>300 Pixels/polegada</b>. Se o computador ficar lento demais com muitas camadas, use <b>150</b>, que é o mínimo aceito.</div></li>
+    <li><div>Modo de cor: <b>Cor RGB, 8 bits</b>. Conteúdo do plano de fundo: <b>Branco</b>.</div></li>
+    <li><div>Abra <b>Configurações avançadas</b> e escolha o perfil <b>sRGB IEC61966-2.1</b>. Clique em <b>Criar</b>.</div></li>
+    <li><div>Confira em <span class="m" data-en="Image › Image Size…">Imagem › Tamanho da imagem…</span> (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>I</kbd>): devem aparecer <b>7087 × 10630 px</b>. Clique em Cancelar para fechar sem mudar nada.</div></li>
+    <li><div>Crie uma margem de segurança: <span class="m" data-en="View › Guides › New Guide Layout…">Exibir › Guias › Novo layout de guia…</span>, marque <b>Margem</b> com 2 cm em todos os lados. Nenhum texto importante deve ficar fora dessas guias.</div></li>
+    <li><div>Salve agora: <span class="m" data-en="File › Save As…">Arquivo › Salvar como…</span> em formato <b>Photoshop (PSD)</b>, com o nome <code>grupo_tema_v01.psd</code>. Salve versões novas (v02, v03) a cada etapa grande.</div></li>
+  </ol>
+  <div class="note why"><b>Por que RGB primeiro</b>Vários filtros e ajustes ficam bloqueados ou limitados em CMYK, e as fotos já chegam em RGB. Montar em RGB e converter uma única vez no final evita perdas de cor repetidas. O módulo 13 mostra a conversão.</div>
+  <div class="note warn"><b>Arquivo grande</b>Um pôster a 300 ppi com dezenas de camadas passa facilmente de 2 GB, limite do formato PSD. Se o Photoshop recusar salvar, use <b>Formato de documento grande (PSB)</b> no mesmo menu Salvar como. Trabalhe na unidade local do computador e copie para o pendrive ou nuvem ao final da aula; salvar direto em pendrive é lento e corrompe arquivos.</div>
+  <div class="note tip"><b>Sangria</b>Se a gráfica pedir sangria (área extra que será cortada), aumente a tela em <span class="m" data-en="Image › Canvas Size…">Imagem › Tamanho da tela…</span> conforme a medida que ela informar (geralmente 3 mm de cada lado) e estenda o fundo até a nova borda.</div>
+  <label class="donebox"><input type="checkbox" data-done="documento"> Concluí este módulo</label>
+</section>
+
+<!-- 02 -->
+<section class="mod" id="camadas" data-group="Básico">
+  <div class="modnum">02</div>
+  <h2>Inserir imagens em camadas</h2>
+  <p class="goal">Cada foto entra em sua própria camada, como Objeto inteligente, para poder ser ampliada e reduzida sem perder qualidade.</p>
+  <ol class="steps">
+    <li><div>Use <span class="m" data-en="File › Place Embedded…">Arquivo › Inserir incorporado…</span> e escolha a foto. Ela aparece com uma caixa de transformação.</div></li>
+    <li><div>Arraste os cantos para ajustar o tamanho (a proporção é mantida; segure <kbd>Shift</kbd> para distorcer). Pressione <kbd>Enter</kbd> para confirmar.</div></li>
+    <li><div>No painel <b>Camadas</b> (<kbd>F7</kbd>), a camada nova tem um ícone de Objeto inteligente no canto da miniatura. Dê duplo clique no <b>nome</b> e renomeie (“céu”, “mão”, “prédio”).</div></li>
+    <li><div>Para mudar tamanho ou posição depois: selecione a camada e use <span class="m" data-en="Edit › Free Transform">Editar › Transformação livre</span> (<kbd>Ctrl</kbd>+<kbd>T</kbd>). Mover: ferramenta Mover (<kbd>V</kbd>).</div></li>
+    <li><div>Ordem das camadas: arraste no painel, ou use <kbd>Ctrl</kbd>+<kbd>]</kbd> para subir e <kbd>Ctrl</kbd>+<kbd>[</kbd> para descer. O que está em cima no painel aparece na frente.</div></li>
+    <li><div>Agrupe camadas relacionadas: selecione várias (com <kbd>Ctrl</kbd>+clique) e pressione <kbd>Ctrl</kbd>+<kbd>G</kbd>. Dê nome aos grupos.</div></li>
+  </ol>
+  <div class="note tip"><b>Atalho para várias fotos</b>Arrastar arquivos do Explorador de Arquivos para dentro do documento também insere como Objeto inteligente. Para abrir uma pasta inteira em camadas, use <span class="m" data-en="File › Scripts › Load Files into Stack…">Arquivo › Scripts › Carregar arquivos na pilha…</span></div>
+  <div class="note warn"><b>Erro comum</b>Copiar e colar (<kbd>Ctrl</kbd>+<kbd>C</kbd> / <kbd>Ctrl</kbd>+<kbd>V</kbd>) cria uma camada de pixels comum. Se você reduzir e depois ampliar de novo, a imagem fica borrada para sempre. Se isso acontecer, clique com o botão direito na camada › <b>Converter em Objeto inteligente</b> antes de transformar.</div>
+  <label class="donebox"><input type="checkbox" data-done="camadas"> Concluí este módulo</label>
+</section>
+
+<!-- 03 -->
+<section class="mod" id="selecao" data-group="Básico">
+  <div class="modnum">03</div>
+  <h2>Recortar partes de uma imagem</h2>
+  <p class="goal">No Photoshop, “recortar” pode significar duas coisas: cortar as bordas de uma foto (ferramenta Corte) ou isolar uma parte dela (seleção). Na fotomontagem, quase sempre é a segunda.</p>
+  <h3>Escolha a ferramenta de seleção</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Ferramenta</th><th>Tecla</th><th>Use quando</th></tr></thead>
+    <tbody>
+      <tr><td>Seleção de objeto</td><td><kbd>W</kbd></td><td>Objetos bem definidos (pessoa, carro, garrafa). Passe o mouse por cima: ele destaca o objeto; clique para selecionar.</td></tr>
+      <tr><td>Seleção rápida</td><td><kbd>W</kbd></td><td>“Pinte” sobre a área; a seleção cresce até as bordas.</td></tr>
+      <tr><td>Letreiro retangular / elíptico</td><td><kbd>M</kbd></td><td>Formas geométricas, janelas, recortes de molduras.</td></tr>
+      <tr><td>Laço poligonal</td><td><kbd>L</kbd></td><td>Objetos de lados retos (prédios, caixas).</td></tr>
+      <tr><td>Caneta</td><td><kbd>P</kbd></td><td>Contornos lisos e precisos (produtos, objetos curvos). Mais lenta, resultado mais limpo. <span class="tag adv">Avançado</span></td></tr>
+    </tbody>
+  </table></div>
+  <ol class="steps">
+    <li><div>Selecione a camada da foto no painel Camadas.</div></li>
+    <li><div>Faça a seleção com a ferramenta escolhida. Segure <kbd>Shift</kbd> para <b>adicionar</b> áreas e <kbd>Alt</kbd> para <b>subtrair</b>.</div></li>
+    <li><div>Para suavizar a borda: <span class="m" data-en="Select › Modify › Feather…">Selecionar › Modificar › Difusão…</span> com 1 a 3 px (a 300 ppi). Bordas duras demais denunciam o recorte.</div></li>
+    <li><div>Com a seleção ativa, clique no botão <b>Adicionar máscara de camada</b> (retângulo com círculo, embaixo do painel Camadas). A parte selecionada fica visível e o resto some, sem ser apagado.</div></li>
+    <li><div>Alternativa rápida: <kbd>Ctrl</kbd>+<kbd>J</kbd> copia a seleção para uma camada nova (<span class="m" data-en="Layer › New › Layer via Copy">Camada › Nova › Camada por cópia</span>). Use quando precisar do mesmo elemento várias vezes.</div></li>
+    <li><div>Desmarcar: <kbd>Ctrl</kbd>+<kbd>D</kbd>. Inverter seleção: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>.</div></li>
+  </ol>
+  <h3>Caneta: de caminho a seleção <span class="tag adv">Avançado</span></h3>
+  <ol class="steps">
+    <li><div>Com a Caneta (<kbd>P</kbd>) no modo <b>Caminho</b> (barra de opções), clique para pontos retos; clique e arraste para curvas.</div></li>
+    <li><div>Feche o contorno clicando no primeiro ponto.</div></li>
+    <li><div><kbd>Ctrl</kbd>+<kbd>Enter</kbd> transforma o caminho em seleção. Depois siga do passo 4 acima.</div></li>
+  </ol>
+  <label class="donebox"><input type="checkbox" data-done="selecao"> Concluí este módulo</label>
+</section>
+
+<!-- 04 -->
+<section class="mod" id="fundo" data-group="Básico">
+  <div class="modnum">04</div>
+  <h2>Remover o fundo</h2>
+  <p class="goal">Deixar só o objeto principal, com bordas limpas, usando máscara (nunca a borracha).</p>
+  <h3>Método rápido</h3>
+  <ol class="steps">
+    <li><div>Selecione a camada da foto.</div></li>
+    <li><div>Na <b>Barra de tarefas contextual</b> (barra flutuante sob a imagem) clique em <b>Remover plano de fundo</b>. Se ela não aparecer, use o painel <span class="m" data-en="Window › Properties">Janela › Propriedades</span> › Ações rápidas › <b>Remover plano de fundo</b>.</div></li>
+    <li><div>O Photoshop cria uma máscara de camada automaticamente. Amplie a 100% (<kbd>Ctrl</kbd>+<kbd>1</kbd>) e confira as bordas.</div></li>
+  </ol>
+  <h3>Método refinado (cabelo, pelos, bordas difíceis)</h3>
+  <ol class="steps">
+    <li><div><span class="m" data-en="Select › Subject">Selecionar › Assunto</span> para uma seleção inicial.</div></li>
+    <li><div>Abra <span class="m" data-en="Select › Select and Mask…">Selecionar › Selecionar e mascarar…</span> (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>R</kbd>).</div></li>
+    <li><div>Em <b>Modo de exibição</b>, escolha <b>Em preto</b> ou <b>Em branco</b> (o que mais contrastar com o objeto).</div></li>
+    <li><div>Use a ferramenta <b>Refinar borda</b> (pincel à esquerda) passando sobre cabelo e pelos. Para objetos com cabelo, teste também o botão <b>Refinar cabelo</b>.</div></li>
+    <li><div>Se aparecer contorno colorido do fundo antigo, marque <b>Descontaminar cores</b>.</div></li>
+    <li><div>Em <b>Saída para</b>, escolha <b>Máscara de camada</b> (ou <b>Nova camada com máscara de camada</b>, se marcou Descontaminar). Clique OK.</div></li>
+  </ol>
+  <h3>Corrigir a máscara à mão</h3>
+  <ol class="steps">
+    <li><div>Clique na <b>miniatura da máscara</b> (o retângulo branco e preto ao lado da foto) para trabalhar nela.</div></li>
+    <li><div>Pincel (<kbd>B</kbd>): <b>preto esconde</b>, <b>branco revela</b>. <kbd>X</kbd> troca as duas cores; <kbd>D</kbd> volta ao preto e branco padrão.</div></li>
+    <li><div><kbd>Alt</kbd>+clique na miniatura da máscara mostra só a máscara, para achar falhas. Repita para voltar.</div></li>
+  </ol>
+  <div class="note why"><b>Por que máscara e não borracha</b>A borracha apaga pixels de vez. A máscara só esconde: se você errar ou mudar de ideia na semana seguinte, pinta de branco e a parte volta.</div>
+  <div class="note tip"><b>Fundo de cor uniforme</b>Para fundos lisos (céu limpo, parede, tela verde), <span class="m" data-en="Select › Color Range…">Selecionar › Intervalo de cores…</span> costuma funcionar melhor que a IA: clique no fundo com o conta-gotas, ajuste a Tolerância, depois inverta a seleção e crie a máscara.</div>
+  <label class="donebox"><input type="checkbox" data-done="fundo"> Concluí este módulo</label>
+</section>
+
+<!-- 05 -->
+<section class="mod" id="mesclar" data-group="Básico">
+  <div class="modnum">05</div>
+  <h2>Mesclar imagens</h2>
+  <p class="goal">Fazer duas ou mais imagens se fundirem sem emenda visível.</p>
+  <h3>Transição suave com máscara e gradiente</h3>
+  <ol class="steps">
+    <li><div>Coloque uma foto sobre a outra, em camadas separadas.</div></li>
+    <li><div>Adicione uma máscara de camada à foto de cima (sem seleção ativa, a máscara nasce toda branca).</div></li>
+    <li><div>Ferramenta Gradiente (<kbd>G</kbd>), tipo <b>Linear</b>, cores preto e branco (<kbd>D</kbd>).</div></li>
+    <li><div>Com a máscara selecionada, arraste uma linha onde deve ocorrer a passagem. Linha curta = transição rápida; linha longa = transição suave.</div></li>
+    <li><div>Refine pintando na máscara com pincel macio (dureza 0%) e opacidade baixa. As teclas <kbd>1</kbd> a <kbd>0</kbd> mudam a opacidade do pincel de 10% a 100%.</div></li>
+  </ol>
+  <h3>Modos de mesclagem</h3>
+  <p>Ficam no menu suspenso no topo do painel Camadas (o padrão é “Normal”).</p>
+  <div class="modes">
+    <div><b>Multiplicação</b>Escurece; o branco desaparece. Para sombras, texturas sobre superfícies, desenhos a traço.</div>
+    <div><b>Tela</b>Clareia; o preto desaparece. Para fumaça, fogo, luz, faíscas fotografadas sobre fundo preto.</div>
+    <div><b>Sobrepor / Luz suave</b>Aumenta contraste e mistura textura sem cobrir a imagem.</div>
+    <div><b>Cor</b>Aplica só a cor, mantendo luz e sombra de baixo. Usado no módulo 08.</div>
+  </div>
+  <h3>Máscara de corte</h3>
+  <p>Faz uma camada aparecer só dentro do formato da camada de baixo (por exemplo, uma textura dentro de uma silhueta ou de um texto). Selecione a camada de cima e use <span class="m" data-en="Layer › Create Clipping Mask">Camada › Criar máscara de corte</span> (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>G</kbd>), ou <kbd>Alt</kbd>+clique na linha entre as duas camadas.</p>
+  <h3>Mesclar se <span class="tag adv">Avançado</span></h3>
+  <ol class="steps">
+    <li><div>Dê duplo clique na área vazia da camada (à direita do nome) para abrir <b>Estilo de camada</b>.</div></li>
+    <li><div>Na parte de baixo, em <b>Mesclar se</b>, arraste o controle branco de “Esta camada” para a esquerda: os tons claros somem. O controle preto faz o mesmo com os escuros.</div></li>
+    <li><div>Segure <kbd>Alt</kbd> e arraste metade do controle para dividi-lo. Isso cria uma transição suave em vez de um corte seco.</div></li>
+  </ol>
+  <div class="note tip"><b>Uso típico</b>Nuvens fotografadas sobre céu azul, colocadas sobre outro céu: “Mesclar se” na camada de baixo faz as nuvens aparecerem apenas nas áreas claras, sem recorte manual.</div>
+  <label class="donebox"><input type="checkbox" data-done="mesclar"> Concluí este módulo</label>
+</section>
+
+<!-- 06 -->
+<section class="mod" id="unificar" data-group="Básico">
+  <div class="modnum">06</div>
+  <h2>Filtros e ajustes para unificar a composição</h2>
+  <p class="goal">Três diferenças denunciam uma montagem: luz (direção e intensidade), cor (temperatura e contraste) e textura (grão e nitidez). Ajuste cada uma.</p>
+  <h3>1. Igualar cada elemento ao cenário</h3>
+  <ol class="steps">
+    <li><div>Selecione a camada de um elemento. Clique no ícone de <b>Nova camada de ajuste</b> (círculo meio preto) no painel Camadas › <b>Curvas</b>.</div></li>
+    <li><div>Prenda o ajuste só a esse elemento: <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>G</kbd> (máscara de corte). Sem isso, o ajuste afeta todas as camadas de baixo.</div></li>
+    <li><div>Ajuste a curva até o elemento ter o mesmo contraste do fundo: sombras tão escuras quanto as do fundo, luzes tão claras quanto as do fundo.</div></li>
+    <li><div>Repita com <b>Equilíbrio de cores</b> ou <b>Filtro de fotografia</b> para igualar a temperatura (mais quente/azulado).</div></li>
+  </ol>
+  <div class="note tip"><b>Truque de conferência</b>Crie uma camada de ajuste <b>Matiz/Saturação</b> no topo de tudo e leve a Saturação a −100. Sem cor, fica fácil ver se um elemento está mais claro ou mais contrastado que o cenário. Desligue o olho dessa camada quando terminar.</div>
+  <h3>2. Unificar tudo de uma vez</h3>
+  <ol class="steps">
+    <li><div>No topo da pilha, crie uma camada de ajuste <b>Mapa de gradiente</b> com um gradiente de duas cores (sombra fria, luz quente, por exemplo). Mude o modo para <b>Luz suave</b> e a opacidade para 10–30%.</div></li>
+    <li><div>Ou use <b>Pesquisa de cores</b> (Color Lookup) e escolha uma LUT pronta, com opacidade baixa. Funciona como um “filtro de cinema” comum a todas as imagens.</div></li>
+    <li><div>Crie uma cópia mesclada de tudo em camada nova: <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Alt</kbd>+<kbd>E</kbd>. Converta em Objeto inteligente (botão direito na camada).</div></li>
+    <li><div>Aplique <span class="m" data-en="Filter › Camera Raw Filter…">Filtro › Filtro do Camera Raw…</span> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd>): ajuste Temperatura, Contraste, Textura e, em <b>Efeitos</b>, Vinheta e Granulação. Como é Objeto inteligente, o filtro continua editável (duplo clique no nome do filtro).</div></li>
+  </ol>
+  <div class="note warn"><b>Atenção</b>A camada mesclada do passo 3 é uma “foto” do momento. Se você mudar algo embaixo, apague essa camada e gere de novo.</div>
+  <h3>3. Igualar a textura</h3>
+  <ol class="steps">
+    <li><div>Fotos de câmeras diferentes têm ruído diferente. Crie uma camada nova: <span class="m" data-en="Layer › New › Layer…">Camada › Nova › Camada…</span>, modo <b>Sobrepor</b>, marque <b>Preencher com cor neutra para Sobrepor (50% cinza)</b>.</div></li>
+    <li><div>Aplique <span class="m" data-en="Filter › Noise › Add Noise…">Filtro › Ruído › Adicionar ruído…</span> com 3–6%, <b>Gaussiano</b>, <b>Monocromático</b>. O mesmo grão sobre tudo “cola” as imagens.</div></li>
+    <li><div>Para dar profundidade, aplique <span class="m" data-en="Filter › Blur › Gaussian Blur…">Filtro › Desfoque › Desfoque gaussiano…</span> leve em elementos distantes e reduza o contraste deles. Objetos ao fundo são naturalmente menos nítidos.</div></li>
+  </ol>
+  <h3>Corresponder cor <span class="tag adv">Avançado</span></h3>
+  <p><span class="m" data-en="Image › Adjustments › Match Color…">Imagem › Ajustes › Corresponder cor…</span> copia a paleta de uma imagem para outra. Só funciona em camada comum (não em Objeto inteligente), então use uma cópia rasterizada do elemento. Em <b>Origem</b>, escolha o próprio documento e a camada do cenário; reduza <b>Atenuar</b> para um resultado mais sutil.</p>
+  <label class="donebox"><input type="checkbox" data-done="unificar"> Concluí este módulo</label>
+</section>
+
+<!-- 07 -->
+<section class="mod" id="alterarcor" data-group="Básico">
+  <div class="modnum">07</div>
+  <h2>Alterar a cor de imagens</h2>
+  <p class="goal">Trocar a cor de um objeto ou de uma área sem danificar a foto original.</p>
+  <h3>Matiz/Saturação (o método principal)</h3>
+  <ol class="steps">
+    <li><div>Selecione a camada do objeto. Nova camada de ajuste › <b>Matiz/Saturação</b>. Prenda com <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>G</kbd>.</div></li>
+    <li><div>No painel Propriedades, troque “Principal” por uma faixa de cor (Vermelhos, Amarelos...) para mudar só essa cor. Ou clique no ícone de <b>mão com setas</b> e clique-arraste para os lados sobre a cor na imagem.</div></li>
+    <li><div>Mova o controle <b>Matiz</b> para trocar a cor; <b>Saturação</b> para intensificar ou apagar; <b>Luminosidade</b> com moderação.</div></li>
+    <li><div>Se a mudança vazou para áreas que não deviam mudar, pinte de preto na máscara da camada de ajuste (ela já vem com uma).</div></li>
+  </ol>
+  <h3>Outras opções</h3>
+  <ul class="plain">
+    <li><b>Cor seletiva</b> (camada de ajuste): ajustes finos dentro de uma cor, pensados em ciano, magenta, amarelo e preto. Útil para corrigir tons de pele e verdes.</li>
+    <li><span class="m" data-en="Image › Adjustments › Replace Color…">Imagem › Ajustes › Substituir cor…</span>: escolhe uma cor com conta-gotas e a substitui. É destrutivo; use em uma cópia da camada.</li>
+    <li><b>Cor sólida + modo Cor</b>: camada de ajuste Cor sólida, presa ao objeto, com modo de mesclagem <b>Cor</b>. Troca a cor por qualquer tom exato (útil para usar a cor da identidade da instituição).</li>
+  </ul>
+  <div class="note tip"><b>Matiz exato</b>Matiz/Saturação dificilmente acerta um tom específico. Quando a cor tem que ser exata, use Cor sólida em modo Cor e ajuste a opacidade.</div>
+  <label class="donebox"><input type="checkbox" data-done="alterarcor"> Concluí este módulo</label>
+</section>
+
+<!-- 08 -->
+<section class="mod" id="colorir" data-group="Básico">
+  <div class="modnum">08</div>
+  <h2>Colorir imagens</h2>
+  <p class="goal">Dar cor a fotos em preto e branco, desenhos escaneados ou áreas específicas, preservando a luz e a sombra.</p>
+  <h3>Colorir uma foto</h3>
+  <ol class="steps">
+    <li><div>Crie uma camada vazia acima da foto (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>) e mude o modo de mesclagem para <b>Cor</b>.</div></li>
+    <li><div>Se quiser colorir só um objeto recortado, prenda a camada a ele (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>G</kbd>).</div></li>
+    <li><div>Pincel (<kbd>B</kbd>) macio, escolha a cor e pinte. A textura e as sombras da foto continuam aparecendo.</div></li>
+    <li><div>Use uma camada para cada cor (pele, roupa, fundo) e baixe a opacidade quando precisar de algo mais sutil.</div></li>
+  </ol>
+  <h3>Colorir um desenho escaneado</h3>
+  <ol class="steps">
+    <li><div>Insira o desenho e limpe o papel com uma camada de ajuste <b>Níveis</b>: arraste o controle branco para a esquerda até o fundo ficar branco puro.</div></li>
+    <li><div>Mude o modo da camada do desenho para <b>Multiplicação</b>: o branco some e só o traço fica.</div></li>
+    <li><div>Pinte em camadas <b>abaixo</b> do traço, em modo Normal. O traço fica por cima, como nanquim.</div></li>
+    <li><div>Para pintar só dentro do que já foi pintado, ative <b>Bloquear pixels transparentes</b> (primeiro cadeado no painel Camadas, tecla <kbd>/</kbd>).</div></li>
+  </ol>
+  <h3>Colorização estilizada</h3>
+  <p>Camada de ajuste <b>Mapa de gradiente</b> presa a um elemento: as sombras ganham a cor da esquerda do gradiente e as luzes, a da direita. Bom para duotons e para dar a vários elementos a mesma identidade de cor.</p>
+  <label class="donebox"><input type="checkbox" data-done="colorir"> Concluí este módulo</label>
+</section>
+
+<!-- 09 -->
+<section class="mod" id="texto" data-group="Básico">
+  <div class="modnum">09</div>
+  <h2>Inserir textos</h2>
+  <p class="goal">Título ou chamada curta, informação da ação/instituição e um meio de contato, legíveis a 2 metros.</p>
+  <ol class="steps">
+    <li><div>Ferramenta Tipo horizontal (<kbd>T</kbd>). Para o título, <b>clique uma vez</b> e digite (texto de ponto). Para blocos de informação, <b>clique e arraste</b> uma caixa (texto de parágrafo, quebra a linha sozinho).</div></li>
+    <li><div>Confirme com <kbd>Ctrl</kbd>+<kbd>Enter</kbd> ou clicando no ✓ da barra de opções.</div></li>
+    <li><div>Abra <span class="m" data-en="Window › Character">Janela › Caractere</span> para fonte, tamanho, entrelinha e espaçamento entre letras (rastreamento). Em um documento configurado em centímetros e ppi, o tamanho em <b>pontos</b> corresponde ao tamanho real impresso (72 pt = 2,54 cm).</div></li>
+    <li><div>Para editar depois, selecione a ferramenta <kbd>T</kbd> e clique no texto, ou dê duplo clique na miniatura “T” da camada.</div></li>
+    <li><div>Se o texto sumir sobre a foto, coloque abaixo dele uma camada com sombra suave pintada em Multiplicação, ou uma faixa de cor. Evite contorno (traçado) grosso: envelhece o pôster.</div></li>
+  </ol>
+  <h3>Qual tamanho usar?</h3>
+  <p>Regra prática para a altura da letra maiúscula: corpo de texto com pelo menos <b>1/200 da distância</b> de leitura; título com pelo menos <b>1/40</b>. Para letras mais finas ou fonte condensada, aumente.</p>
+  <div class="calc" id="calctxt">
+    <label for="dist">Distância de leitura (m)<input id="dist" type="number" value="2" min="0.5" step="0.5"></label>
+    <div class="out">
+      <div><small>Corpo mínimo · altura da maiúscula</small><strong id="t-body-cm">—</strong></div>
+      <div><small>≈ em pontos</small><strong id="t-body-pt">—</strong></div>
+      <div><small>Título mínimo · altura da maiúscula</small><strong id="t-tit-cm">—</strong></div>
+      <div><small>≈ em pontos</small><strong id="t-tit-pt">—</strong></div>
+    </div>
+    <div class="verdict" style="color:var(--muted);font-weight:400">A conversão para pontos supõe que a maiúscula tem cerca de 70% do tamanho da fonte, o que varia de família para família. Meça na tela com a régua (<kbd>Ctrl</kbd>+<kbd>R</kbd>).</div>
+  </div>
+  <h3>QR code</h3>
+  <ul class="plain">
+    <li>Gere um QR code <b>estático</b>. Muitos geradores gratuitos criam códigos “dinâmicos” que param de funcionar quando o período de teste acaba, possivelmente depois da exposição.</li>
+    <li>Baixe em SVG ou PNG grande (2000 px ou mais) e insira com <span class="m" data-en="File › Place Embedded…">Arquivo › Inserir incorporado…</span></li>
+    <li>Tamanho mínimo de 4 cm de lado, com margem branca em volta (zona de silêncio). Alto contraste: escuro sobre claro.</li>
+    <li>Teste com o celular apontado para a tela e, depois, para a impressão de teste.</li>
+  </ul>
+  <div class="note warn"><b>Fontes e créditos</b>Use fontes com licença livre (Google Fonts, licença OFL) ou do Adobe Fonts incluído na conta. Registre o nome da fonte e da licença nos créditos, assim como texturas de terceiros. Os computadores do laboratório podem não permitir instalar fontes: verifique antes de escolher.</div>
+  <label class="donebox"><input type="checkbox" data-done="texto"> Concluí este módulo</label>
+</section>
+
+<!-- 10 -->
+<section class="mod" id="luz" data-group="Recursos extras">
+  <div class="modnum">10</div>
+  <h2>Luz e sombra <span class="tag ext">Recomendado</span></h2>
+  <p class="goal">Um objeto sem sombra parece flutuar. Esta é a técnica que mais faz uma montagem parecer real.</p>
+  <h3>Sombra de contato</h3>
+  <ol class="steps">
+    <li><div>Crie uma camada vazia <b>abaixo</b> do objeto recortado, modo <b>Multiplicação</b>.</div></li>
+    <li><div>Pincel preto, dureza 0%, opacidade 30–40%. Pinte uma faixa fina e escura exatamente onde o objeto toca o chão.</div></li>
+    <li><div>Com pincel maior e opacidade menor, pinte uma sombra mais ampla e suave em volta. A sombra fica mais escura e nítida perto do ponto de contato.</div></li>
+  </ol>
+  <h3>Sombra projetada</h3>
+  <ol class="steps">
+    <li><div>Duplique o objeto (<kbd>Ctrl</kbd>+<kbd>J</kbd>), rasterize a cópia (botão direito › Rasterizar camada) e ative <b>Bloquear pixels transparentes</b> (<kbd>/</kbd>).</div></li>
+    <li><div>Preencha de preto: <kbd>D</kbd> e depois <kbd>Alt</kbd>+<kbd>Backspace</kbd>. Desative o bloqueio.</div></li>
+    <li><div>Coloque essa camada abaixo do objeto. <kbd>Ctrl</kbd>+<kbd>T</kbd>, botão direito › <b>Distorcer</b>, e “deite” a sombra na direção oposta à luz do cenário.</div></li>
+    <li><div>Aplique Desfoque gaussiano, modo Multiplicação, opacidade 40–60%. Uma máscara com gradiente faz a sombra desaparecer conforme se afasta.</div></li>
+  </ol>
+  <h3>Pintar luz e sombra sem estragar a foto</h3>
+  <ol class="steps">
+    <li><div>Camada nova em modo <b>Luz suave</b>, presa ao objeto.</div></li>
+    <li><div>Pincel macio a 5–10% de opacidade: branco ilumina, preto escurece. Reforce o lado do objeto voltado para a luz do cenário.</div></li>
+  </ol>
+  <label class="donebox"><input type="checkbox" data-done="luz"> Concluí este módulo</label>
+</section>
+
+<!-- 11 -->
+<section class="mod" id="transformar" data-group="Recursos extras">
+  <div class="modnum">11</div>
+  <h2>Transformações e perspectiva <span class="tag ext">Recomendado</span></h2>
+  <p class="goal">Encaixar um elemento na perspectiva do cenário.</p>
+  <ul class="plain">
+    <li><kbd>Ctrl</kbd>+<kbd>T</kbd>, botão direito dentro da caixa: <b>Inclinar</b>, <b>Distorcer</b>, <b>Perspectiva</b> e <b>Deformar</b>. Deformar curva o objeto (uma imagem dobrada sobre uma garrafa, uma bandeira).</li>
+    <li><b>Espelhar</b>: botão direito › Virar horizontal. Útil para alinhar a direção da luz entre fotos.</li>
+    <li><span class="m" data-en="Edit › Puppet Warp">Editar › Deformação de marionete</span>: crie alfinetes nas articulações e dobre braços, galhos ou caudas. <span class="tag adv">Avançado</span></li>
+    <li>Para encaixar algo em uma superfície em perspectiva (parede, tela, placa), use <b>Distorcer</b> e arraste cada canto até o canto da superfície.</li>
+  </ul>
+  <label class="donebox"><input type="checkbox" data-done="transformar"> Concluí este módulo</label>
+</section>
+
+<!-- 12 -->
+<section class="mod" id="ia" data-group="Recursos extras">
+  <div class="modnum">12</div>
+  <h2>IA generativa: o que vale neste projeto</h2>
+  <p class="goal">O Photoshop tem ferramentas que geram imagem a partir de texto. O projeto exige que as fotografias e ilustrações principais sejam da equipe.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Ferramenta</th><th>O que faz</th><th>Neste projeto</th></tr></thead>
+    <tbody>
+      <tr><td>Ferramenta Remover (<kbd>J</kbd>)</td><td>Apaga fios, sujeiras e pequenos objetos.</td><td>Permitido.</td></tr>
+      <tr><td>Remover plano de fundo / Selecionar assunto</td><td>Seleção automática.</td><td>Permitido.</td></tr>
+      <tr><td>Expandir generativo (Corte)</td><td>Estende as bordas de uma foto sua.</td><td>Permitido em áreas secundárias, declarado nos créditos.</td></tr>
+      <tr><td>Preenchimento generativo</td><td>Cria conteúdo novo a partir de um texto.</td><td>Só para correções pequenas. Não pode gerar elementos principais da composição. Declarar.</td></tr>
+      <tr><td>Gerar imagem</td><td>Cria uma imagem inteira a partir de texto.</td><td>Não permitido para elementos da composição.</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note warn"><b>Declare sempre</b>Liste nos créditos qualquer área feita com IA generativa. Elas também dependem de internet, login Adobe e créditos generativos, que podem não estar disponíveis no laboratório.</div>
+  <label class="donebox"><input type="checkbox" data-done="ia"> Concluí este módulo</label>
+</section>
+
+<!-- 13 -->
+<section class="mod" id="impressao" data-group="Entrega">
+  <div class="modnum">13</div>
+  <h2>Fechar para impressão e versão digital</h2>
+  <p class="goal">Gerar o arquivo CMYK para a gráfica e o arquivo sRGB para telas, sem perder o arquivo de trabalho em camadas.</p>
+  <h3>Teste de impressão reduzido</h3>
+  <p>Imprima o pôster em <b>A4</b> (cerca de 1/3 do tamanho real) e olhe a <b>66 cm</b> de distância. Isso equivale a ver o pôster de 60 × 90 cm a 2 metros: se o texto ou o QR code não funcionarem no A4, não funcionarão no pôster.</p>
+  <h3>Arquivo para a gráfica (CMYK)</h3>
+  <ol class="steps">
+    <li><div>Salve o arquivo de trabalho RGB em camadas. Ele é o original; nunca converta esse arquivo.</div></li>
+    <li><div>Pergunte à gráfica qual perfil CMYK ela usa. Se ela não souber, use <b>Coated FOGRA39</b>.</div></li>
+    <li><div>Simule a impressão: <span class="m" data-en="View › Proof Setup › Custom…">Exibir › Configuração de prova › Personalizado…</span>, escolha o perfil. Ative/desative com <span class="m" data-en="View › Proof Colors">Exibir › Cores de prova</span> (<kbd>Ctrl</kbd>+<kbd>Y</kbd>).</div></li>
+    <li><div>Veja o que não vai sair: <span class="m" data-en="View › Gamut Warning">Exibir › Aviso de gama</span> (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Y</kbd>) pinta de cinza as cores que a impressora não alcança. Azuis e verdes muito saturados e tons neon costumam aparecer. Reduza a saturação deles com Matiz/Saturação mascarada.</div></li>
+    <li><div>Crie uma cópia achatada: <span class="m" data-en="Image › Duplicate…">Imagem › Duplicar…</span>, marque <b>Duplicar somente camadas mescladas</b>.</div></li>
+    <li><div>Na cópia: <span class="m" data-en="Edit › Convert to Profile…">Editar › Converter em perfil…</span>, perfil de destino da gráfica, intenção <b>Perceptual</b> ou <b>Colorimétrico relativo</b> (com Compensação de ponto preto marcada). Compare as duas na visualização.</div></li>
+    <li><div>Salve no formato que a gráfica pedir: <b>PDF</b> (<span class="m" data-en="Photoshop PDF › PDF/X-1a:2001">Photoshop PDF › PDF/X-1a:2001</span>) ou <b>TIFF</b> sem camadas, compressão LZW. Nome: <code>grupo_tema_60x90_CMYK.pdf</code>.</div></li>
+  </ol>
+  <h3>Versão digital (sRGB)</h3>
+  <ol class="steps">
+    <li><div>A partir do arquivo de trabalho RGB: <span class="m" data-en="File › Export › Export As…">Arquivo › Exportar › Exportar como…</span></div></li>
+    <li><div>Formato JPG (qualidade 80–90%) ou PNG. Reduza o tamanho, por exemplo 1080 × 1620 px para redes sociais.</div></li>
+    <li><div>Marque <b>Converter em sRGB</b> e <b>Incorporar perfil de cor</b>.</div></li>
+  </ol>
+  <label class="donebox"><input type="checkbox" data-done="impressao"> Concluí este módulo</label>
+</section>
+
+<!-- atalhos -->
+<section class="mod" id="atalhos" data-group="Referência">
+  <div class="modnum">REF</div>
+  <h2>Atalhos de teclado</h2>
+  <p class="goal">Filtre pelo nome da ação ou pela tecla.</p>
+  <input class="search" id="kq" type="search" placeholder="Ex.: máscara, desfazer, Ctrl+J" aria-label="Filtrar atalhos">
+  <div class="tw"><table id="ktable">
+    <thead><tr><th>Atalho</th><th>Ação</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+</section>
+
+<!-- checklist -->
+<section class="mod" id="entrega" data-group="Referência">
+  <div class="modnum">REF</div>
+  <h2>Checklist de entrega</h2>
+  <p class="goal">Confira antes de enviar. As marcações ficam salvas neste navegador.</p>
+  <ul class="checklist" id="checklist">
+    <li><label><input type="checkbox" data-chk="c1"> Documento de 60 × 90 cm, vertical, a 300 ppi (ou no mínimo 150 ppi).</label></li>
+    <li><label><input type="checkbox" data-chk="c2"> Nenhum elemento importante abaixo de 150 ppi efetivos (sem pixels visíveis a 100% de zoom).</label></li>
+    <li><label><input type="checkbox" data-chk="c3"> Fotografias e ilustrações principais produzidas pela equipe.</label></li>
+    <li><label><input type="checkbox" data-chk="c4"> Texturas e fontes de terceiros com licença livre e crédito registrado.</label></li>
+    <li><label><input type="checkbox" data-chk="c5"> Uso de IA generativa (se houver) declarado nos créditos.</label></li>
+    <li><label><input type="checkbox" data-chk="c6"> Título ou chamada curta, informação da ação/instituição e meio de contato presentes.</label></li>
+    <li><label><input type="checkbox" data-chk="c7"> Texto legível a 2 m (teste em A4 visto a 66 cm).</label></li>
+    <li><label><input type="checkbox" data-chk="c8"> QR code estático, com no mínimo 4 cm, testado no impresso.</label></li>
+    <li><label><input type="checkbox" data-chk="c9"> Textos dentro da margem de segurança de 2 cm.</label></li>
+    <li><label><input type="checkbox" data-chk="c10"> A ideia vai além da ilustração literal: há metáfora, surpresa ou ponto de vista.</label></li>
+    <li><label><input type="checkbox" data-chk="c11"> Arquivo CMYK no perfil da gráfica (PDF/X-1a ou TIFF).</label></li>
+    <li><label><input type="checkbox" data-chk="c12"> Versão digital em sRGB (JPG ou PNG).</label></li>
+    <li><label><input type="checkbox" data-chk="c13"> Arquivo de trabalho RGB em camadas (PSD/PSB) guardado.</label></li>
+  </ul>
+</section>
+
+    </main>
+  </div>
+  <footer>Se algum item mudou de lugar na sua versão, use a busca do Photoshop (<kbd>Ctrl</kbd>+<kbd>F</kbd>) e digite o nome do comando.</footer>
+</div>
+
+<script>
+(function(){
+  var KEY='fm6090-v1', state={};
+  try{ state=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ state={}; }
+  function save(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+
+  /* índice */
+  var mods=[].slice.call(document.querySelectorAll('section.mod'));
+  var toc=document.getElementById('toc'), lastGrp='';
+  mods.forEach(function(s){
+    var g=s.dataset.group;
+    if(g!==lastGrp){ var gl=document.createElement('li'); gl.className='grp'; gl.textContent=g; toc.appendChild(gl); lastGrp=g; }
+    var li=document.createElement('li'), a=document.createElement('a');
+    a.href='#'+s.id; a.dataset.id=s.id;
+    var n=s.querySelector('.modnum').textContent;
+    var t=s.querySelector('h2').childNodes[0].textContent.trim();
+    a.innerHTML='<span class="n">'+n+'</span><span class="t"></span><span class="ok"></span>';
+    a.querySelector('.t').textContent=t;
+    if(n==='REF'){ a.querySelector('.n').textContent='·'; a.querySelector('.ok').style.visibility='hidden'; a.querySelector('.t').style.display='inline'; }
+    li.appendChild(a); toc.appendChild(li);
+  });
+
+  /* progresso */
+  var boxes=[].slice.call(document.querySelectorAll('[data-done]'));
+  function refresh(){
+    var d=0;
+    boxes.forEach(function(b){
+      b.checked=!!state[b.dataset.done]; if(b.checked) d++;
+      var a=toc.querySelector('a[data-id="'+b.dataset.done+'"]'); if(a) a.classList.toggle('done',b.checked);
+    });
+    var p=Math.round(d/boxes.length*100);
+    document.getElementById('pct').textContent=p+'%';
+    document.getElementById('cnt').textContent=d+'/'+boxes.length;
+    document.getElementById('barfill').style.width=p+'%';
+  }
+  boxes.forEach(function(b){ b.addEventListener('change',function(){ state[b.dataset.done]=b.checked; save(); refresh(); }); });
+  [].slice.call(document.querySelectorAll('[data-chk]')).forEach(function(c){
+    c.checked=!!state[c.dataset.chk];
+    c.addEventListener('change',function(){ state[c.dataset.chk]=c.checked; save(); });
+  });
+  refresh();
+
+  /* seção ativa */
+  if('IntersectionObserver' in window){
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){
+        toc.querySelectorAll('a').forEach(function(a){ a.classList.toggle('active',a.dataset.id===e.target.id); });
+        var act=toc.querySelector('a.active'); if(act && window.innerWidth<=900){ try{ act.scrollIntoView({block:'nearest',inline:'center'}); }catch(err){} }
+      }});
+    },{rootMargin:'-30% 0px -60% 0px'});
+    mods.forEach(function(s){ io.observe(s); });
+  }
+
+  /* idioma dos menus */
+  var chips=[].slice.call(document.querySelectorAll('.m[data-en]'));
+  chips.forEach(function(c){ c.dataset.pt=c.textContent; });
+  function setLang(l){
+    chips.forEach(function(c){ c.textContent=c.dataset[l]; });
+    document.getElementById('lang-pt').setAttribute('aria-pressed',l==='pt');
+    document.getElementById('lang-en').setAttribute('aria-pressed',l==='en');
+    state.lang=l; save();
+  }
+  document.getElementById('lang-pt').onclick=function(){ setLang('pt'); };
+  document.getElementById('lang-en').onclick=function(){ setLang('en'); };
+
+  /* atalhos */
+  var K=[
+    ['Ctrl+N','Novo documento'],['Ctrl+S','Salvar'],['Ctrl+Shift+S','Salvar como'],['Ctrl+Z','Desfazer (repita para voltar mais passos)'],['Ctrl+Shift+Z','Refazer'],
+    ['Ctrl+0','Ajustar o documento à tela'],['Ctrl+1','Zoom 100% (ver pixels reais)'],['Espaço (segurar)','Mão: arrastar a visualização'],['Z','Zoom'],
+    ['V','Mover'],['M','Letreiro (seleção retangular/elíptica)'],['L','Laço'],['W','Seleção de objeto / Seleção rápida'],['P','Caneta'],['C','Corte'],
+    ['B','Pincel'],['G','Gradiente'],['J','Remover / Pincel de recuperação'],['T','Texto'],['X','Trocar cor de frente e de fundo'],['D','Cores padrão (preto/branco)'],
+    ['[ e ]','Diminuir / aumentar tamanho do pincel'],['1 … 0','Opacidade do pincel 10% … 100%'],['/','Bloquear pixels transparentes'],
+    ['Ctrl+T','Transformação livre'],['Ctrl+J','Duplicar camada / copiar seleção para camada nova'],['Ctrl+Shift+N','Nova camada'],['Ctrl+G','Agrupar camadas'],
+    ['Ctrl+Alt+G','Criar máscara de corte'],['Ctrl+] e Ctrl+[','Subir / descer camada'],['Ctrl+Shift+Alt+E','Carimbar visível (cópia mesclada em camada nova)'],
+    ['Ctrl+D','Desmarcar seleção'],['Ctrl+Shift+I','Inverter seleção'],['Ctrl+Alt+R','Selecionar e mascarar'],['Ctrl+I','Inverter (em máscara: troca o que aparece e o que some)'],
+    ['Alt+clique na máscara','Ver só a máscara'],['Shift+clique na máscara','Desativar/ativar máscara'],['Ctrl+clique na miniatura','Carregar o contorno da camada como seleção'],
+    ['Alt+Backspace','Preencher com a cor de frente'],['Ctrl+Backspace','Preencher com a cor de fundo'],['Ctrl+Shift+A','Filtro do Camera Raw'],
+    ['Ctrl+R','Mostrar/ocultar réguas'],['Ctrl+;','Mostrar/ocultar guias'],['Ctrl+Y','Cores de prova (simular CMYK)'],['Ctrl+Shift+Y','Aviso de gama'],
+    ['Ctrl+F','Buscar comando no Photoshop'],['F7','Painel Camadas']
+  ];
+  var tb=document.querySelector('#ktable tbody'), mac=false;
+  function fmt(k){ if(!mac) return k; return k.replace(/Ctrl/g,'Cmd').replace(/Alt/g,'Option').replace(/Backspace/g,'Delete'); }
+  function renderK(){
+    var q=(document.getElementById('kq').value||'').toLowerCase().trim();
+    tb.innerHTML='';
+    K.forEach(function(r){
+      var k=fmt(r[0]);
+      if(q && (k+' '+r[1]).toLowerCase().indexOf(q)<0) return;
+      var tr=document.createElement('tr'), a=document.createElement('td'), b=document.createElement('td');
+      k.split(/(\+| e | … )/).forEach(function(p){
+        if(p==='+'||p===' e '||p===' … '){ a.appendChild(document.createTextNode(p)); }
+        else if(p){ var e=document.createElement('kbd'); e.textContent=p; a.appendChild(e); }
+      });
+      b.textContent=r[1]; tr.appendChild(a); tr.appendChild(b); tb.appendChild(tr);
+    });
+    if(!tb.children.length){ tb.innerHTML='<tr><td colspan="2" style="color:var(--muted)">Nenhum atalho encontrado. Tente outra palavra.</td></tr>'; }
+  }
+  document.getElementById('kq').addEventListener('input',renderK);
+
+  /* Windows / Mac nos kbd do texto */
+  var kbds=[].slice.call(document.querySelectorAll('main kbd, footer kbd'));
+  kbds.forEach(function(k){ k.dataset.win=k.textContent; });
+  function setOS(o){
+    mac=(o==='mac');
+    kbds.forEach(function(k){ k.textContent=fmt(k.dataset.win); });
+    document.getElementById('os-win').setAttribute('aria-pressed',!mac);
+    document.getElementById('os-mac').setAttribute('aria-pressed',mac);
+    state.os=o; save(); renderK();
+  }
+  document.getElementById('os-win').onclick=function(){ setOS('win'); };
+  document.getElementById('os-mac').onclick=function(){ setOS('mac'); };
+
+  /* calculadora de foto */
+  function n(id){ return parseFloat(document.getElementById(id).value)||0; }
+  function f1(x){ return x.toLocaleString('pt-BR',{maximumFractionDigits:1}); }
+  function calcFoto(){
+    var w=n('fw'), h=n('fh'), need=n('fneed');
+    var long=Math.max(w,h);
+    document.getElementById('f300').textContent=f1(w/300*2.54)+' cm';
+    document.getElementById('f150').textContent=f1(w/150*2.54)+' cm';
+    var eff=need>0? w/(need/2.54):0;
+    document.getElementById('feff').textContent=Math.round(eff)+' ppi';
+    var v=document.getElementById('fverd');
+    if(eff>=300){ v.textContent='Ótima qualidade para esse uso.'; v.className='verdict ok'; }
+    else if(eff>=150){ v.textContent='Aceitável: dentro do mínimo de 150 ppi para pôster visto a distância.'; v.className='verdict ok'; }
+    else { v.textContent='Abaixo de 150 ppi: use a foto menor no pôster, fotografe de novo mais perto ou com mais resolução.'; v.className='verdict bad'; }
+  }
+  ['fw','fh','fneed'].forEach(function(id){ document.getElementById(id).addEventListener('input',calcFoto); });
+
+  /* calculadora de texto */
+  function calcTxt(){
+    var d=n('dist')*100;
+    var b=d/200, t=d/40;
+    var pt=function(cm){ return Math.round(cm/0.7/2.54*72); };
+    document.getElementById('t-body-cm').textContent=f1(b)+' cm';
+    document.getElementById('t-body-pt').textContent=pt(b)+' pt';
+    document.getElementById('t-tit-cm').textContent=f1(t)+' cm';
+    document.getElementById('t-tit-pt').textContent=pt(t)+' pt';
+  }
+  document.getElementById('dist').addEventListener('input',calcTxt);
+
+  calcFoto(); calcTxt();
+  setLang(state.lang==='en'?'en':'pt');
+  setOS(state.os==='mac'?'mac':'win');
+})();
+</script>
+
+</body></html>
